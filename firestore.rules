@@ -1,0 +1,127 @@
+/**
+ * @fileoverview Firestore Security Rules for Elixiary AI Assistant App
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for user-specific data (ingredients and recipes) and allows public read access to a global list of ingredients. It prioritizes security and performance by denormalizing ownership and avoiding complex queries within the rules.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores user profile information, with the userId as the document ID.
+ * - /users/{userId}/ingredients/{userIngredientId}: Stores user-specific ingredient information.
+ * - /users/{userId}/recipes/{recipeId}: Stores user-specific cocktail recipes.
+ * - /ingredients/{ingredientId}: Stores a global list of ingredients available to all users.
+ *
+ * Key Security Decisions:
+ * - Users can only access their own user data (profile, ingredients, recipes).
+ * - Ingredients are publicly readable.
+ * - Listing of user ingredients and recipes is restricted to the owning user.
+ * - Data validation is minimal in this prototyping phase, focusing on authorization and relational integrity only.
+ *
+ * Denormalization for Authorization:
+ *  - User-specific ingredients and recipes are stored under the /users/{userId} path, allowing easy enforcement of ownership using request.auth.uid.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Enforces access control for user profiles. Users can only read and write their own profile data.
+     * @path /users/{userId}
+     * @allow (create) - Authenticated user can create their own profile.
+     * @allow (get) - Authenticated user can read their own profile.
+     * @allow (update) - Authenticated user can update their own profile.
+     * @allow (delete) - Authenticated user can delete their own profile.
+     * @deny (create) - Unauthenticated user cannot create a profile.
+     * @deny (get) - Authenticated user cannot read another user's profile.
+     * @deny (update) - Authenticated user cannot update another user's profile.
+     * @deny (delete) - Authenticated user cannot delete another user's profile.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == request.auth.uid;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && resource.data.id == userId;
+      allow delete: if isSignedIn() && isOwner(userId) && resource.data.id == userId;
+      allow list: if false;
+    }
+
+    /**
+     * @description Enforces access control for user-specific ingredients. Users can only manage their own ingredients.
+     * @path /users/{userId}/ingredients/{userIngredientId}
+     * @allow (create) - Authenticated user can create an ingredient for themselves.
+     * @allow (get) - Authenticated user can read their own ingredient.
+     * @allow (update) - Authenticated user can update their own ingredient.
+     * @allow (delete) - Authenticated user can delete their own ingredient.
+     * @deny (create) - Unauthenticated user cannot create an ingredient.
+     * @deny (create) - Authenticated user cannot create an ingredient for another user.
+     * @deny (get) - Authenticated user cannot read another user's ingredient.
+     * @deny (update) - Authenticated user cannot update another user's ingredient.
+     * @deny (delete) - Authenticated user cannot delete another user's ingredient.
+     * @principle Enforces document ownership for all operations on user ingredients.
+     */
+    match /users/{userId}/ingredients/{userIngredientId} {
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
+      allow delete: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
+      allow list: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Enforces access control for user-specific cocktail recipes. Users can only manage their own recipes.
+     * @path /users/{userId}/recipes/{recipeId}
+     * @allow (create) - Authenticated user can create a recipe for themselves.
+     * @allow (get) - Authenticated user can read their own recipe.
+     * @allow (update) - Authenticated user can update their own recipe.
+     * @allow (delete) - Authenticated user can delete their own recipe.
+     * @deny (create) - Unauthenticated user cannot create a recipe.
+     * @deny (create) - Authenticated user cannot create a recipe for another user.
+     * @deny (get) - Authenticated user cannot read another user's recipe.
+     * @deny (update) - Authenticated user cannot update another user's recipe.
+     * @deny (delete) - Authenticated user cannot delete another user's recipe.
+     * @principle Enforces document ownership for all operations on cocktail recipes.
+     */
+    match /users/{userId}/recipes/{recipeId} {
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
+      allow delete: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
+      allow list: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Allows public read access to ingredients, but restricts write access.
+     * @path /ingredients/{ingredientId}
+     * @allow (get) - Any user can read ingredient data.
+     * @allow (list) - Any user can list ingredient data.
+     * @deny (create) - No user can create ingredients.
+     * @deny (update) - No user can update ingredients.
+     * @deny (delete) - No user can delete ingredients.
+     * @principle Allows public read access while restricting write access.
+     */
+    match /ingredients/{ingredientId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
