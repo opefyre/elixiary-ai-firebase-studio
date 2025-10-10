@@ -1,0 +1,95 @@
+name: Deploy to Firebase App Hosting
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_CONFIG: '{"projectId":"studio-1063505923-cbb37","appId":"1:608849643395:web:cadb73d82f7dcd849158b6","apiKey":"AIzaSyBpXf3HbU9GtT_OBkAUAdzAGMnfn6RyU8s","authDomain":"studio-1063505923-cbb37.firebaseapp.com","messagingSenderId":"608849643395"}'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Configure Firebase credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
+            echo "FIREBASE_SERVICE_ACCOUNT secret is not configured." >&2
+            exit 1
+          fi
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$HOME/firebase_service_account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase_service_account.json" >> "$GITHUB_ENV"
+
+      - name: Determine App Hosting backend
+        id: backend
+        run: |
+          set -euo pipefail
+          backends_json="$(firebase apphosting:backends:list --project studio-1063505923-cbb37 --json)"
+          backend_id="$(
+            printf '%s' "$backends_json" | python - <<'PY'
+import json
+import sys
+
+data = json.load(sys.stdin)
+candidates = []
+
+def visit(node):
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key in {"name", "id", "backendId"} and isinstance(value, str):
+                candidates.append(value)
+            visit(value)
+    elif isinstance(node, list):
+        for item in node:
+            visit(item)
+
+visit(data)
+
+backend = ""
+for value in candidates:
+    if "/backends/" in value:
+        backend = value.split("/backends/")[-1]
+        break
+if not backend:
+    for value in candidates:
+        if value:
+            backend = value
+            break
+
+sys.stdout.write(backend)
+PY
+          )"
+
+          if [ -z "$backend_id" ]; then
+            echo "Unable to determine Firebase App Hosting backend. Received response:" >&2
+            printf '%s\n' "$backends_json" >&2
+            exit 1
+          fi
+
+          echo "backend_id=$backend_id" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Firebase App Hosting
+        run: |
+          set -euo pipefail
+          firebase apphosting:rollouts:create "${{ steps.backend.outputs.backend_id }}" --project studio-1063505923-cbb37 --git-commit "$GITHUB_SHA" --force
