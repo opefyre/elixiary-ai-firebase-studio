@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { OfflineWarning } from "@/components/offline-warning";
 
 export const metadata: Metadata = {
-  title: "Elixiary AI Assistant",
-  description: "Generate custom cocktail recipes with AI.",
+  title: "Elixiary",
+  description: "AI-powered cocktail recipe discovery.",
 };
 
 export default function RootLayout({
@@ -22,16 +25,19 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <div aria-live="polite" className="sr-only"></div>
+        <OfflineWarning />
+        <Header />
+        <main id="main-content">{children}</main>
+        <Footer />
         <Toaster />
       </body>
     </html>

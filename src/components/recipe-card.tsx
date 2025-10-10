@@ -1,86 +1,59 @@
 import Image from "next/image";
-import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-recipe";
 import type { ImagePlaceholder } from "@/lib/placeholder-images";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import type { MockRecipe } from "@/lib/mock-data";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, BarChart } from "lucide-react";
 
 type RecipeCardProps = {
-  recipe: GenerateCocktailRecipeOutput;
+  recipe: MockRecipe;
   image: ImagePlaceholder;
 };
 
-// The AI might return a string with items prefixed by "-" or numbers. This handles it.
-function formatList(text: string): string[] {
-  if (!text) return [];
-  return text
-    .split("\n")
-    .map((item) => item.trim().replace(/^(-|\d+\.?)\s*/, ""))
-    .filter((item) => item.length > 0);
-}
-
 export function RecipeCard({ recipe, image }: RecipeCardProps) {
-  const ingredientsList = formatList(recipe.ingredients);
-  const instructionsList = formatList(recipe.instructions);
-
   return (
     <article
       aria-label={`Recipe for ${recipe.recipeName}`}
-      className="flex flex-col overflow-hidden rounded-lg border border-primary/20 bg-card/50 shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/30"
+      className="flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="relative aspect-video w-full">
-        <Image
-          src={image.imageUrl}
-          alt={recipe.recipeName}
-          fill
-          className="object-cover"
-          data-ai-hint={image.imageHint}
-        />
-      </div>
-      <CardHeader>
-        <CardTitle className="font-headline text-lg">
-          {recipe.recipeName}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col pt-0">
-        <div className="space-y-4">
-          <div>
-            <h3 className="mb-2 font-semibold text-primary">Ingredients</h3>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {ingredientsList.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <Separator className="bg-primary/10" />
-
-          <div>
-            <h3 className="mb-2 font-semibold text-primary">Instructions</h3>
-            <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
-              {instructionsList.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ol>
-          </div>
-
-          {recipe.garnish && (
-            <>
-              <Separator className="bg-primary/10" />
-              <div>
-                <h3 className="mb-2 font-semibold text-primary">Garnish</h3>
-                <p className="text-sm text-muted-foreground">
-                  {recipe.garnish}
-                </p>
-              </div>
-            </>
-          )}
+      <div className="flex flex-col md:flex-row">
+        <div className="relative h-48 w-full md:h-auto md:w-[200px] shrink-0">
+          <Image
+            src={image.imageUrl}
+            alt={recipe.recipeName}
+            fill
+            className="object-cover"
+            data-ai-hint={image.imageHint}
+          />
         </div>
-      </CardContent>
+        <CardContent className="flex flex-1 flex-col p-4">
+          <h3 className="text-lg font-bold font-headline">{recipe.recipeName}</h3>
+          
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{recipe.publishedDate}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <BarChart className="h-3.5 w-3.5" />
+              <span>{recipe.difficulty}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{recipe.prepTime}</span>
+            </div>
+          </div>
+          
+          <div className="mt-4 flex flex-wrap gap-2">
+            {recipe.tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-[11px] font-normal">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+
+        </CardContent>
+      </div>
     </article>
   );
 }

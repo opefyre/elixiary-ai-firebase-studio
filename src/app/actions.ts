@@ -18,6 +18,9 @@ type State = {
   error: string | null;
 };
 
+// This function remains to power the recipe generation.
+// The form that uses it will be removed in this update,
+// but we'll keep the action for future use.
 export async function handleGenerateRecipe(
   input: GenerateCocktailRecipeInput
 ): Promise<State> {
