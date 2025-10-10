@@ -44,14 +44,11 @@ const generateCocktailImageFlow = ai.defineFlow(
   },
   async ({recipeName, ingredients}) => {
     const {media} = await ai.generate({
-      model: 'googleai/gemini-1.5-flash-latest',
+      model: 'googleai/gemini-pro-vision',
       prompt: `Generate a photorealistic image of a cocktail named "${recipeName}".
       The cocktail contains the following ingredients: ${ingredients}.
       The image should be professionally styled, well-lit, and appealing, as if for a high-end cocktail menu.
       Show the cocktail in an appropriate glass, with a simple, elegant background that is out of focus.`,
-      config: {
-        responseModalities: ['IMAGE'],
-      },
     });
 
     if (!media.url) {
