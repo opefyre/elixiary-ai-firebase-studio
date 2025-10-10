@@ -30,6 +30,12 @@ export async function handleGenerateRecipe(
 
   try {
     const recipe = await generateCocktailRecipe(validatedFields.data);
+    if (!recipe) {
+      return {
+        recipe: null,
+        error: "The AI did not return a recipe. Please try a different prompt.",
+      };
+    }
     return { recipe, error: null };
   } catch (error: any) {
     console.error("Detailed Error:", error);
