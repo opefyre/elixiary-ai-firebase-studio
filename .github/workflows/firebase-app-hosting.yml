@@ -7,8 +7,10 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    env:
+      FIREBASE_PROJECT_ID: studio-1063505923-cbb37
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,9 +27,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Install Firebase CLI
-        run: npm install --global firebase-tools
-
       - name: Configure Firebase credentials
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -40,8 +39,11 @@ jobs:
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$HOME/firebase_service_account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase_service_account.json" >> "$GITHUB_ENV"
 
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
       - name: Enable Firebase web frameworks support
-        run: firebase experiments:enable webframeworks --project studio-1063505923-cbb37
+        run: firebase experiments:enable webframeworks --project "$FIREBASE_PROJECT_ID"
 
       - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --project studio-1063505923-cbb37 --non-interactive
+        run: firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --non-interactive
