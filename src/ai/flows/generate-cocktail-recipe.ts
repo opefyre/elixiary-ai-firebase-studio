@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 
 const GenerateCocktailRecipeInputSchema = z.object({
@@ -40,6 +41,7 @@ export async function generateCocktailRecipe(
 
 const prompt = ai.definePrompt({
   name: 'generateCocktailRecipePrompt',
+  model: googleAI('gemini-1.5-flash-latest'),
   input: {schema: GenerateCocktailRecipeInputSchema},
   output: {schema: GenerateCocktailRecipeOutputSchema},
   prompt: `You are an expert mixologist. Generate a unique and delicious cocktail recipe based on the user's request.
