@@ -12,7 +12,7 @@ import {
 import { z } from "zod";
 
 const actionSchema = z.object({
-  prompt: z.string().min(10, "Please provide a more detailed description."),
+  prompt: z.string(),
 });
 
 type State = {

@@ -26,7 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
-  prompt: z.string().min(10, "Please provide a more detailed description."),
+  prompt: z.string().min(1, "Please enter a prompt."),
 });
 
 type FormValues = z.infer<typeof formSchema>;
