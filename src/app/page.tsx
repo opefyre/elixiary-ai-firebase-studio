@@ -3,9 +3,10 @@
 import { handleGenerateRecipe } from '@/app/actions';
 import { RecipeGenerationForm } from '@/components/recipe-generation-form';
 import { useUser } from '@/firebase';
-import { AuthButton } from '@/components/auth-button';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
@@ -38,7 +39,9 @@ export default function Home() {
               <p className="text-muted-foreground">
                 You need to be signed in to generate cocktail recipes.
               </p>
-              <AuthButton />
+              <Button asChild>
+                <Link href="/login">Sign In</Link>
+              </Button>
             </CardContent>
           </Card>
         )}

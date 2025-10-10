@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-} from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,19 +12,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogIn, LogOut } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
+import Link from 'next/link';
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth';
 
 export function AuthButton() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
-
-  const handleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error('Error signing in with Google', error);
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -38,15 +30,26 @@ export function AuthButton() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error('Error signing in with Google', error);
+    }
+  };
+
   if (isUserLoading) {
     return <Skeleton className="h-10 w-24" />;
   }
 
   if (!user) {
     return (
-      <Button onClick={handleSignIn} variant="outline">
-        <LogIn className="mr-2 h-4 w-4" />
-        Sign In
+      <Button asChild variant="outline">
+        <Link href="/login">
+          <LogIn className="mr-2 h-4 w-4" />
+          Sign In
+        </Link>
       </Button>
     );
   }
