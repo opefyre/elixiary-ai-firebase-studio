@@ -5,9 +5,9 @@ import {
   type GenerateCocktailRecipeInput,
   type GenerateCocktailRecipeOutput,
 } from "@/ai/flows/generate-cocktail-recipe";
-import { 
+import {
   generateCocktailImage,
-  type GenerateCocktailImageOutput
+  type GenerateCocktailImageOutput,
 } from "@/ai/flows/generate-cocktail-image";
 import { z } from "zod";
 
@@ -36,11 +36,20 @@ export async function handleGenerateRecipe(
 
   try {
     const recipe = await generateCocktailRecipe(validatedFields.data);
-    const image = await generateCocktailImage({
-      recipeName: recipe.recipeName,
-      ingredients: recipe.ingredients,
-    });
-    return { recipe, image, error: null };
+    
+    // Only generate an image if we have a valid recipe with ingredients.
+    if (recipe.ingredients) {
+      const image = await generateCocktailImage({
+        recipeName: recipe.recipeName,
+        ingredients: recipe.ingredients,
+      });
+      return { recipe, image, error: null };
+    }
+
+    // If no ingredients, it means the AI is asking for more info.
+    // Return just the recipe part (which contains the question).
+    return { recipe, image: null, error: null };
+
   } catch (error) {
     console.error(error);
     return {
