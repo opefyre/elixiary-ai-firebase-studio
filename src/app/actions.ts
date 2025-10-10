@@ -12,7 +12,7 @@ import {
 import { z } from "zod";
 
 const actionSchema = z.object({
-  prompt: z.string(),
+  prompt: z.string().min(1, "Please enter a prompt."),
 });
 
 type State = {
@@ -50,12 +50,13 @@ export async function handleGenerateRecipe(
     // Return just the recipe part (which contains the question).
     return { recipe, image: null, error: null };
 
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("Detailed Error:", error);
+    const errorMessage = error.message || "An unknown error occurred. Please check the server logs.";
     return {
       recipe: null,
       image: null,
-      error: "Failed to generate recipe. The AI may be busy, please try again.",
+      error: `Failed to generate recipe: ${errorMessage}`,
     };
   }
 }
