@@ -2,7 +2,7 @@
 
 import { AuthForm } from '@/components/auth-form';
 import { useUser } from '@/firebase';
-import { Botanic, Citrus, GlassWater, Loader2, Martini } from 'lucide-react';
+import { Sprout, Citrus, GlassWater, Loader2, Martini } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -36,7 +36,7 @@ export default function LoginPage() {
         <GlassWater className="h-full w-full" />
       </div>
       <div className="absolute top-1/3 right-[20%] h-28 w-28 animate-float text-primary/10" >
-        <Botanic className="h-full w-full" />
+        <Sprout className="h-full w-full" />
       </div>
       
       <div className="mx-auto w-full max-w-md relative z-10">
