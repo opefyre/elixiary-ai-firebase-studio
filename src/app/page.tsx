@@ -9,8 +9,7 @@ export default function Home() {
           Craft Your Perfect Elixir
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-          Describe the ingredients, mood, and flavors you have in mind, and
-          our AI will invent a unique cocktail recipe just for you.
+          Tell our AI mixologist what you're in the mood for, and it will invent a unique cocktail recipe just for you.
         </p>
       </section>
 

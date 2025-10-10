@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Generates a custom cocktail recipe based on available ingredients, mood/occasion, and flavor profile.
+ * @fileOverview Generates a custom cocktail recipe based on a user prompt.
  *
  * - generateCocktailRecipe - A function that generates a cocktail recipe.
  * - GenerateCocktailRecipeInput - The input type for the generateCocktailRecipe function.
@@ -12,13 +12,9 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateCocktailRecipeInputSchema = z.object({
-  ingredients: z
+  prompt: z
     .string()
-    .describe('A comma-separated list of available ingredients.'),
-  mood: z.string().describe('The desired mood or occasion for the cocktail.'),
-  flavorProfile: z
-    .string()
-    .describe('The preferred flavor profile (e.g., sweet, tart, smoky).'),
+    .describe('A user-provided prompt describing the desired cocktail.'),
 });
 export type GenerateCocktailRecipeInput = z.infer<
   typeof GenerateCocktailRecipeInputSchema
@@ -46,18 +42,12 @@ const prompt = ai.definePrompt({
   name: 'generateCocktailRecipePrompt',
   input: {schema: GenerateCocktailRecipeInputSchema},
   output: {schema: GenerateCocktailRecipeOutputSchema},
-  prompt: `You are an expert mixologist. Generate a unique and delicious cocktail recipe based on the following criteria:
+  prompt: `You are an expert mixologist. Generate a unique and delicious cocktail recipe based on the user's request.
 
-Available Ingredients: {{{ingredients}}}
-Mood/Occasion: {{{mood}}}
-Flavor Profile: {{{flavorProfile}}}
+User Request: {{{prompt}}}
 
-Consider the available ingredients, mood, and flavor profile to create a balanced and appealing cocktail. Provide clear and concise instructions, specific ingredient amounts, and a garnish suggestion.
-
-Recipe Name:
-Ingredients:
-Instructions:
-Garnish: `,
+Interpret the user's request, considering any mentioned ingredients, moods, flavors, or occasions. Create a balanced and appealing cocktail. Provide clear and concise instructions, specific ingredient amounts, and a garnish suggestion.
+`,
 });
 
 const generateCocktailRecipeFlow = ai.defineFlow(

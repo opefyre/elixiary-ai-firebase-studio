@@ -12,9 +12,7 @@ import {
 import { z } from "zod";
 
 const actionSchema = z.object({
-  ingredients: z.string(),
-  mood: z.string(),
-  flavorProfile: z.string(),
+  prompt: z.string().min(10, "Please provide a more detailed description."),
 });
 
 type State = {
