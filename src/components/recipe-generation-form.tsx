@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Wand2 } from "lucide-react";
+import { Loader2, Wand2, Dices } from "lucide-react";
 import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-recipe";
 import type { GenerateCocktailImageOutput } from "@/ai/flows/generate-cocktail-image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -66,8 +66,9 @@ export function RecipeGenerationForm({
     },
   });
 
-  const handlePromptClick = (prompt: string) => {
-    form.setValue("prompt", prompt);
+  const handleRandomPrompt = () => {
+    const randomPrompt = luckyPrompts[Math.floor(Math.random() * luckyPrompts.length)];
+    form.setValue("prompt", randomPrompt);
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -103,27 +104,7 @@ export function RecipeGenerationForm({
             )}
           />
 
-          <div className="space-y-3">
-            <p className="text-center text-sm font-medium text-muted-foreground">
-              Or, get inspired:
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {luckyPrompts.map((prompt, i) => (
-                <Button
-                  key={i}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePromptClick(prompt)}
-                  className="rounded-full"
-                >
-                  {prompt}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-center pt-2">
+          <div className="flex justify-center pt-2 gap-4">
             <Button type="submit" disabled={isLoading} size="lg">
               {isLoading ? (
                 <>
@@ -136,6 +117,9 @@ export function RecipeGenerationForm({
                   Generate Recipe
                 </>
               )}
+            </Button>
+            <Button type="button" variant="outline" size="lg" onClick={handleRandomPrompt} aria-label="I'm feeling lucky">
+                <Dices className="h-4 w-4" />
             </Button>
           </div>
         </form>
