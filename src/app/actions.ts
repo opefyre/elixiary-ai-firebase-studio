@@ -5,6 +5,10 @@ import {
   type GenerateCocktailRecipeInput,
   type GenerateCocktailRecipeOutput,
 } from "@/ai/flows/generate-cocktail-recipe";
+import { 
+  generateCocktailImage,
+  type GenerateCocktailImageOutput
+} from "@/ai/flows/generate-cocktail-image";
 import { z } from "zod";
 
 const actionSchema = z.object({
@@ -15,12 +19,10 @@ const actionSchema = z.object({
 
 type State = {
   recipe: GenerateCocktailRecipeOutput | null;
+  image: GenerateCocktailImageOutput | null;
   error: string | null;
 };
 
-// This function remains to power the recipe generation.
-// The form that uses it will be removed in this update,
-// but we'll keep the action for future use.
 export async function handleGenerateRecipe(
   input: GenerateCocktailRecipeInput
 ): Promise<State> {
@@ -29,17 +31,23 @@ export async function handleGenerateRecipe(
   if (!validatedFields.success) {
     return {
       recipe: null,
+      image: null,
       error: "Invalid input.",
     };
   }
 
   try {
     const recipe = await generateCocktailRecipe(validatedFields.data);
-    return { recipe, error: null };
+    const image = await generateCocktailImage({
+      recipeName: recipe.recipeName,
+      ingredients: recipe.ingredients,
+    });
+    return { recipe, image, error: null };
   } catch (error) {
     console.error(error);
     return {
       recipe: null,
+      image: null,
       error: "Failed to generate recipe. The AI may be busy, please try again.",
     };
   }

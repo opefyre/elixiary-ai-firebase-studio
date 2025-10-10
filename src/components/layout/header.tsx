@@ -1,7 +1,4 @@
 import Link from "next/link";
-import { Moon, Search, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/icons/logo";
 
 export function Header() {
@@ -17,21 +14,6 @@ export function Header() {
             </p>
           </div>
         </Link>
-        <div className="flex flex-1 justify-end items-center gap-2 md:gap-4">
-          <div className="relative w-full max-w-sm">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-             <Input
-                type="search"
-                placeholder="Search recipes..."
-                className="h-10 w-full rounded-full bg-muted pl-10 pr-4 text-sm md:text-xs"
-              />
-          </div>
-          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 rounded-full text-base">
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-        </div>
       </div>
     </header>
   );

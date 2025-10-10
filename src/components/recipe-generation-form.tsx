@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,9 +23,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-recipe";
+import type { GenerateCocktailImageOutput } from "@/ai/flows/generate-cocktail-image";
 
 const formSchema = z.object({
   ingredients: z.string().min(1, "Please list at least one ingredient."),
@@ -39,6 +40,7 @@ type RecipeGenerationFormProps = {
     input: FormValues
   ) => Promise<{
     recipe: GenerateCocktailRecipeOutput | null;
+    image: GenerateCocktailImageOutput | null;
     error: string | null;
   }>;
 };
@@ -49,6 +51,7 @@ export function RecipeGenerationForm({
   const [recipe, setRecipe] = useState<GenerateCocktailRecipeOutput | null>(
     null
   );
+  const [image, setImage] = useState<GenerateCocktailImageOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,9 +67,11 @@ export function RecipeGenerationForm({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     setRecipe(null);
+    setImage(null);
     setError(null);
     const result = await handleGenerateRecipe(data);
     setRecipe(result.recipe);
+    setImage(result.image);
     setError(result.error);
     setIsLoading(false);
   };
@@ -158,6 +163,16 @@ export function RecipeGenerationForm({
             <CardTitle>{recipe.recipeName}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {image && (
+              <div className="relative aspect-video w-full overflow-hidden rounded-md">
+                <Image
+                  src={image.imageUrl}
+                  alt={recipe.recipeName}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
             <div>
               <h4 className="font-semibold">Ingredients:</h4>
               <p className="whitespace-pre-wrap">{recipe.ingredients}</p>
