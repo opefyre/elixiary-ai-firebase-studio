@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
 import { OfflineWarning } from "@/components/offline-warning";
 import { FirebaseClientProvider } from "@/firebase";
+import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Elixiary",
@@ -35,7 +36,21 @@ export default function RootLayout({
             Skip to main content
           </a>
           <Header />
-          <main id="main-content">{children}</main>
+          <div className="relative">
+            <div className="absolute top-1/4 left-1/4 h-32 w-32 animate-float text-primary/10 [animation-delay:-2s]">
+              <Martini className="h-full w-full" />
+            </div>
+            <div className="absolute bottom-1/4 right-1/4 h-24 w-24 animate-float text-primary/10 [animation-delay:-4s]">
+              <Citrus className="h-full w-full" />
+            </div>
+            <div className="absolute bottom-1/3 left-[15%] h-20 w-20 animate-float text-primary/10 [animation-delay:-6s]">
+              <GlassWater className="h-full w-full" />
+            </div>
+            <div className="absolute top-1/3 right-[20%] h-28 w-28 animate-float text-primary/10">
+              <Sprout className="h-full w-full" />
+            </div>
+            <main id="main-content" className="relative z-10">{children}</main>
+          </div>
           <Toaster />
           <OfflineWarning />
         </FirebaseClientProvider>
