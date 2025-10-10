@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
+import { AuthButton } from "@/components/auth-button";
 
 export function Header() {
   return (
@@ -9,6 +10,7 @@ export function Header() {
           <Logo className="h-7 w-7 text-primary" />
           <h1 className="text-xl font-bold leading-none font-headline">Elixiary</h1>
         </Link>
+        <AuthButton />
       </div>
     </header>
   );

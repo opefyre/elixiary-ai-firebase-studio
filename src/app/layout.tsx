@@ -3,6 +3,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
 import { OfflineWarning } from "@/components/offline-warning";
+import { FirebaseClientProvider } from "@/firebase";
 
 export const metadata: Metadata = {
   title: "Elixiary",
@@ -29,13 +30,15 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <Header />
-        <main id="main-content">{children}</main>
-        <Toaster />
-        <OfflineWarning />
+        <FirebaseClientProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          <Header />
+          <main id="main-content">{children}</main>
+          <Toaster />
+          <OfflineWarning />
+        </FirebaseClientProvider>
       </body>
     </html>
   );
