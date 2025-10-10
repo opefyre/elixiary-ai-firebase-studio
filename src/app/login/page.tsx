@@ -29,11 +29,8 @@ export default function LoginPage() {
       <div className="mx-auto w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="font-headline text-3xl font-bold md:text-4xl">
-            Welcome Back
+            Sign In or Create an Account
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Sign in to continue to Elixiary.
-          </p>
         </div>
         <AuthForm />
       </div>

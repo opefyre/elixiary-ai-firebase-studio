@@ -102,48 +102,65 @@ export function AuthForm() {
       disabled={isLoading}
       className="w-full"
     >
-      <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
-        <path
-          fill="#FFC107"
-          d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 10.32C34.553 6.477 29.623 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
-        />
-        <path
-          fill="#FF3D00"
-          d="M6.306 14.691c-1.332 2.65-2.074 5.631-2.074 8.815C4.232 26.964 5.32 30.04 7.18 32.571l6.19-4.845C11.776 26.494 11 25.286 11 24s.776-2.494 2.37-3.726l-6.254-4.892z"
-        />
-        <path
-          fill="#4CAF50"
-          d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-4.845A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.28-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
-        />
-        <path
-          fill="#1976D2"
-          d="M43.611 20.083H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 4.845C41.758 35.215 44 30.022 44 24c0-1.341-.138-2.65-.389-3.917z"
-        />
-      </svg>
+      {isLoading ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
+          <path
+            fill="#FFC107"
+            d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 10.32C34.553 6.477 29.623 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+          />
+          <path
+            fill="#FF3D00"
+            d="M6.306 14.691c-1.332 2.65-2.074 5.631-2.074 8.815C4.232 26.964 5.32 30.04 7.18 32.571l6.19-4.845C11.776 26.494 11 25.286 11 24s.776-2.494 2.37-3.726l-6.254-4.892z"
+          />
+          <path
+            fill="#4CAF50"
+            d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-4.845A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.28-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+          />
+          <path
+            fill="#1976D2"
+            d="M43.611 20.083H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 4.845C41.758 35.215 44 30.022 44 24c0-1.341-.138-2.65-.389-3.917z"
+          />
+        </svg>
+      )}
       Sign in with Google
     </Button>
   );
 
   return (
     <Card>
-      <CardContent className="p-0">
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <GoogleSignInButton />
 
-          {error && (
-            <div className="p-4 pt-6 pb-0">
-              <Alert variant="destructive">
-                <AlertTitle>Authentication Failed</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
             </div>
-          )}
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
 
-          <TabsContent value="signin">
-            <div className="p-6">
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+
+            {error && (
+              <div className="pt-4">
+                <Alert variant="destructive">
+                  <AlertTitle>Authentication Failed</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            <TabsContent value="signin" className="pt-4">
               <Form {...signInForm}>
                 <form
                   onSubmit={signInForm.handleSubmit(onSignInSubmit)}
@@ -193,26 +210,11 @@ export function AuthForm() {
                     )}
                     Sign In
                   </Button>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
-
-                  <GoogleSignInButton />
                 </form>
               </Form>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="signup">
-            <div className="p-6">
+            <TabsContent value="signup" className="pt-4">
               <Form {...signUpForm}>
                 <form
                   onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
@@ -264,9 +266,9 @@ export function AuthForm() {
                   </Button>
                 </form>
               </Form>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </CardContent>
     </Card>
   );
