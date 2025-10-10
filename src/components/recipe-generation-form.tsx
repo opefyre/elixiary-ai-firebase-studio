@@ -126,24 +126,28 @@ export function RecipeGenerationForm({
         </Alert>
       )}
 
-      {recipe && (
+      {recipe && recipe.recipeName && (
         <Card className="mt-8">
           <CardHeader>
             <CardTitle className="text-2xl">{recipe.recipeName}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <h4 className="text-lg font-semibold">Ingredients</h4>
-              <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
-                {recipe.ingredients}
-              </p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold">Instructions</h4>
-              <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
-                {recipe.instructions}
-              </p>
-            </div>
+            {recipe.ingredients && (
+              <div>
+                <h4 className="text-lg font-semibold">Ingredients</h4>
+                <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
+                  {recipe.ingredients}
+                </p>
+              </div>
+            )}
+            {recipe.instructions && (
+              <div>
+                <h4 className="text-lg font-semibold">Instructions</h4>
+                <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
+                  {recipe.instructions}
+                </p>
+              </div>
+            )}
             {recipe.garnish && (
               <div>
                 <h4 className="text-lg font-semibold">Garnish</h4>
