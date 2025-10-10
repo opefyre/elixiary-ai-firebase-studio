@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,12 +20,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, Wand2, Dices } from "lucide-react";
 import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-recipe";
-import type { GenerateCocktailImageOutput } from "@/ai/flows/generate-cocktail-image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
-  prompt: z.string().min(1, "Please enter a prompt."),
+  prompt: z.string(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -36,7 +34,6 @@ type RecipeGenerationFormProps = {
     input: FormValues
   ) => Promise<{
     recipe: GenerateCocktailRecipeOutput | null;
-    image: GenerateCocktailImageOutput | null;
     error: string | null;
   }>;
 };
@@ -55,7 +52,6 @@ export function RecipeGenerationForm({
   const [recipe, setRecipe] = useState<GenerateCocktailRecipeOutput | null>(
     null
   );
-  const [image, setImage] = useState<GenerateCocktailImageOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -74,11 +70,9 @@ export function RecipeGenerationForm({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     setRecipe(null);
-    setImage(null);
     setError(null);
     const result = await handleGenerateRecipe(data);
     setRecipe(result.recipe);
-    setImage(result.image);
     setError(result.error);
     setIsLoading(false);
   };
@@ -138,16 +132,6 @@ export function RecipeGenerationForm({
             <CardTitle className="text-2xl">{recipe.recipeName}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {image && (
-              <div className="relative aspect-video w-full overflow-hidden rounded-md">
-                <Image
-                  src={image.imageUrl}
-                  alt={recipe.recipeName}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
             <div>
               <h4 className="text-lg font-semibold">Ingredients</h4>
               <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
