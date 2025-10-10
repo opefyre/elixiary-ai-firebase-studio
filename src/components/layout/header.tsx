@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Moon, Search, Sun, X } from "lucide-react";
+import { Moon, Search, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/icons/logo";
@@ -11,7 +11,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3">
           <Logo className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold leading-none font-headline">Elixiary</h1>
+            <h1 className="text-[1.5rem] font-bold leading-none font-headline">Elixiary</h1>
             <p className="text-[0.75rem] font-semibold uppercase tracking-widest text-primary/80">
               AI Assistant
             </p>
@@ -23,12 +23,8 @@ export function Header() {
              <Input
                 type="search"
                 placeholder="Search recipes..."
-                className="h-10 w-full rounded-full bg-muted pl-10 pr-10 text-base md:text-sm"
+                className="h-10 w-full rounded-full bg-muted pl-10 pr-4 text-sm md:text-xs"
               />
-              <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full">
-                <X className="h-4 w-4" />
-                <span className="sr-only">Clear search</span>
-              </Button>
           </div>
           <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 rounded-full text-base">
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
