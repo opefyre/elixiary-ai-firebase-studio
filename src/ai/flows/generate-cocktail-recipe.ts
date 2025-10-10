@@ -21,12 +21,12 @@ export type GenerateCocktailRecipeInput = z.infer<
 >;
 
 const GenerateCocktailRecipeOutputSchema = z.object({
-  recipeName: z.string().describe('The name of the generated cocktail recipe.'),
+  recipeName: z.string().describe('The name of the generated cocktail recipe. If the user prompt is too vague, ask for more details.'),
   instructions: z
     .string()
-    .describe('Step-by-step instructions for making the cocktail.'),
-  ingredients: z.string().describe('A list of ingredients with amounts.'),
-  garnish: z.string().describe('Suggestion for a garnish.'),
+    .describe('Step-by-step instructions for making the cocktail. If the user prompt is too vague, ask for more details.'),
+  ingredients: z.string().describe('A list of ingredients with amounts. If the user prompt is too vague, ask for more details.'),
+  garnish: z.string().describe('Suggestion for a garnish. If the user prompt is too vague, ask for more details.'),
 });
 export type GenerateCocktailRecipeOutput = z.infer<
   typeof GenerateCocktailRecipeOutputSchema
@@ -47,6 +47,8 @@ const prompt = ai.definePrompt({
 User Request: {{{prompt}}}
 
 Interpret the user's request, considering any mentioned ingredients, moods, flavors, or occasions. Create a balanced and appealing cocktail. Provide clear and concise instructions, specific ingredient amounts, and a garnish suggestion.
+
+If the user's prompt is too vague (e.g., "make me a drink"), do not generate a recipe. Instead, politely ask for more information in the 'recipeName' field, like "I can do that! To help me craft the perfect cocktail, could you tell me a bit more about what you're looking for? For example, what kind of spirits, flavors, or mood are you in the mood for?". Leave the other fields empty.
 `,
 });
 
