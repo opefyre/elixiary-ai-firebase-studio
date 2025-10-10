@@ -51,6 +51,7 @@ Interpret the user's request, considering any mentioned ingredients, moods, flav
 
 If the user's prompt is too vague (e.g., "make me a drink"), do not generate a recipe. Instead, politely ask for more information in the 'recipeName' field, like "I can do that! To help me craft the perfect cocktail, could you tell me a bit more about what you're in the mood for? For example, what kind of spirits, flavors, or mood are you in the mood for?". Leave the other fields empty.
 `,
+  model: 'gemini-pro',
 });
 
 const generateCocktailRecipeFlow = ai.defineFlow(
