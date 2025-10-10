@@ -1,1 +1,6 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/suggest-ingredient-substitutions.ts';
+import '@/ai/flows/generate-cocktail-recipe.ts';
+import '@/ai/flows/summarize-recipe-reviews.ts';
