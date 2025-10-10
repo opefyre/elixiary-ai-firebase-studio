@@ -41,7 +41,6 @@ export async function generateCocktailRecipe(
 
 const prompt = ai.definePrompt({
   name: 'generateCocktailRecipePrompt',
-  model: googleAI('gemini-1.5-flash-latest'),
   input: {schema: GenerateCocktailRecipeInputSchema},
   output: {schema: GenerateCocktailRecipeOutputSchema},
   prompt: `You are an expert mixologist. Generate a unique and delicious cocktail recipe based on the user's request.
@@ -50,7 +49,7 @@ User Request: {{{prompt}}}
 
 Interpret the user's request, considering any mentioned ingredients, moods, flavors, or occasions. Create a balanced and appealing cocktail. Provide clear and concise instructions, specific ingredient amounts, and a garnish suggestion.
 
-If the user's prompt is too vague (e.g., "make me a drink"), do not generate a recipe. Instead, politely ask for more information in the 'recipeName' field, like "I can do that! To help me craft the perfect cocktail, could you tell me a bit more about what you're looking for? For example, what kind of spirits, flavors, or mood are you in the mood for?". Leave the other fields empty.
+If the user's prompt is too vague (e.g., "make me a drink"), do not generate a recipe. Instead, politely ask for more information in the 'recipeName' field, like "I can do that! To help me craft the perfect cocktail, could you tell me a bit more about what you're in the mood for? For example, what kind of spirits, flavors, or mood are you in the mood for?". Leave the other fields empty.
 `,
 });
 
