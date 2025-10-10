@@ -9,7 +9,6 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/google-genai';
 import {z} from 'genkit';
 
 const GenerateCocktailRecipeInputSchema = z.object({
@@ -51,7 +50,7 @@ Interpret the user's request, considering any mentioned ingredients, moods, flav
 
 If the user's prompt is too vague (e.g., "make me a drink"), do not generate a recipe. Instead, politely ask for more information in the 'recipeName' field, like "I can do that! To help me craft the perfect cocktail, could you tell me a bit more about what you're in the mood for? For example, what kind of spirits, flavors, or mood are you in the mood for?". Leave the other fields empty.
 `,
-  model: 'gemini-pro',
+  model: 'gemini-1.5-flash-latest',
 });
 
 const generateCocktailRecipeFlow = ai.defineFlow(
