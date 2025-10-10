@@ -32,11 +32,10 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <div aria-live="polite" className="sr-only"></div>
-        <OfflineWarning />
         <Header />
         <main id="main-content">{children}</main>
         <Toaster />
+        <OfflineWarning />
       </body>
     </html>
   );

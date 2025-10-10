@@ -16,16 +16,15 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wand2 } from "lucide-react";
 import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-recipe";
 import type { GenerateCocktailImageOutput } from "@/ai/flows/generate-cocktail-image";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
   ingredients: z.string().min(1, "Please list at least one ingredient."),
@@ -78,23 +77,16 @@ export function RecipeGenerationForm({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Generate a Recipe</CardTitle>
-          <CardDescription>
-            Fill out the form below and let our AI create a unique cocktail for
-            you.
-          </CardDescription>
-        </CardHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-6">
+      <Card className="border-0 bg-transparent shadow-none sm:border-2 sm:bg-card sm:shadow-sm">
+        <CardContent className="p-0 sm:p-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="ingredients"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Available Ingredients</FormLabel>
+                    <FormLabel>Ingredients</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g., Gin, Lime Juice, Simple Syrup"
@@ -112,7 +104,7 @@ export function RecipeGenerationForm({
                   <FormItem>
                     <FormLabel>Mood / Occasion</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Refreshing summer day, cozy night in" {...field} />
+                      <Input placeholder="e.g., Refreshing summer day" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,46 +115,47 @@ export function RecipeGenerationForm({
                 name="flavorProfile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preferred Flavor Profile</FormLabel>
+                    <FormLabel>Flavor Profile</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Sweet and fruity, smoky and strong" {...field} />
+                      <Input placeholder="e.g., Sweet and fruity" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  "Generate Recipe"
-                )}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
+               <div className="flex justify-end pt-2">
+                <Button type="submit" disabled={isLoading} size="lg">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="mr-2 h-4 w-4" />
+                      Generate Recipe
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
       </Card>
 
       {error && (
-        <Card className="mt-8 bg-destructive/10 border-destructive">
-            <CardHeader>
-                <CardTitle className="text-destructive">Generation Failed</CardTitle>
-                <CardDescription className="text-destructive/80">{error}</CardDescription>
-            </CardHeader>
-        </Card>
+        <Alert variant="destructive" className="mt-8">
+            <AlertTitle>Generation Failed</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {recipe && (
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>{recipe.recipeName}</CardTitle>
+            <CardTitle className="text-2xl">{recipe.recipeName}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {image && (
               <div className="relative aspect-video w-full overflow-hidden rounded-md">
                 <Image
@@ -174,17 +167,17 @@ export function RecipeGenerationForm({
               </div>
             )}
             <div>
-              <h4 className="font-semibold">Ingredients:</h4>
-              <p className="whitespace-pre-wrap">{recipe.ingredients}</p>
+              <h4 className="font-semibold text-lg">Ingredients</h4>
+              <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{recipe.ingredients}</p>
             </div>
             <div>
-              <h4 className="font-semibold">Instructions:</h4>
-              <p className="whitespace-pre-wrap">{recipe.instructions}</p>
+              <h4 className="font-semibold text-lg">Instructions</h4>
+              <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{recipe.instructions}</p>
             </div>
             {recipe.garnish && (
               <div>
-                <h4 className="font-semibold">Garnish:</h4>
-                <p>{recipe.garnish}</p>
+                <h4 className="font-semibold text-lg">Garnish</h4>
+                <p className="mt-1 text-muted-foreground">{recipe.garnish}</p>
               </div>
             )}
           </CardContent>
