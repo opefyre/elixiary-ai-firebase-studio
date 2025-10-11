@@ -23,13 +23,26 @@ export async function POST(request: NextRequest) {
 
   let firestore;
   try {
+    console.log('Initializing Firebase Admin SDK...');
     const firebase = initializeFirebaseServer();
     firestore = firebase.firestore;
     console.log('Firebase Admin SDK initialized successfully');
+    
+    // Test Firestore connection
+    console.log('Testing Firestore connection...');
+    const testRef = firestore.collection('test').doc('connection');
+    await testRef.set({ timestamp: new Date() });
+    await testRef.delete();
+    console.log('Firestore connection test successful');
   } catch (error) {
     console.error('Firebase Admin SDK initialization failed:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+    });
     return NextResponse.json(
-      { error: 'Firebase initialization failed' },
+      { error: 'Firebase initialization failed', details: error.message },
       { status: 500 }
     );
   }
