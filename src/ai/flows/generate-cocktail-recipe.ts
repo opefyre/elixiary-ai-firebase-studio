@@ -29,7 +29,7 @@ const GenerateCocktailRecipeOutputSchema = z.object({
     .describe('Clear, numbered step-by-step instructions for making the cocktail. IMPORTANT: Put each step on its own line, separated by newline characters (\\n). Number each step. Example format:\n1. Fill shaker with ice\\n2. Add all ingredients\\n3. Shake vigorously for 10 seconds'),
   garnish: z.string().describe('Detailed garnish suggestions. If multiple options, separate with newline characters (\\n).'),
   glassware: z.string().describe('The recommended type of glass to serve the cocktail in.'),
-  difficultyLevel: z.string().describe('Easy, Medium, or Hard - indicating the skill level required.'),
+  difficultyLevel: z.enum(['Easy', 'Medium', 'Hard']).describe('Difficulty level - be honest and varied:\nEasy: Simple mixing, 3-4 ingredients, no special techniques (e.g., highball, simple shaken drinks)\nMedium: Multiple steps, 5-7 ingredients, basic techniques (e.g., muddling, layering, standard shaking/stirring)\nHard: Complex techniques, 8+ ingredients, advanced skills (e.g., molecular mixology, fat washing, smoking, multiple preparation steps)\nIMPORTANT: Vary difficulty based on actual recipe complexity - not all cocktails should be Medium!'),
   servingSize: z.string().describe('Number of servings this recipe makes (e.g., "1 cocktail" or "Serves 2").'),
   tips: z.string().describe('Professional mixologist tips and variations. IMPORTANT: If multiple tips, put each on its own line separated by newline characters (\\n). Use bullet points or dashes.'),
 });
@@ -67,7 +67,11 @@ Your task is to create a unique, well-balanced cocktail recipe that perfectly ma
 - Suggest appropriate GLASSWARE
 - Provide professional TIPS for best results
 - Add creative GARNISH ideas
-- Specify DIFFICULTY level honestly
+- Specify DIFFICULTY level HONESTLY based on recipe complexity:
+  * Easy: 3-4 ingredients, simple mixing (gin & tonic, rum & coke, simple highballs)
+  * Medium: 5-7 ingredients, basic techniques (classic cocktails, muddling, layering)
+  * Hard: 8+ ingredients, advanced techniques (tiki drinks, molecular mixology, complex prep)
+  * IMPORTANT: Match difficulty to actual complexity - vary your ratings!
 
 **FORMAT GUIDELINES - EXTREMELY IMPORTANT:**
 
