@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useUser, useRecipes } from '@/firebase';
-import { Loader2, BookOpen, Search, Filter, X, ShoppingCart } from 'lucide-react';
+import { Loader2, BookOpen, Search, Filter, X, ShoppingCart, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
