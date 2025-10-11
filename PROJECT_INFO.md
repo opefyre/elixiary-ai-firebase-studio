@@ -44,7 +44,8 @@
 - `npm run lint` - ESLint validation
 
 ## Deployment Status
-- ✅ **Live on Vercel**: https://elixiary-ai-firebase-studio.vercel.app/
+- ✅ **Live Production**: https://ai.elixiary.com/
+- ✅ **Vercel Preview**: https://elixiary-ai-firebase-studio.vercel.app/
 - ✅ Automatic deployments from GitHub main branch
 - ✅ Cleaned up codebase (60%+ reduction in files)
 - ✅ Removed unused dependencies

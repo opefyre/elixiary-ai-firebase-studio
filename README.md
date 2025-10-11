@@ -3,7 +3,7 @@
 Generate unique cocktail recipes with AI! Tell our AI mixologist what you're in the mood for, and it will create a custom cocktail recipe just for you.
 
 ## 🌐 Live Demo
-**Visit the app**: [https://elixiary-ai-firebase-studio.vercel.app/](https://elixiary-ai-firebase-studio.vercel.app/)
+**Visit the app**: [https://ai.elixiary.com/](https://ai.elixiary.com/)
 
 ## ✨ Features
 - 🤖 **AI-Powered Recipe Generation** - Uses Google Gemini to create unique cocktail recipes
