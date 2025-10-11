@@ -1,6 +1,7 @@
 'use client';
 
 import { useFirebase, useUser } from '@/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
 export default function DebugPage() {
@@ -38,25 +39,28 @@ export default function DebugPage() {
           displayName: user.displayName,
         };
 
-        // Try to read user document
-        const userDoc = await firestore.collection('users').doc(user.uid).get();
+        // Try to read user document (Firebase v9+ syntax)
+        const userDocRef = doc(firestore, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
         
         // Try to read the webhook user document
-        const webhookUserDoc = await firestore.collection('users').doc('uzyFZtgGRAZZUlqc3j7c42PUHgk1').get();
+        const webhookUserDocRef = doc(firestore, 'users', 'uzyFZtgGRAZZUlqc3j7c42PUHgk1');
+        const webhookUserDoc = await getDoc(webhookUserDocRef);
 
         setDebugInfo({
           currentUser: currentUserInfo,
           currentUserDocument: {
-            exists: userDoc.exists,
-            data: userDoc.exists ? userDoc.data() : null,
+            exists: userDoc.exists(),
+            data: userDoc.exists() ? userDoc.data() : null,
           },
           webhookUserDocument: {
-            exists: webhookUserDoc.exists,
-            data: webhookUserDoc.exists ? webhookUserDoc.data() : null,
+            exists: webhookUserDoc.exists(),
+            data: webhookUserDoc.exists() ? webhookUserDoc.data() : null,
           },
           firebaseConfig: {
             projectId: firestore.app.options.projectId,
           },
+          userIdMatch: user.uid === 'uzyFZtgGRAZZUlqc3j7c42PUHgk1',
         });
       } catch (error: any) {
         setDebugInfo({
@@ -121,6 +125,15 @@ export default function DebugPage() {
           <div className="bg-gray-100 p-4 rounded">
             <h2 className="text-lg font-semibold mb-2">Webhook User Document (uzyFZtgGRAZZUlqc3j7c42PUHgk1)</h2>
             <pre className="text-sm">{JSON.stringify(debugInfo.webhookUserDocument, null, 2)}</pre>
+          </div>
+
+          <div className={`${debugInfo.userIdMatch ? 'bg-green-100' : 'bg-yellow-100'} p-4 rounded`}>
+            <h2 className="text-lg font-semibold mb-2">User ID Match</h2>
+            <p className="text-sm">
+              {debugInfo.userIdMatch 
+                ? '✅ Current user matches webhook user' 
+                : '❌ Current user does NOT match webhook user'}
+            </p>
           </div>
 
           {debugInfo.error && (
