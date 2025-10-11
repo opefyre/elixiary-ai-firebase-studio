@@ -7,6 +7,7 @@ import {
   orderBy,
   onSnapshot,
   addDoc,
+  updateDoc,
   deleteDoc,
   doc,
   serverTimestamp,

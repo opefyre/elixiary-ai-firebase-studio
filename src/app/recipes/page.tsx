@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from "next";
 import { useState, useMemo } from 'react';
 import { useUser, useRecipes } from '@/firebase';
 import { Loader2, BookOpen, Search, Filter, X, ShoppingCart } from 'lucide-react';
