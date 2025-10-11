@@ -99,57 +99,61 @@ ${window.location.origin}`.trim();
 
   return (
     <>
-      <Card className="border-primary/20 hover:border-primary/40 transition-colors">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-xl font-bold line-clamp-2">
-            {recipe.recipeName}
-          </CardTitle>
-          
-          {'description' in recipe && recipe.description && (
-            <p className="text-sm text-muted-foreground line-clamp-3 italic">
-              {recipe.description}
-            </p>
-          )}
+      <Card className="group border-primary/20 hover:border-primary/40 transition-all cursor-pointer hover:shadow-lg">
+        <div onClick={() => setIsOpen(true)}>
+          <CardHeader className="space-y-3">
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="text-xl font-bold line-clamp-2 flex-1 group-hover:text-primary transition-colors">
+                {recipe.recipeName}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                }}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {'description' in recipe && recipe.description && (
+              <p className="text-sm text-muted-foreground line-clamp-3 italic leading-relaxed">
+                {recipe.description}
+              </p>
+            )}
+          </CardHeader>
 
-          <div className="flex flex-wrap gap-2 text-xs">
-            {'glassware' in recipe && recipe.glassware && (
-              <span className="bg-primary/10 text-primary px-2 py-1 rounded">
-                🍸 {recipe.glassware}
-              </span>
-            )}
-            {'difficultyLevel' in recipe && recipe.difficultyLevel && (
-              <span className="bg-muted px-2 py-1 rounded">
-                📊 {recipe.difficultyLevel}
-              </span>
-            )}
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2 text-xs">
+              {'glassware' in recipe && recipe.glassware && (
+                <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">
+                  🍸 {recipe.glassware}
+                </span>
+              )}
+              {'difficultyLevel' in recipe && recipe.difficultyLevel && (
+                <span className="bg-muted px-2.5 py-1 rounded-full font-medium">
+                  📊 {recipe.difficultyLevel}
+                </span>
+              )}
+            </div>
+            
             {recipe.createdAt && (
-              <span className="bg-muted px-2 py-1 rounded flex items-center gap-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2 border-t border-border">
                 <Clock className="h-3 w-3" />
-                {formatDate(recipe.createdAt)}
-              </span>
+                <span>{formatDate(recipe.createdAt)}</span>
+              </div>
             )}
-          </div>
-        </CardHeader>
 
-        <CardContent className="space-y-2">
-          <Button
-            variant="default"
-            className="w-full"
-            onClick={() => setIsOpen(true)}
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            View Full Recipe
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Recipe
-          </Button>
-        </CardContent>
+            <div className="flex items-center justify-center pt-2 text-sm text-primary/60 group-hover:text-primary transition-colors">
+              <Eye className="h-4 w-4 mr-1.5" />
+              <span className="font-medium">Click to view full recipe</span>
+            </div>
+          </CardContent>
+        </div>
       </Card>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
