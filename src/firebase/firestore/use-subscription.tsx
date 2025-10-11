@@ -31,6 +31,18 @@ export function useSubscription() {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
           
+          // Helper function to convert timestamp (Firestore Timestamp or ISO string) to Date
+          const toDate = (timestamp: any): Date | null => {
+            if (!timestamp) return null;
+            if (typeof timestamp === 'string') {
+              return new Date(timestamp);
+            }
+            if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+              return timestamp.toDate();
+            }
+            return null;
+          };
+
           // Convert Firestore timestamps to Date objects
           const subscriptionData: UserSubscription = {
             subscriptionTier: data.subscriptionTier || 'free',
@@ -40,16 +52,16 @@ export function useSubscription() {
             stripePriceId: data.stripePriceId,
             isEarlyBird: data.isEarlyBird || false,
             earlyBirdNumber: data.earlyBirdNumber,
-            subscriptionStartDate: data.subscriptionStartDate?.toDate() || null,
-            currentPeriodStart: data.currentPeriodStart?.toDate() || null,
-            currentPeriodEnd: data.currentPeriodEnd?.toDate() || null,
+            subscriptionStartDate: toDate(data.subscriptionStartDate),
+            currentPeriodStart: toDate(data.currentPeriodStart),
+            currentPeriodEnd: toDate(data.currentPeriodEnd),
             cancelAtPeriodEnd: data.cancelAtPeriodEnd || false,
             recipesGeneratedThisMonth: data.recipesGeneratedThisMonth || 0,
-            lastGenerationResetDate: data.lastGenerationResetDate?.toDate() || new Date(),
+            lastGenerationResetDate: toDate(data.lastGenerationResetDate) || new Date(),
             totalRecipesGenerated: data.totalRecipesGenerated || 0,
             recipeCount: data.recipeCount || 0,
-            createdAt: data.createdAt?.toDate() || new Date(),
-            updatedAt: data.updatedAt?.toDate(),
+            createdAt: toDate(data.createdAt) || new Date(),
+            updatedAt: toDate(data.updatedAt),
           };
           
           setSubscription(subscriptionData);
