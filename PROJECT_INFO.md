@@ -62,3 +62,4 @@
 - Perfect for free-tier deployment (Firebase/Vercel)
 - Ready for CI/CD pipeline setup
 - GitHub Actions workflow fixed and ready for deployment
+- Secrets configured: GEMINI_API_KEY and FIREBASE_SERVICE_ACCOUNT
