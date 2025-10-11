@@ -79,7 +79,7 @@ Your task is to create a unique, well-balanced cocktail recipe that perfectly ma
 
 If the request is too vague (e.g., just "make me a drink"), politely ask for more specific details about preferred spirits, flavors, or occasion in the recipeName field and leave other fields with helpful prompts.
 `,
-  model: 'googleai/gemini-1.5-flash',
+  model: 'vertexai/gemini-1.5-flash',
 });
 
 const generateCocktailRecipeFlow = ai.defineFlow(

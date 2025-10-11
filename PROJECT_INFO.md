@@ -54,7 +54,10 @@
 - ✅ No linting errors
 
 ## Environment Variables
-- `GEMINI_API_KEY` - Required for AI recipe generation (configured in Vercel)
+- **Vertex AI**: Uses GCP project authentication (no API key needed!)
+  - Project ID: `studio-1063505923-cbb37`
+  - Region: `us-central1`
+  - Vercel automatically authenticates with GCP
 - Firebase configuration - Automatically loaded from `src/firebase/config.ts`
 
 ## Deployment Platform
