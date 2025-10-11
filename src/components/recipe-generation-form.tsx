@@ -19,11 +19,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Wand2, Dices, Share2, Copy, Check } from "lucide-react";
+import { Loader2, Wand2, Dices, Share2, Copy, Check, Save } from "lucide-react";
 import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-recipe";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useRecipes } from "@/firebase";
 
 const formSchema = z.object({
   prompt: z.string(),
@@ -72,7 +73,10 @@ export function RecipeGenerationForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [currentPrompt, setCurrentPrompt] = useState<string>('');
   const { toast } = useToast();
+  const { saveRecipe } = useRecipes();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -176,14 +180,51 @@ ${window.location.origin}`.trim();
     }
   };
 
+  const handleSaveRecipe = async () => {
+    if (!recipe || !currentPrompt) return;
+    
+    try {
+      await saveRecipe(recipe, currentPrompt);
+      setIsSaved(true);
+      toast({
+        title: "Recipe Saved! 💾",
+        description: "Recipe has been saved to your collection.",
+      });
+      setTimeout(() => setIsSaved(false), 3000);
+    } catch (err) {
+      toast({
+        title: "Save Failed",
+        description: "Could not save recipe. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     setRecipe(null);
     setError(null);
+    setIsSaved(false);
+    setCurrentPrompt(data.prompt);
     const result = await handleGenerateRecipe(data);
     setRecipe(result.recipe);
     setError(result.error);
     setIsLoading(false);
+    
+    // Auto-save recipe if generation was successful
+    if (result.recipe && !result.error) {
+      try {
+        await saveRecipe(result.recipe, data.prompt);
+        setIsSaved(true);
+        toast({
+          title: "Recipe Generated & Saved! ✨",
+          description: "Your cocktail recipe has been saved to your collection.",
+        });
+      } catch (err) {
+        // Silently fail auto-save, user can manually save if needed
+        console.error('Auto-save failed:', err);
+      }
+    }
   };
 
   return (

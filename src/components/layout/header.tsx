@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { AuthButton } from "@/components/auth-button";
+import { BookOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   return (
@@ -10,7 +12,15 @@ export function Header() {
           <Logo className="h-7 w-7 text-primary" />
           <h1 className="text-xl font-bold leading-none font-headline">Elixiary</h1>
         </Link>
-        <AuthButton />
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/recipes" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">My Recipes</span>
+            </Link>
+          </Button>
+          <AuthButton />
+        </div>
       </div>
     </header>
   );
