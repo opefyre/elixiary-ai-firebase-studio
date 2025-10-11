@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { initializeFirebase } from '@/firebase';
-import { doc, updateDoc, serverTimestamp, getDoc, setDoc, getDoc as getFirestoreDoc } from 'firebase/firestore';
+import { initializeFirebaseServer } from '@/firebase/server';
 
 export async function POST(request: NextRequest) {
   console.log('Webhook received');
@@ -24,11 +23,11 @@ export async function POST(request: NextRequest) {
 
   let firestore;
   try {
-    const firebase = initializeFirebase();
+    const firebase = initializeFirebaseServer();
     firestore = firebase.firestore;
-    console.log('Firebase initialized successfully');
+    console.log('Firebase Admin SDK initialized successfully');
   } catch (error) {
-    console.error('Firebase initialization failed:', error);
+    console.error('Firebase Admin SDK initialization failed:', error);
     return NextResponse.json(
       { error: 'Firebase initialization failed' },
       { status: 500 }
@@ -140,23 +139,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   );
   console.log('Subscription retrieved:', subscription.id);
 
-  const userRef = doc(firestore, 'users', userId);
+  const userRef = firestore.collection('users').doc(userId);
   console.log('User ref created:', userId);
   
   // Get current early bird count if this is an early bird
   let earlyBirdNumber: number | undefined;
   if (isEarlyBird) {
     console.log('Processing early bird subscription');
-    const configRef = doc(firestore, 'config', 'earlyBird');
-    const configSnap = await getDoc(configRef);
+    const configRef = firestore.collection('config').doc('earlyBird');
+    const configSnap = await configRef.get();
     
-    if (configSnap.exists()) {
-      const currentCount = configSnap.data().count || 0;
+    if (configSnap.exists) {
+      const currentCount = configSnap.data()?.count || 0;
       earlyBirdNumber = currentCount + 1;
       console.log('Incrementing early bird count to:', earlyBirdNumber);
       
       // Increment early bird counter
-      await updateDoc(configRef, {
+      await configRef.update({
         count: earlyBirdNumber,
         isActive: earlyBirdNumber < 50,
       });
@@ -164,7 +163,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       // Initialize early bird config
       earlyBirdNumber = 1;
       console.log('Initializing early bird config');
-      await setDoc(configRef, {
+      await configRef.set({
         count: 1,
         isActive: true,
         maxCount: 50,
@@ -174,9 +173,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
 
   // Check if user document exists, create it if it doesn't
   console.log('Checking if user document exists...');
-  const userDoc = await getFirestoreDoc(userRef);
+  const userDoc = await userRef.get();
   
-  if (!userDoc.exists()) {
+  if (!userDoc.exists) {
     console.log('User document does not exist, creating new document');
     // Create user document with subscription data
     const userData = {
@@ -187,15 +186,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       stripePriceId: subscription.items.data[0].price.id,
       isEarlyBird: isEarlyBird,
       ...(earlyBirdNumber && { earlyBirdNumber }),
-      subscriptionStartDate: serverTimestamp(),
+      subscriptionStartDate: new Date(),
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     console.log('Creating user document with data:', userData);
-    await setDoc(userRef, userData);
+    await userRef.set(userData);
     console.log('User document created successfully');
   } else {
     console.log('User document exists, updating...');
@@ -208,14 +207,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       stripePriceId: subscription.items.data[0].price.id,
       isEarlyBird: isEarlyBird,
       ...(earlyBirdNumber && { earlyBirdNumber }),
-      subscriptionStartDate: serverTimestamp(),
+      subscriptionStartDate: new Date(),
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date(),
     };
     console.log('Updating user document with data:', updateData);
-    await updateDoc(userRef, updateData);
+    await userRef.update(updateData);
     console.log('User document updated successfully');
   }
 
@@ -233,16 +232,16 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription, fire
     return;
   }
 
-  const userRef = doc(firestore, 'users', userId);
-  const userDoc = await getFirestoreDoc(userRef);
+  const userRef = firestore.collection('users').doc(userId);
+  const userDoc = await userRef.get();
 
-  if (userDoc.exists()) {
-    await updateDoc(userRef, {
+  if (userDoc.exists) {
+    await userRef.update({
       subscriptionStatus: subscription.status,
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date(),
     });
   }
 
@@ -257,15 +256,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, fire
     return;
   }
 
-  const userRef = doc(firestore, 'users', userId);
-  const userDoc = await getFirestoreDoc(userRef);
+  const userRef = firestore.collection('users').doc(userId);
+  const userDoc = await userRef.get();
 
-  if (userDoc.exists()) {
-    await updateDoc(userRef, {
+  if (userDoc.exists) {
+    await userRef.update({
       subscriptionTier: 'free',
       subscriptionStatus: 'expired',
       cancelAtPeriodEnd: false,
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date(),
     });
   }
 
@@ -283,14 +282,14 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, f
     return;
   }
 
-  const userRef = doc(firestore, 'users', userId);
-  const userDoc = await getFirestoreDoc(userRef);
+  const userRef = firestore.collection('users').doc(userId);
+  const userDoc = await userRef.get();
 
-  if (userDoc.exists()) {
-    await updateDoc(userRef, {
+  if (userDoc.exists) {
+    await userRef.update({
       subscriptionStatus: 'active',
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date(),
     });
   }
 
@@ -308,13 +307,13 @@ async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, fire
     return;
   }
 
-  const userRef = doc(firestore, 'users', userId);
-  const userDoc = await getFirestoreDoc(userRef);
+  const userRef = firestore.collection('users').doc(userId);
+  const userDoc = await userRef.get();
 
-  if (userDoc.exists()) {
-    await updateDoc(userRef, {
+  if (userDoc.exists) {
+    await userRef.update({
       subscriptionStatus: 'past_due',
-      updatedAt: serverTimestamp(),
+      updatedAt: new Date(),
     });
   }
 
