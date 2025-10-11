@@ -9,10 +9,11 @@ export default function DebugPage() {
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
 
   // Use the hooks directly
-  let firebaseServices, userServices;
+  let firebaseServices, userServices, auth;
   try {
     firebaseServices = useFirebase();
     userServices = useUser();
+    auth = firebaseServices.auth;
   } catch (error: any) {
     setFirebaseError(error.message);
   }
@@ -41,16 +42,32 @@ export default function DebugPage() {
 
         console.log('=== DEBUG INFO ===');
         console.log('Current User ID:', user.uid);
+        console.log('User Email:', user.email);
+        console.log('Auth Token:', await user.getIdToken());
         console.log('Expected User ID:', 'uzyFZtgGRAZZUlqc3j7c42PUHgk1');
         console.log('IDs Match:', user.uid === 'uzyFZtgGRAZZUlqc3j7c42PUHgk1');
+        console.log('Firestore instance:', firestore);
+        console.log('Firebase Auth instance:', auth);
 
         // Try to read user document (Firebase v9+ syntax)
         const userDocRef = doc(firestore, 'users', user.uid);
+        console.log('User document reference:', userDocRef);
+        console.log('User document path:', userDocRef.path);
         console.log('Attempting to read user document for:', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        console.log('User document exists:', userDoc.exists());
-        if (userDoc.exists()) {
-          console.log('User document data:', userDoc.data());
+        
+        try {
+          const userDoc = await getDoc(userDocRef);
+          console.log('User document exists:', userDoc.exists());
+          if (userDoc.exists()) {
+            console.log('User document data:', userDoc.data());
+          } else {
+            console.log('User document does not exist');
+          }
+        } catch (docError: any) {
+          console.error('Error reading user document:', docError);
+          console.error('Error code:', docError.code);
+          console.error('Error message:', docError.message);
+          throw docError;
         }
         
         // Create the debug info object
