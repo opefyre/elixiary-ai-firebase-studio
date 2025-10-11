@@ -90,9 +90,7 @@ function PricingContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId: isEarlyBirdActive
-            ? (priceType === 'monthly' ? process.env.NEXT_PUBLIC_STRIPE_EARLY_BIRD_MONTHLY_PRICE_ID : process.env.NEXT_PUBLIC_STRIPE_EARLY_BIRD_ANNUAL_PRICE_ID)
-            : (priceType === 'monthly' ? process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID : process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID),
+          planType: priceType, // 'monthly' or 'annual'
           userId: user.uid,
           userEmail: user.email,
           isEarlyBird: isEarlyBirdActive,

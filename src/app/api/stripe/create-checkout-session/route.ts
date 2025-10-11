@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       apiVersion: '2024-12-18.acacia',
     });
 
-    const { priceId, userId, userEmail, isEarlyBird } = await request.json();
+    const { planType, userId, userEmail, isEarlyBird } = await request.json();
 
     if (!userId || !userEmail) {
       return NextResponse.json(
@@ -28,11 +28,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!priceId || !Object.values(STRIPE_PRICES).includes(priceId)) {
+    if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
-        { error: 'Invalid price ID' },
+        { error: 'Invalid plan type. Must be "monthly" or "annual"' },
         { status: 400 }
       );
+    }
+
+    // Determine price ID based on plan type and early bird status
+    let priceId: string;
+    if (isEarlyBird) {
+      priceId = planType === 'monthly' 
+        ? STRIPE_PRICES.EARLY_BIRD_MONTHLY 
+        : STRIPE_PRICES.EARLY_BIRD_ANNUAL;
+    } else {
+      priceId = planType === 'monthly' 
+        ? STRIPE_PRICES.PRO_MONTHLY 
+        : STRIPE_PRICES.PRO_ANNUAL;
     }
 
     // Get or create Stripe customer
