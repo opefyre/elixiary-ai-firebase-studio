@@ -1,6 +1,10 @@
 # 💎 Elixiary AI - Subscription Plan & Implementation
 
-## 🎯 Updated Freemium Model
+**Status**: ✅ **Phases 1-4 & 7 Complete** | 🚧 **Phases 5-6 & 8 Pending**
+
+---
+
+## 🎯 Freemium Model
 
 ### **Free Tier (Forever Free)**
 **Monthly Limits:**
@@ -31,460 +35,290 @@
 - Saves $2.89 vs monthly even with discount
 - 30-day money-back guarantee
 
-**Pro Features (Unlimited):**
-- ✅ **Unlimited recipe generations**
-- ✅ **Unlimited saved recipes**
-- ✅ **AI-generated cocktail images** (Gemini Imagen/Vision)
-- ✅ **PDF export** with beautiful formatting
-- ✅ **Advanced customization** (complexity, dietary restrictions, flavor profiles)
-- ✅ **Ingredient substitution suggestions** (unlimited access)
-- ✅ **Recipe history & analytics**
-- ✅ **Priority support** (email within 24h)
-- ✅ **Early access** to new features
-- ✅ **Custom recipe URLs** for sharing
-- ✅ **No limits badge** on profile
+**Pro Features:**
+- ✅ **Unlimited recipe generations** ✅ LIVE
+- ✅ **Unlimited saved recipes** ✅ LIVE
+- 🚧 **AI-generated cocktail images** (Gemini Imagen) - Coming Soon
+- 🚧 **PDF export** with beautiful formatting - Coming Soon
+- 🚧 **Advanced customization** - Coming Soon
+- ✅ **Priority support** ✅ LIVE
 
 ---
 
 ## 💰 Pricing Structure
 
-### Current Implementation
+### Current Implementation (✅ LIVE)
 ```
 Free Tier:
 - Price: $0
-- Recipe Generation: 10/month
-- Saved Recipes: 20 max
+- Recipe Generation: 10/month ✅
+- Saved Recipes: 20 max ✅
 - Images: None
 - Features: Basic
 
-Pro Tier (After 50 users):
-- Monthly: $4.99/month
-- Annual: $49/year ($4.08/month, 18% off)
-- Recipe Generation: Unlimited
-- Saved Recipes: Unlimited
-- Images: Unlimited (Gemini)
-- Features: All
+Pro Tier (Regular):
+- Monthly: $4.99/month ✅
+- Annual: $49/year ✅
+- Recipe Generation: Unlimited ✅
+- Saved Recipes: Unlimited ✅
+- Images: Coming Soon 🚧
+- Features: All current + upcoming
 
-Pro Tier (First 50 users - Launch Offer):
-- Monthly: $1.49/month (first 3 months, then $4.99)
-- Annual: $14.99/year (first year, then $49/year)
-- Same Pro features
-- Countdown badge: "X/50 spots left"
-- Urgency messaging
+Pro Tier (Early Bird - First 50 users):
+- Monthly: $1.49/month (3 months → $4.99) ✅
+- Annual: $14.99/year (1 year → $49/year) ✅
+- Same Pro features ✅
+- Counter badge: "X/50 spots left" ✅
 ```
 
 ---
 
 ## 🛠️ Technical Stack
 
-### Payment Processing
-- **Stripe** (2.9% + $0.30 per transaction)
-- Stripe Customer Portal for self-service billing
-- Webhook handlers for subscription events
+### Payment Processing (✅ COMPLETE)
+- **Stripe** - Checkout, subscriptions, webhooks ✅
+- Stripe Customer Portal (Coming Soon)
+- 2.9% + $0.30 per transaction
 
-### Image Generation
-- **Gemini Imagen 3** (via Vertex AI or Google AI API)
+### Image Generation (🚧 PLANNED)
+- **Gemini Imagen 3** (via Google AI API)
 - Estimated cost: ~$0.04-0.08 per image
-- Fallback: Use Gemini 2.0 Flash for image understanding + Imagen
+- Fallback to Gemini 2.0 Flash multimodal
 
-### Database (Firestore)
-```
-users/{userId}
-├── subscriptionTier: "free" | "pro"
-├── subscriptionStatus: "active" | "trialing" | "past_due" | "canceled" | "incomplete"
-├── stripeCustomerId: string
-├── stripeSubscriptionId: string
-├── stripePriceId: string (to track early bird vs regular)
-├── isEarlyBird: boolean (first 50 users)
-├── earlyBirdNumber: number (1-50)
-├── subscriptionStartDate: timestamp
-├── currentPeriodStart: timestamp
-├── currentPeriodEnd: timestamp
-├── cancelAtPeriodEnd: boolean
-├── recipesGeneratedThisMonth: number
-├── lastGenerationResetDate: timestamp
-├── totalRecipesGenerated: number
-├── recipeCount: number (saved recipes)
-└── createdAt: timestamp
-```
+### Database (✅ COMPLETE)
+Firestore schema implemented with all subscription fields:
+- User documents with subscription data ✅
+- Usage tracking (generations, saves) ✅
+- Early bird counter in `config/earlyBird` ✅
+- Security rules deployed ✅
 
 ---
 
-## 📋 Implementation Checklist
+## 📋 Implementation Status
 
-### **Phase 1: Foundation & Tracking (Days 1-2)**
+### ✅ **Phase 1: Foundation & Tracking** - COMPLETE
 
-#### Database Schema
-- [ ] Create Firestore security rules for subscription data
-- [ ] Add subscription fields to user document on signup
-- [ ] Create Cloud Function to reset monthly generation counter (runs 1st of each month)
-- [ ] Add usage tracking to recipe generation flow
-
-#### Usage Counter System
-- [ ] Track `recipesGeneratedThisMonth` on each generation
-- [ ] Track `recipeCount` on save/delete
-- [ ] Add counter reset logic (monthly)
-- [ ] Create utility functions: `canGenerateRecipe()`, `canSaveRecipe()`
-
-#### User Dashboard (My Account Page)
-- [ ] Create `/account` page
-- [ ] Show current tier (Free or Pro)
-- [ ] Show usage stats: "X/10 recipes this month" (Free) or "Unlimited ✨" (Pro)
-- [ ] Show "X/20 saved recipes" (Free) or "Unlimited ✨" (Pro)
-- [ ] Show next reset date for free users
-- [ ] Add "Upgrade to Pro" CTA for free users
+- ✅ Firestore security rules for subscription data
+- ✅ Subscription fields in user documents
+- ✅ Usage counter system (generations, saves)
+- ✅ Monthly reset logic for generations
+- ✅ Utility functions: `canGenerateRecipe()`, `canSaveRecipe()`
+- ✅ User dashboard (`/account` page)
+- ✅ Real-time usage stats display
 
 ---
 
-### **Phase 2: Feature Gating & UI (Days 2-3)**
+### ✅ **Phase 2: Feature Gating & UI** - COMPLETE
 
-#### Recipe Generation Limits
-- [ ] Check user tier before generation
-- [ ] Block generation if free user at 10/month limit
-- [ ] Show upgrade modal when limit hit
-- [ ] Decrement counter on failed generations (rollback)
-- [ ] Update recipe generation form to show counter: "X/10 left this month"
-
-#### Recipe Save Limits
-- [ ] Check recipe count before saving
-- [ ] Block save if free user at 20 recipes
-- [ ] Show upgrade modal when limit hit
-- [ ] Show counter in "My Recipes": "X/20 recipes saved"
-
-#### Upgrade Modals/CTAs
-- [ ] Create `<UpgradeModal>` component
-- [ ] Show different messages based on limit type (generation vs save)
-- [ ] Add countdown: "X/50 early bird spots left"
-- [ ] Show pricing comparison: Regular vs Early Bird
-- [ ] Add urgency elements: "Limited time offer"
-- [ ] Include testimonials/social proof (mock initially)
-
-#### Pro Badges & Visual Indicators
-- [ ] Add "PRO" badge to user avatar in header (if pro)
-- [ ] Add "🔓 Unlimited" indicators throughout UI for pro users
-- [ ] Add "🔒 Pro Feature" badges on locked features
-- [ ] Show upgrade prompt tooltips on hover over locked features
+- ✅ Recipe generation limits enforced
+- ✅ Recipe save limits enforced
+- ✅ Upgrade modal when limits hit
+- ✅ Usage indicators in UI
+- ✅ Pro badges and visual indicators
+- ✅ Upgrade CTAs throughout app
 
 ---
 
-### **Phase 3: Stripe Integration (Days 3-5)**
+### ✅ **Phase 3: Stripe Integration** - COMPLETE
 
-#### Stripe Setup
-- [ ] Create Stripe account (or use existing)
-- [ ] Add Stripe API keys to environment variables (Vercel + local .env.local)
-  - `STRIPE_SECRET_KEY`
-  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-  - `STRIPE_WEBHOOK_SECRET`
-- [ ] Install Stripe SDK: `npm install stripe @stripe/stripe-js`
-
-#### Stripe Products & Prices
-- [ ] Create Pro product in Stripe Dashboard
-- [ ] Create early bird prices:
-  - Monthly: $1.49/month (with phase to $4.99 after 3 months)
-  - Annual: $14.99/year (with phase to $49/year after 1 year)
-- [ ] Create regular prices (for after 50 users):
-  - Monthly: $4.99/month
-  - Annual: $49/year
-- [ ] Note all Price IDs for code
-
-#### Checkout Flow
-- [ ] Create `/api/stripe/create-checkout-session` API route
-- [ ] Pass user ID, email, selected price, early bird status
-- [ ] Create Stripe Checkout session with:
-  - Success URL: `/account?success=true`
-  - Cancel URL: `/account?canceled=true`
-  - Customer email pre-filled
-  - Trial period: none (direct charge)
-- [ ] Create `/pricing` page with plans
-- [ ] Add "Upgrade to Pro" buttons throughout app
-- [ ] Implement client-side redirect to Checkout
-
-#### Webhook Handler
-- [ ] Create `/api/stripe/webhook` API route
-- [ ] Verify webhook signature
-- [ ] Handle events:
-  - `checkout.session.completed` → Activate subscription, update Firestore
-  - `customer.subscription.updated` → Update subscription status
-  - `customer.subscription.deleted` → Downgrade to free tier
-  - `invoice.payment_succeeded` → Extend subscription period
-  - `invoice.payment_failed` → Mark past_due, send notification
-- [ ] Test with Stripe CLI: `stripe listen --forward-to localhost:3000/api/stripe/webhook`
-
-#### Customer Portal
-- [ ] Enable Stripe Customer Portal in dashboard
-- [ ] Create `/api/stripe/create-portal-session` API route
-- [ ] Add "Manage Billing" button in `/account` page
-- [ ] Allow users to:
-  - Update payment method
-  - View invoices
-  - Cancel subscription
-  - Download receipts
+- ✅ Stripe account configured
+- ✅ Environment variables set in Vercel
+- ✅ Products & prices created (4 total)
+- ✅ Checkout flow (`/api/stripe/create-checkout-session`)
+- ✅ Webhook handler (`/api/stripe/webhook`)
+- ✅ Events handled:
+  - `checkout.session.completed` ✅
+  - `customer.subscription.updated` ✅
+  - `customer.subscription.deleted` ✅
+  - `invoice.payment_succeeded` ✅
+  - `invoice.payment_failed` ✅
+- ✅ Firebase Admin SDK for server-side operations
+- 🚧 Customer Portal (planned for v2)
 
 ---
 
-### **Phase 4: Early Bird System (Day 5)**
+### ✅ **Phase 4: Early Bird System** - COMPLETE
 
-#### Early Bird Counter
-- [ ] Create Firestore collection: `config/earlyBird`
-  - `count: number` (0-50)
-  - `isActive: boolean`
-- [ ] Increment counter on successful Pro signup
-- [ ] Check counter before showing early bird pricing
-- [ ] When count reaches 50: disable early bird, show regular pricing
-
-#### UI Updates
-- [ ] Show "X/50 spots left" in real-time on pricing page
-- [ ] Update button text: "Claim Early Bird Spot" vs "Upgrade to Pro"
-- [ ] Show "Early Bird Member #X" badge for early users
-- [ ] Add urgency timer: "Offer expires in X hours" (optional)
-- [ ] Celebrate when user joins: "You're Early Bird #X! 🎉"
-
-#### Email Notifications (Optional for MVP)
-- [ ] Welcome email on signup
-- [ ] Payment confirmation email
-- [ ] Upgrade confirmation with early bird details
-- [ ] Cancellation confirmation
-- [ ] Approaching limit warnings (8/10 recipes used)
+- ✅ Firestore `config/earlyBird` collection
+- ✅ Counter increments on Pro signup
+- ✅ Real-time spot counter on pricing page
+- ✅ Early bird member badge
+- ✅ Automatic switch to regular pricing after 50 users
 
 ---
 
-### **Phase 5: Pro Features (Days 6-8)**
+### 🚧 **Phase 5: Pro Features** - PENDING
 
-#### Image Generation (Gemini)
-- [ ] Research Gemini Imagen 3 API (via Vertex AI)
-- [ ] Add to genkit config if possible, or use separate API call
-- [ ] Create new flow: `generate-cocktail-image.ts`
-- [ ] Input: recipe name, description, ingredients
-- [ ] Output: base64 image or URL
-- [ ] Add "Generate Image" button to recipe cards (Pro only)
-- [ ] Show loading state during image generation
-- [ ] Save image URL to recipe document in Firestore
-- [ ] Display image in recipe card and full view
+#### Image Generation (Planned)
+- [ ] Integrate Gemini Imagen 3 API
+- [ ] Create image generation flow
+- [ ] Add "Generate Image" button to recipes (Pro only)
+- [ ] Store image URLs in Firestore
+- [ ] Display images in recipe cards
 
-#### PDF Export
-- [ ] Install: `npm install jspdf jspdf-autotable`
-- [ ] Create utility: `lib/pdf-exporter.ts`
-- [ ] Design PDF template:
-  - Recipe name as title
-  - Image (if available)
-  - Ingredients list
-  - Instructions
-  - Garnish & tips
-  - Footer: "Generated by Elixiary AI"
-- [ ] Add "Export PDF" button to recipe full view (Pro only)
-- [ ] Trigger download on click
+#### PDF Export (Planned)
+- [ ] Install `jspdf` and `jspdf-autotable`
+- [ ] Create PDF export utility
+- [ ] Design PDF template
+- [ ] Add "Export PDF" button (Pro only)
+- [ ] Include recipe image if available
 
-#### Advanced Customization
-- [ ] Add "Customize" button in recipe generation form (Pro only)
-- [ ] Create customization modal with options:
-  - Complexity level: Simple, Moderate, Complex
-  - Dietary restrictions: Vegan, Low-sugar, Alcohol-free, Gluten-free
-  - Flavor profile sliders: Sweet, Sour, Bitter, Spicy, Fruity
-- [ ] Pass customization parameters to AI prompt
-- [ ] Update `generate-cocktail-recipe.ts` to accept custom params
-
-#### Recipe History & Analytics
-- [ ] Track generation history: save prompt, timestamp, result
-- [ ] Create "History" tab in `/account` page
-- [ ] Show stats:
-  - Total recipes generated
-  - Most used ingredients
-  - Favorite glass types
-  - Generation frequency chart (last 30 days)
-- [ ] Allow re-generate from history
+#### Advanced Customization (Planned)
+- [ ] Add customization modal in generation form
+- [ ] Options: complexity, dietary restrictions, flavor profiles
+- [ ] Update AI prompt to use custom parameters
+- [ ] Show "Customize" button for Pro users only
 
 ---
 
-### **Phase 6: Polish & Testing (Days 8-9)**
+### ✅ **Phase 6: Polish & Testing** - MOSTLY COMPLETE
 
-#### UI/UX Polish
-- [ ] Add loading states for all async operations
-- [ ] Add error handling and user-friendly messages
-- [ ] Add success toasts for upgrades, cancellations
-- [ ] Test all upgrade flows (monthly, annual, early bird)
-- [ ] Test all limit scenarios (hit 10/month, hit 20 saved)
-- [ ] Mobile responsiveness check
-- [ ] Dark mode check
-
-#### Testing Checklist
-- [ ] Test signup → free tier → hit limit → upgrade → unlimited
-- [ ] Test monthly vs annual checkout
-- [ ] Test early bird pricing (mock counter at 49, 50, 51)
-- [ ] Test webhook events (use Stripe test mode)
-- [ ] Test subscription cancellation → still has access until period end
-- [ ] Test failed payment → downgrade to free
-- [ ] Test image generation (Pro only)
-- [ ] Test PDF export (Pro only)
-- [ ] Test billing portal access
-
-#### Security & Performance
-- [ ] Ensure all API routes check authentication
-- [ ] Validate user tier server-side (never trust client)
-- [ ] Rate limit API routes
-- [ ] Add error logging (Sentry or similar)
-- [ ] Cache subscription status (reduce Firestore reads)
-- [ ] Optimize image loading (use Next.js Image)
+- ✅ Loading states for async operations
+- ✅ Error handling and user messages
+- ✅ Success toasts for upgrades
+- ✅ All limit scenarios tested
+- ✅ Mobile responsiveness verified
+- ✅ Production cleanup (debug code removed)
+- ✅ Build verification (no errors)
+- [ ] Dark mode testing (if applicable)
+- [ ] Additional edge case testing
 
 ---
 
-### **Phase 7: Pricing Page & Marketing (Days 9-10)**
+### ✅ **Phase 7: Pricing Page & Marketing** - COMPLETE
 
-#### Create `/pricing` Page
-- [ ] Hero section: "Choose Your Mixology Journey"
-- [ ] Two-column comparison: Free vs Pro
-- [ ] Highlight early bird offer: "70% OFF - First 50 users only!"
-- [ ] Add countdown: "X spots remaining"
-- [ ] Feature comparison table
-- [ ] FAQ section:
-  - Can I cancel anytime? Yes
-  - What happens after 3 months? Price goes to $4.99
-  - Do I get to keep early bird pricing forever? First 3 months (monthly) or first year (annual)
-  - Refund policy? 30-day money-back guarantee
-  - What payment methods? All major cards via Stripe
-- [ ] Testimonials section (mock/real)
-- [ ] Add to header navigation
-
-#### Social Proof Elements
-- [ ] Add "🔥 X users upgraded today" (can be manual initially)
-- [ ] Add "⭐ X recipes generated this week" counter
-- [ ] Show avatar stack of Pro users (mock initially)
-- [ ] Add trust badges: "Secure payment via Stripe", "30-day guarantee"
-
-#### Email Sequences (Optional)
-- [ ] Day 1: Welcome email
-- [ ] Day 3: You've used 5/10 recipes - consider upgrading
-- [ ] Day 7: You've used 10/10 - upgrade now
-- [ ] Day 14: Don't forget your recipes reset in X days
-- [ ] Day 30: Your monthly recipes have reset!
+- ✅ `/pricing` page created
+- ✅ Feature comparison (Free vs Pro)
+- ✅ Early bird offer highlighted
+- ✅ Real-time spot counter
+- ✅ FAQ section
+- ✅ Added to header navigation
+- ✅ Social proof elements (real-time counter)
+- 🚧 Email sequences (future enhancement)
 
 ---
 
-### **Phase 8: Launch Preparation (Day 10)**
+### 🚧 **Phase 8: Launch Preparation** - PENDING
 
 #### Pre-Launch Checklist
-- [ ] Switch Stripe to live mode (from test mode)
-- [ ] Add live Stripe keys to Vercel environment variables
-- [ ] Set early bird counter to 0 in production Firestore
-- [ ] Test end-to-end with real payment (then refund)
-- [ ] Prepare launch announcement:
-  - Twitter/X post
-  - Product Hunt submission
-  - Reddit (r/SideProject, r/SaaS)
-  - Email to existing users (if any)
+- ✅ Stripe in test mode (switch to live mode when ready)
+- ✅ Webhook configured and tested
+- ✅ End-to-end testing completed
+- [ ] Switch Stripe to live mode
+- [ ] Add live Stripe keys to Vercel
+- [ ] Reset early bird counter to 0 in production
+- [ ] Final end-to-end test with real payment (then refund)
+- [ ] Prepare launch announcement
 - [ ] Create changelog/release notes
-- [ ] Update README with Pro features
-- [ ] Prepare customer support flow (email, FAQ)
+- [ ] Customer support flow setup
 
 #### Monitoring Setup
-- [ ] Set up Stripe dashboard alerts for:
-  - Failed payments
-  - New subscriptions
-  - Cancellations
-- [ ] Set up analytics for:
-  - Free → Pro conversion rate
-  - Most common upgrade trigger (generation limit vs save limit)
-  - Churn rate
-  - MRR tracking
-
-#### Launch Day
-- [ ] Deploy to production
-- [ ] Announce on all channels
-- [ ] Monitor Stripe dashboard
-- [ ] Monitor Firestore for errors
-- [ ] Respond to user feedback quickly
-- [ ] Celebrate first paying customer! 🎉
+- ✅ Stripe dashboard monitoring
+- ✅ Firebase console monitoring
+- ✅ Vercel analytics configured
+- [ ] Set up alerts for failed payments
+- [ ] Set up conversion tracking
+- [ ] MRR tracking dashboard
 
 ---
 
 ## 📊 Success Metrics & Goals
 
-### Week 1 Goals
-- [ ] 50 total signups (free tier)
-- [ ] 5 Pro signups (10% conversion)
-- [ ] $7.45 MRR (5 × $1.49)
+### Current Status (As of Launch)
+- 🎯 System operational and accepting payments
+- 🎯 Early bird pricing active (first 50 users)
+- 🎯 0/50 early bird spots filled (ready for launch)
 
-### Month 1 Goals
-- [ ] 200 total signups
-- [ ] 20 Pro users (10% conversion)
-- [ ] $100+ MRR
-- [ ] Fill all 50 early bird spots
+### Target Metrics
 
-### Month 3 Goals
-- [ ] 1,000 total signups
-- [ ] 100 Pro users
-- [ ] $500+ MRR (mix of early bird transitioning to $4.99 + new users)
+**Week 1 Goals:**
+- 50 total signups (free tier)
+- 5 Pro signups (10% conversion)
+- $7.45 MRR
 
-### Month 6 Goals
-- [ ] 5,000 total signups
-- [ ] 250+ Pro users
-- [ ] $1,250+ MRR
+**Month 1 Goals:**
+- 200 total signups
+- 20 Pro users (10% conversion)
+- $100+ MRR
+- Fill all 50 early bird spots
 
----
-
-## 💡 Post-Launch Optimizations
-
-### A/B Testing Ideas
-- [ ] Test pricing: $4.99 vs $6.99 vs $9.99
-- [ ] Test free tier limit: 10 vs 15 vs 5 recipes
-- [ ] Test early bird discount: 70% vs 50% vs 80%
-- [ ] Test CTA copy: "Upgrade Now" vs "Go Pro" vs "Unlock Unlimited"
-
-### Feature Requests to Track
-- [ ] Ingredient inventory (track what you have at home)
-- [ ] Recipe ratings & reviews
-- [ ] Community sharing (public recipe gallery)
-- [ ] Meal planning (schedule cocktails for events)
-- [ ] Barware recommendations
-
-### Growth Experiments
-- [ ] Referral program: Give 1 month free for each paying referral
-- [ ] Lifetime deal: $199 one-time (limited to 10 users)
-- [ ] Team plans: $14.99/month for 3 users
-- [ ] White-label for bars/restaurants
+**Month 3 Goals:**
+- 1,000 total signups
+- 100 Pro users
+- $500+ MRR
 
 ---
 
-## 🚨 Risk Mitigation
+## 💡 Future Enhancements
 
-### If Early Bird Doesn't Fill
-- [ ] Extend offer to first 100 users
-- [ ] Add time limit: "Expires in 7 days"
-- [ ] Increase discount: 80% off instead of 70%
+### High Priority
+1. AI-generated cocktail images (Gemini Imagen 3)
+2. PDF export with beautiful formatting
+3. Advanced recipe customization
+4. Stripe Customer Portal for self-service billing
+5. Email notification system
 
-### If Churn is High
-- [ ] Survey canceling users
-- [ ] Add exit interview: "What could we improve?"
-- [ ] Offer pause subscription (1-3 months)
-- [ ] Win-back campaign: 50% off for 3 months
+### Medium Priority
+- Recipe history & analytics dashboard
+- Ingredient inventory tracking
+- Recipe ratings & reviews
+- Community sharing (public recipe gallery)
+- Referral program
 
-### If Free Users Don't Convert
-- [ ] Reduce free tier: 5 recipes instead of 10
-- [ ] Add more Pro-only features
-- [ ] Better upgrade messaging
-- [ ] Add video tutorials showing Pro features
-
----
-
-## 📝 Notes
-
-- **Image Generation Note:** Gemini Imagen 3 is available via Vertex AI. If not accessible via free tier, we may need to:
-  1. Wait for Gemini 2.0 Flash multimodal with better image generation
-  2. Use text-to-image prompts with Gemini to generate descriptive prompts, then use free tier Stable Diffusion
-  3. Defer image generation to post-MVP
-
-- **Stripe vs Lemon Squeezy:** Sticking with Stripe for better developer experience and ecosystem.
-
-- **Tax Handling:** Stripe automatically calculates and collects sales tax/VAT if enabled in settings. Recommended to enable.
-
-- **Testing:** Use Stripe test mode with test card: `4242 4242 4242 4242`, any future expiry, any CVC.
+### Low Priority
+- Team plans ($14.99/month for 3 users)
+- White-label for bars/restaurants
+- Mobile app (React Native)
 
 ---
 
-## 🎯 Current Status: Planning Complete ✅
+## 🚨 Notes & Considerations
 
-**Next Step:** Begin implementation starting with Phase 1 (Database Schema & Usage Tracking).
+### Image Generation
+- Using Gemini Imagen 3 via Google AI API when available
+- Estimated cost per image: $0.04-0.08
+- May need to implement generation limits even for Pro (e.g., 100/month)
+- Consider caching frequently generated images
 
-**Estimated Total Implementation Time:** 10 working days (2 weeks at steady pace)
+### Pricing Strategy
+- Monitor conversion rates closely
+- A/B test pricing after first 50 users
+- Consider seasonal promotions (holidays, summer)
+- Potentially introduce lifetime deal (limited quantity)
 
-**Ready to start?** Let's build this! 🚀
+### Churn Prevention
+- Survey canceling users
+- Offer pause subscription feature
+- Win-back campaigns
+- Improve onboarding for free users
 
+---
+
+## 🎯 Current Status Summary
+
+**✅ COMPLETED:**
+- Database schema & security rules
+- Usage tracking & limits
+- Stripe checkout & webhooks
+- Early bird pricing system
+- Account dashboard
+- Pricing page
+- Feature gating
+- Production cleanup
+
+**🚧 IN PROGRESS:**
+- Final testing before live launch
+- Marketing materials
+
+**📋 PLANNED:**
+- AI image generation
+- PDF export
+- Advanced customization
+- Stripe Customer Portal
+- Email notifications
+
+---
+
+**Last Updated**: October 11, 2025  
+**Implementation Time**: 10 days  
+**Status**: Ready for Production Launch 🚀
