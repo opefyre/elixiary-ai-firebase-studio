@@ -4,8 +4,14 @@ import { initializeFirebase } from '@/firebase';
 import { doc, updateDoc, serverTimestamp, getDoc, setDoc, getDoc as getFirestoreDoc } from 'firebase/firestore';
 
 export async function POST(request: NextRequest) {
+  console.log('Webhook received');
+  
   // Initialize at runtime
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('Missing Stripe configuration:', {
+      hasSecretKey: !!process.env.STRIPE_SECRET_KEY,
+      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+    });
     return NextResponse.json(
       { error: 'Stripe not configured' },
       { status: 500 }
@@ -16,7 +22,18 @@ export async function POST(request: NextRequest) {
     apiVersion: '2024-12-18.acacia',
   });
 
-  const { firestore } = initializeFirebase();
+  let firestore;
+  try {
+    const firebase = initializeFirebase();
+    firestore = firebase.firestore;
+    console.log('Firebase initialized successfully');
+  } catch (error) {
+    console.error('Firebase initialization failed:', error);
+    return NextResponse.json(
+      { error: 'Firebase initialization failed' },
+      { status: 500 }
+    );
+  }
   
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
@@ -45,34 +62,46 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    console.log(`Processing webhook event: ${event.type}`);
+    
     switch (event.type) {
       case 'checkout.session.completed': {
+        console.log('Handling checkout.session.completed');
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutCompleted(session, stripe, firestore);
+        console.log('Checkout completed successfully');
         break;
       }
 
       case 'customer.subscription.updated': {
+        console.log('Handling customer.subscription.updated');
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionUpdated(subscription, firestore);
+        console.log('Subscription updated successfully');
         break;
       }
 
       case 'customer.subscription.deleted': {
+        console.log('Handling customer.subscription.deleted');
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionDeleted(subscription, firestore);
+        console.log('Subscription deleted successfully');
         break;
       }
 
       case 'invoice.payment_succeeded': {
+        console.log('Handling invoice.payment_succeeded');
         const invoice = event.data.object as Stripe.Invoice;
         await handlePaymentSucceeded(invoice, stripe, firestore);
+        console.log('Payment succeeded handled successfully');
         break;
       }
 
       case 'invoice.payment_failed': {
+        console.log('Handling invoice.payment_failed');
         const invoice = event.data.object as Stripe.Invoice;
         await handlePaymentFailed(invoice, stripe, firestore);
+        console.log('Payment failed handled successfully');
         break;
       }
 
@@ -80,40 +109,51 @@ export async function POST(request: NextRequest) {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
+    console.log('Webhook processed successfully');
     return NextResponse.json({ received: true });
   } catch (error: any) {
     console.error('Error processing webhook:', error);
+    console.error('Error stack:', error.stack);
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
+      { error: 'Webhook handler failed', details: error.message },
       { status: 500 }
     );
   }
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe: Stripe, firestore: any) {
+  console.log('handleCheckoutCompleted called with session:', session.id);
+  
   const userId = session.metadata?.firebaseUID;
   const isEarlyBird = session.metadata?.isEarlyBird === 'true';
+  
+  console.log('Session metadata:', { userId, isEarlyBird, metadata: session.metadata });
 
   if (!userId) {
     console.error('No firebaseUID in session metadata');
-    return;
+    throw new Error('No firebaseUID in session metadata');
   }
 
+  console.log('Retrieving subscription:', session.subscription);
   const subscription = await stripe.subscriptions.retrieve(
     session.subscription as string
   );
+  console.log('Subscription retrieved:', subscription.id);
 
   const userRef = doc(firestore, 'users', userId);
+  console.log('User ref created:', userId);
   
   // Get current early bird count if this is an early bird
   let earlyBirdNumber: number | undefined;
   if (isEarlyBird) {
+    console.log('Processing early bird subscription');
     const configRef = doc(firestore, 'config', 'earlyBird');
     const configSnap = await getDoc(configRef);
     
     if (configSnap.exists()) {
       const currentCount = configSnap.data().count || 0;
       earlyBirdNumber = currentCount + 1;
+      console.log('Incrementing early bird count to:', earlyBirdNumber);
       
       // Increment early bird counter
       await updateDoc(configRef, {
@@ -123,6 +163,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
     } else {
       // Initialize early bird config
       earlyBirdNumber = 1;
+      console.log('Initializing early bird config');
       await setDoc(configRef, {
         count: 1,
         isActive: true,
@@ -132,11 +173,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   }
 
   // Check if user document exists, create it if it doesn't
+  console.log('Checking if user document exists...');
   const userDoc = await getFirestoreDoc(userRef);
   
   if (!userDoc.exists()) {
+    console.log('User document does not exist, creating new document');
     // Create user document with subscription data
-    await setDoc(userRef, {
+    const userData = {
       subscriptionTier: 'pro',
       subscriptionStatus: subscription.status,
       stripeCustomerId: session.customer as string,
@@ -150,10 +193,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    });
+    };
+    console.log('Creating user document with data:', userData);
+    await setDoc(userRef, userData);
+    console.log('User document created successfully');
   } else {
+    console.log('User document exists, updating...');
     // Update existing user document
-    await updateDoc(userRef, {
+    const updateData = {
       subscriptionTier: 'pro',
       subscriptionStatus: subscription.status,
       stripeCustomerId: session.customer as string,
@@ -166,7 +213,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       updatedAt: serverTimestamp(),
-    });
+    };
+    console.log('Updating user document with data:', updateData);
+    await updateDoc(userRef, updateData);
+    console.log('User document updated successfully');
   }
 
   console.log(`Subscription activated for user: ${userId}`, {
