@@ -70,20 +70,48 @@ export default function RecipesPage() {
 
   if (!user) {
     return (
-      <div className="container mx-auto max-w-2xl px-4 py-8 pt-24 md:py-12 md:pt-28">
-        <Card className="text-center">
-          <CardHeader>
-            <CardTitle>Please Sign In</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
-            <p className="text-muted-foreground">
-              You need to be signed in to view your saved recipes.
-            </p>
-            <Button asChild>
-              <Link href="/login">Sign In</Link>
+      <div className="container mx-auto max-w-6xl px-4 py-8 pt-24 md:py-12 md:pt-28">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="text-center space-y-8 max-w-md">
+            {/* Icon */}
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+                <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 rounded-full p-8">
+                  <BookOpen className="h-16 w-16 text-primary" />
+                </div>
+              </div>
+            </div>
+
+            {/* Text */}
+            <div className="space-y-3">
+              <h2 className="font-headline text-2xl md:text-3xl font-bold">
+                Your Recipe Collection
+              </h2>
+              <p className="text-muted-foreground text-base leading-relaxed">
+                Sign in to save and organize your favorite cocktail recipes. 
+                Build your personal mixology library.
+              </p>
+            </div>
+
+            {/* CTA Button */}
+            <Button 
+              asChild 
+              size="lg"
+              className="rounded-full px-8 py-6 text-base font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+            >
+              <Link href="/login" className="gap-2">
+                Sign In to Continue
+                <span className="text-lg">→</span>
+              </Link>
             </Button>
-          </CardContent>
-        </Card>
+
+            {/* Subtle hint */}
+            <p className="text-xs text-muted-foreground/60">
+              Free account • No credit card required
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
