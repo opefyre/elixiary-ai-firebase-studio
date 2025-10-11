@@ -62,7 +62,10 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: '', // You'll add this after verifying in Google Search Console
+    google: 'jJBxd9g_0PuMLy9qlE-KqNfs4hfQVqb8bBWuIjD3p-Q',
+    other: {
+      'msvalidate.01': '99FF65807C300F99D988A4FFD56374FE',
+    },
   },
 };
 
