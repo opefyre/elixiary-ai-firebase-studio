@@ -3,14 +3,9 @@ import Stripe from 'stripe';
 import { initializeFirebaseServer } from '@/firebase/server';
 
 export async function POST(request: NextRequest) {
-  console.log('Webhook received');
-  
-  // Initialize at runtime
+  // Initialize Stripe and Firebase at runtime
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    console.error('Missing Stripe configuration:', {
-      hasSecretKey: !!process.env.STRIPE_SECRET_KEY,
-      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
-    });
+    console.error('Missing Stripe configuration');
     return NextResponse.json(
       { error: 'Stripe not configured' },
       { status: 500 }
@@ -23,22 +18,12 @@ export async function POST(request: NextRequest) {
 
   let firestore;
   try {
-    console.log('Initializing Firebase Admin SDK...');
     const firebase = initializeFirebaseServer();
     firestore = firebase.firestore;
-    console.log('Firebase Admin SDK initialized successfully');
-    
-    // Skip Firestore connection test for now to avoid permission issues
-    console.log('Skipping Firestore connection test to avoid permission issues');
-  } catch (error) {
-    console.error('Firebase Admin SDK initialization failed:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack,
-    });
+  } catch (error: any) {
+    console.error('Firebase Admin SDK initialization failed:', error.message);
     return NextResponse.json(
-      { error: 'Firebase initialization failed', details: error.message },
+      { error: 'Firebase initialization failed' },
       { status: 500 }
     );
   }
@@ -70,108 +55,83 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    console.log(`Processing webhook event: ${event.type}`);
-    
     switch (event.type) {
       case 'checkout.session.completed': {
-        console.log('Handling checkout.session.completed');
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutCompleted(session, stripe, firestore);
-        console.log('Checkout completed successfully');
         break;
       }
 
       case 'customer.subscription.updated': {
-        console.log('Handling customer.subscription.updated');
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionUpdated(subscription, firestore);
-        console.log('Subscription updated successfully');
         break;
       }
 
       case 'customer.subscription.deleted': {
-        console.log('Handling customer.subscription.deleted');
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionDeleted(subscription, firestore);
-        console.log('Subscription deleted successfully');
         break;
       }
 
       case 'invoice.payment_succeeded': {
-        console.log('Handling invoice.payment_succeeded');
         const invoice = event.data.object as Stripe.Invoice;
         await handlePaymentSucceeded(invoice, stripe, firestore);
-        console.log('Payment succeeded handled successfully');
         break;
       }
 
       case 'invoice.payment_failed': {
-        console.log('Handling invoice.payment_failed');
         const invoice = event.data.object as Stripe.Invoice;
         await handlePaymentFailed(invoice, stripe, firestore);
-        console.log('Payment failed handled successfully');
         break;
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        // Ignore unhandled event types
+        break;
     }
 
-    console.log('Webhook processed successfully');
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Error processing webhook:', error);
-    console.error('Error stack:', error.stack);
+    console.error('Error processing webhook:', error.message);
     return NextResponse.json(
-      { error: 'Webhook handler failed', details: error.message },
+      { error: 'Webhook handler failed' },
       { status: 500 }
     );
   }
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe: Stripe, firestore: any) {
-  console.log('handleCheckoutCompleted called with session:', session.id);
-  
   const userId = session.metadata?.firebaseUID;
   const isEarlyBird = session.metadata?.isEarlyBird === 'true';
-  
-  console.log('Session metadata:', { userId, isEarlyBird, metadata: session.metadata });
 
   if (!userId) {
     console.error('No firebaseUID in session metadata');
     throw new Error('No firebaseUID in session metadata');
   }
 
-  console.log('Retrieving subscription:', session.subscription);
   const subscription = await stripe.subscriptions.retrieve(
     session.subscription as string
   );
-  console.log('Subscription retrieved:', subscription.id);
 
   const userRef = firestore.collection('users').doc(userId);
-  console.log('User ref created:', userId);
   
   // Get current early bird count if this is an early bird
   let earlyBirdNumber: number | undefined;
   if (isEarlyBird) {
-    console.log('Processing early bird subscription');
     const configRef = firestore.collection('config').doc('earlyBird');
     const configSnap = await configRef.get();
     
     if (configSnap.exists) {
       const currentCount = configSnap.data()?.count || 0;
       earlyBirdNumber = currentCount + 1;
-      console.log('Incrementing early bird count to:', earlyBirdNumber);
       
-      // Increment early bird counter
       await configRef.update({
         count: earlyBirdNumber,
         isActive: earlyBirdNumber < 50,
       });
     } else {
-      // Initialize early bird config
       earlyBirdNumber = 1;
-      console.log('Initializing early bird config');
       await configRef.set({
         count: 1,
         isActive: true,
@@ -180,78 +140,41 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
     }
   }
 
-  // Check if user document exists, create it if it doesn't
-  console.log('Checking if user document exists...');
+  // Check if user document exists
   const userDoc = await userRef.get();
   
-  if (!userDoc.exists) {
-    console.log('User document does not exist, creating new document');
-    // Create user document with subscription data
-    // Build user data with proper timestamp validation
-    const userData: any = {
-      subscriptionTier: 'pro',
-      subscriptionStatus: subscription.status,
-      stripeCustomerId: session.customer as string,
-      stripeSubscriptionId: subscription.id,
-      stripePriceId: subscription.items.data[0].price.id,
-      isEarlyBird: isEarlyBird,
-      ...(earlyBirdNumber && { earlyBirdNumber }),
-      subscriptionStartDate: new Date().toISOString(),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  // Build user data
+  const userData: any = {
+    subscriptionTier: 'pro',
+    subscriptionStatus: subscription.status,
+    stripeCustomerId: session.customer as string,
+    stripeSubscriptionId: subscription.id,
+    stripePriceId: subscription.items.data[0].price.id,
+    isEarlyBird: isEarlyBird,
+    ...(earlyBirdNumber && { earlyBirdNumber }),
+    subscriptionStartDate: new Date().toISOString(),
+    cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+    updatedAt: new Date().toISOString(),
+  };
 
-    // Only add timestamp fields if they exist and are valid
-    if (subscription.current_period_start) {
-      userData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
-    }
-    
-    if (subscription.current_period_end) {
-      userData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
-    }
-    console.log('Creating user document with data:', userData);
-    await userRef.set(userData);
-    console.log('User document created successfully');
-  } else {
-    console.log('User document exists, updating...');
-    // Update existing user document
-    // Build update data with proper timestamp validation
-    const updateData: any = {
-      subscriptionTier: 'pro',
-      subscriptionStatus: subscription.status,
-      stripeCustomerId: session.customer as string,
-      stripeSubscriptionId: subscription.id,
-      stripePriceId: subscription.items.data[0].price.id,
-      isEarlyBird: isEarlyBird,
-      ...(earlyBirdNumber && { earlyBirdNumber }),
-      subscriptionStartDate: new Date().toISOString(),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Only add timestamp fields if they exist and are valid
-    if (subscription.current_period_start) {
-      updateData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
-    }
-    
-    if (subscription.current_period_end) {
-      updateData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
-    }
-    console.log('Updating user document with data:', updateData);
-    await userRef.update(updateData);
-    console.log('User document updated successfully');
+  // Add timestamp fields if they exist
+  if (subscription.current_period_start) {
+    userData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
+  }
+  
+  if (subscription.current_period_end) {
+    userData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
   }
 
-  console.log(`Subscription activated for user: ${userId}`, {
-    isEarlyBird,
-    earlyBirdNumber,
-  });
+  if (!userDoc.exists) {
+    userData.createdAt = new Date().toISOString();
+    await userRef.set(userData);
+  } else {
+    await userRef.update(userData);
+  }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription, firestore: any) {
-  console.log('handleSubscriptionUpdated called for subscription:', subscription.id);
-  
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
@@ -259,20 +182,16 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription, fire
     return;
   }
 
-  console.log('Updating subscription for user:', userId);
-
   const userRef = firestore.collection('users').doc(userId);
   const userDoc = await userRef.get();
 
   if (userDoc.exists) {
-    // Build update data with proper timestamp validation
     const updateData: any = {
       subscriptionStatus: subscription.status,
       cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
       updatedAt: new Date().toISOString(),
     };
 
-    // Only add timestamp fields if they exist and are valid
     if (subscription.current_period_start) {
       updateData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
     }
@@ -281,14 +200,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription, fire
       updateData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
     }
 
-    console.log('Updating user document with data:', updateData);
     await userRef.update(updateData);
-    console.log('User document updated successfully');
-  } else {
-    console.log('User document does not exist, skipping update');
   }
-
-  console.log(`Subscription updated for user: ${userId}`);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription, firestore: any) {
@@ -310,14 +223,10 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, fire
       updatedAt: new Date().toISOString(),
     });
   }
-
-  console.log(`Subscription canceled for user: ${userId}`);
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, firestore: any) {
-  // Check if invoice has a subscription
   if (!invoice.subscription) {
-    console.log('Invoice has no subscription, skipping payment succeeded handler');
     return;
   }
 
@@ -341,14 +250,10 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, f
       updatedAt: new Date().toISOString(),
     });
   }
-
-  console.log(`Payment succeeded for user: ${userId}`);
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, firestore: any) {
-  // Check if invoice has a subscription
   if (!invoice.subscription) {
-    console.log('Invoice has no subscription, skipping payment failed handler');
     return;
   }
 
@@ -371,7 +276,4 @@ async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, fire
       updatedAt: new Date().toISOString(),
     });
   }
-
-  console.log(`Payment failed for user: ${userId}`);
 }
-
