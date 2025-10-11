@@ -56,6 +56,24 @@ export async function POST(request: NextRequest) {
     let customerId: string;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      
+      // 🚨 CHECK FOR EXISTING ACTIVE SUBSCRIPTIONS
+      const existingSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'active',
+        limit: 1,
+      });
+
+      if (existingSubscriptions.data.length > 0) {
+        console.log('User already has active subscription:', existingSubscriptions.data[0].id);
+        return NextResponse.json(
+          { 
+            error: 'You already have an active subscription',
+            message: 'You already have an active Pro subscription. Visit your account page to manage it.'
+          },
+          { status: 409 } // 409 Conflict
+        );
+      }
     } else {
       const customer = await stripe.customers.create({
         email: userEmail,

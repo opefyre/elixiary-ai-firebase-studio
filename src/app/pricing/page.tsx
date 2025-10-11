@@ -99,8 +99,9 @@ function PricingContent() {
 
       const data = await response.json();
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (data.error || !response.ok) {
+        // Show the specific error message from the server
+        throw new Error(data.message || data.error || 'Checkout failed');
       }
 
       // Redirect to Stripe Checkout
