@@ -1,0 +1,44 @@
+name: Deploy to Firebase Hosting
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools@latest
+
+      - name: Deploy to Firebase Hosting
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
+            echo "FIREBASE_SERVICE_ACCOUNT secret is not configured." >&2
+            exit 1
+          fi
+          credentials_path="$HOME/firebase_service_account.json"
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$credentials_path"
+          chmod 600 "$credentials_path"
+          export GOOGLE_APPLICATION_CREDENTIALS="$credentials_path"
+          firebase deploy --only hosting --project studio-1063505923-cbb37 --non-interactive
