@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Create the billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com'}/account`,
@@ -30,9 +31,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
-    console.error('Error creating portal session:', error.message);
+    console.error('Error creating portal session:', error);
+    console.error('Error details:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+    });
+    
+    // Return more specific error message
     return NextResponse.json(
-      { error: 'Failed to create portal session' },
+      { 
+        error: 'Failed to create portal session',
+        details: error.message,
+        hint: 'Make sure Stripe Customer Portal is activated in your Stripe Dashboard'
+      },
       { status: 500 }
     );
   }
