@@ -43,25 +43,35 @@ export default function DebugPage() {
         const userDocRef = doc(firestore, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
         
-        // Try to read the webhook user document
-        const webhookUserDocRef = doc(firestore, 'users', 'uzyFZtgGRAZZUlqc3j7c42PUHgk1');
-        const webhookUserDoc = await getDoc(webhookUserDocRef);
-
-        setDebugInfo({
+        // Create the debug info object
+        const debugData: any = {
           currentUser: currentUserInfo,
           currentUserDocument: {
             exists: userDoc.exists(),
             data: userDoc.exists() ? userDoc.data() : null,
           },
-          webhookUserDocument: {
-            exists: webhookUserDoc.exists(),
-            data: webhookUserDoc.exists() ? webhookUserDoc.data() : null,
-          },
           firebaseConfig: {
             projectId: firestore.app.options.projectId,
           },
           userIdMatch: user.uid === 'uzyFZtgGRAZZUlqc3j7c42PUHgk1',
-        });
+          webhookUserId: 'uzyFZtgGRAZZUlqc3j7c42PUHgk1',
+        };
+
+        // Only try to read webhook user document if we have permission (same user)
+        if (user.uid === 'uzyFZtgGRAZZUlqc3j7c42PUHgk1') {
+          const webhookUserDocRef = doc(firestore, 'users', 'uzyFZtgGRAZZUlqc3j7c42PUHgk1');
+          const webhookUserDoc = await getDoc(webhookUserDocRef);
+          debugData.webhookUserDocument = {
+            exists: webhookUserDoc.exists(),
+            data: webhookUserDoc.exists() ? webhookUserDoc.data() : null,
+          };
+        } else {
+          debugData.webhookUserDocument = {
+            note: 'Cannot access - permission denied (different user)',
+          };
+        }
+
+        setDebugInfo(debugData);
       } catch (error: any) {
         setDebugInfo({
           error: {
@@ -107,9 +117,14 @@ export default function DebugPage() {
       
       {debugInfo && (
         <div className="space-y-6">
-          <div className="bg-gray-100 p-4 rounded">
-            <h2 className="text-lg font-semibold mb-2">Current User</h2>
+          <div className="bg-blue-100 p-4 rounded border-2 border-blue-500">
+            <h2 className="text-lg font-semibold mb-2 text-blue-900">🔑 Current User (YOU)</h2>
             <pre className="text-sm">{JSON.stringify(debugInfo.currentUser, null, 2)}</pre>
+          </div>
+
+          <div className="bg-purple-100 p-4 rounded border-2 border-purple-500">
+            <h2 className="text-lg font-semibold mb-2 text-purple-900">💳 Webhook User (from Stripe payment)</h2>
+            <pre className="text-sm">{JSON.stringify({ userId: debugInfo.webhookUserId }, null, 2)}</pre>
           </div>
 
           <div className="bg-gray-100 p-4 rounded">
