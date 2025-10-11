@@ -4,12 +4,30 @@ import { useFirebase, useUser } from '@/firebase';
 import { useEffect, useState } from 'react';
 
 export default function DebugPage() {
-  const { firestore, auth } = useFirebase();
-  const { user, isUserLoading, userError } = useUser();
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
+
+  // Use the hooks directly
+  let firebaseServices, userServices;
+  try {
+    firebaseServices = useFirebase();
+    userServices = useUser();
+  } catch (error: any) {
+    setFirebaseError(error.message);
+  }
 
   useEffect(() => {
     async function runDebug() {
+      if (firebaseError || !firebaseServices || !userServices) return;
+
+      const { firestore, auth } = firebaseServices;
+      const { user, isUserLoading, userError } = userServices;
+
+      if (isUserLoading) return;
+      if (userError) {
+        setDebugInfo({ userError: userError.message });
+        return;
+      }
       if (!user || !firestore) return;
 
       try {
@@ -45,20 +63,38 @@ export default function DebugPage() {
           error: {
             message: error.message,
             code: error.code,
+            stack: error.stack,
           },
         });
       }
     }
 
     runDebug();
-  }, [user, firestore]);
+  }, [firebaseServices, userServices, firebaseError]);
+
+  if (firebaseError) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6 text-red-600">Firebase Initialization Error</h1>
+        <div className="bg-red-100 p-4 rounded">
+          <p className="text-red-800">{firebaseError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!firebaseServices || !userServices) {
+    return <div className="p-8">Loading debug info...</div>;
+  }
+
+  const { user, isUserLoading, userError } = userServices;
 
   if (isUserLoading) {
-    return <div>Loading debug info...</div>;
+    return <div className="p-8">Loading user...</div>;
   }
 
   if (userError) {
-    return <div>Auth Error: {userError.message}</div>;
+    return <div className="p-8">Auth Error: {userError.message}</div>;
   }
 
   return (
@@ -91,6 +127,13 @@ export default function DebugPage() {
             <div className="bg-red-100 p-4 rounded">
               <h2 className="text-lg font-semibold mb-2 text-red-800">Error</h2>
               <pre className="text-sm text-red-700">{JSON.stringify(debugInfo.error, null, 2)}</pre>
+            </div>
+          )}
+
+          {debugInfo.userError && (
+            <div className="bg-red-100 p-4 rounded">
+              <h2 className="text-lg font-semibold mb-2 text-red-800">User Error</h2>
+              <p className="text-sm text-red-700">{debugInfo.userError}</p>
             </div>
           )}
         </div>
