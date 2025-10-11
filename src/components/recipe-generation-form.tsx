@@ -24,7 +24,8 @@ import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useRecipes } from "@/firebase";
+import { useRecipes, useSubscription, useUser, useFirebase } from "@/firebase";
+import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please describe what kind of cocktail you'd like").min(10, "Please provide more details about your desired cocktail (at least 10 characters)"),
@@ -77,6 +78,9 @@ export function RecipeGenerationForm({
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
   const { toast } = useToast();
   const { saveRecipe } = useRecipes();
+  const { user } = useUser();
+  const { firestore } = useFirebase();
+  const { canGenerateRecipe, remainingGenerations, isPro } = useSubscription();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -201,15 +205,35 @@ ${window.location.origin}`.trim();
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    // Check if user can generate (usage limit)
+    if (!canGenerateRecipe) {
+      toast({
+        title: "Generation Limit Reached",
+        description: `You've used all ${remainingGenerations === 0 ? 'your free' : ''} recipes this month. Upgrade to Pro for unlimited generations!`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setRecipe(null);
     setError(null);
     setIsSaved(false);
     setCurrentPrompt(data.prompt);
+    
     const result = await handleGenerateRecipe(data);
     setRecipe(result.recipe);
     setError(result.error);
     setIsLoading(false);
+    
+    // Track generation (increment counter) if successful
+    if (result.recipe && !result.error && user && firestore) {
+      try {
+        await incrementGenerationCount(user.uid, firestore);
+      } catch (err) {
+        console.error('Failed to track generation:', err);
+      }
+    }
     
     // Auto-save recipe if generation was successful
     if (result.recipe && !result.error) {
@@ -249,8 +273,23 @@ ${window.location.origin}`.trim();
             )}
           />
 
+          {/* Usage indicator for free users */}
+          {!isPro && remainingGenerations !== Infinity && (
+            <div className="text-center text-sm text-muted-foreground">
+              {remainingGenerations > 0 ? (
+                <span>
+                  {remainingGenerations} of 10 free recipes remaining this month
+                </span>
+              ) : (
+                <span className="text-destructive font-medium">
+                  No free recipes remaining. Upgrade to Pro for unlimited!
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-center pt-2 gap-4">
-            <Button type="submit" disabled={isLoading} size="lg">
+            <Button type="submit" disabled={isLoading || !canGenerateRecipe} size="lg">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

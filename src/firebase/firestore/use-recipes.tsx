@@ -13,6 +13,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase';
+import { updateRecipeCount } from '@/firebase/firestore/use-subscription';
 import type { GenerateCocktailRecipeOutput } from '@/ai/flows/generate-cocktail-recipe';
 
 export interface SavedRecipe extends GenerateCocktailRecipeOutput {
@@ -77,6 +78,9 @@ export function useRecipes() {
       userPrompt,
       createdAt: serverTimestamp(),
     });
+    
+    // Update recipe count for usage tracking
+    await updateRecipeCount(user.uid, firestore, 1);
   };
 
   const deleteRecipe = async (recipeId: string) => {
@@ -84,6 +88,9 @@ export function useRecipes() {
 
     const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
     await deleteDoc(recipeRef);
+    
+    // Update recipe count for usage tracking
+    await updateRecipeCount(user.uid, firestore, -1);
   };
 
   const updateRecipeTags = async (recipeId: string, tags: string[]) => {
