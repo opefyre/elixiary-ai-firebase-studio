@@ -39,9 +39,19 @@ export default function DebugPage() {
           displayName: user.displayName,
         };
 
+        console.log('=== DEBUG INFO ===');
+        console.log('Current User ID:', user.uid);
+        console.log('Expected User ID:', 'uzyFZtgGRAZZUlqc3j7c42PUHgk1');
+        console.log('IDs Match:', user.uid === 'uzyFZtgGRAZZUlqc3j7c42PUHgk1');
+
         // Try to read user document (Firebase v9+ syntax)
         const userDocRef = doc(firestore, 'users', user.uid);
+        console.log('Attempting to read user document for:', user.uid);
         const userDoc = await getDoc(userDocRef);
+        console.log('User document exists:', userDoc.exists());
+        if (userDoc.exists()) {
+          console.log('User document data:', userDoc.data());
+        }
         
         // Create the debug info object
         const debugData: any = {
