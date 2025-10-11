@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { useState } from 'react';
 
 export default function AccountPage() {
   const { user, isUserLoading } = useUser();
@@ -20,6 +22,40 @@ export default function AccountPage() {
     remainingSaves,
     nextResetDate,
   } = useSubscription();
+  const { toast } = useToast();
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+
+  const handleManageBilling = async () => {
+    if (!subscription?.stripeCustomerId) {
+      toast({
+        title: 'Error',
+        description: 'No billing information found.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoadingPortal(true);
+    try {
+      const response = await fetch('/api/stripe/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
+      });
+
+      if (!response.ok) throw new Error('Failed to create portal session');
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to open billing portal. Please try again.',
+        variant: 'destructive',
+      });
+      setIsLoadingPortal(false);
+    }
+  };
 
   if (isUserLoading || isSubLoading) {
     return (
@@ -323,8 +359,20 @@ export default function AccountPage() {
               )}
             </div>
 
-            <Button variant="outline" className="w-full" disabled>
-              Manage Billing (Coming Soon)
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleManageBilling}
+              disabled={isLoadingPortal}
+            >
+              {isLoadingPortal ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Manage Billing'
+              )}
             </Button>
           </CardContent>
         </Card>

@@ -11,10 +11,12 @@ import {
   DialogTitle,
   DialogDescription
 } from '@/components/ui/dialog';
-import { Trash2, Eye, Clock, Share2, Copy, Check, Tag, X, Star } from 'lucide-react';
+import { Trash2, Eye, Clock, Share2, Copy, Check, Tag, X, Star, FileDown } from 'lucide-react';
 import { SavedRecipe, useRecipes } from '@/firebase/firestore/use-recipes';
+import { useSubscription } from '@/firebase';
 import ReactMarkdown from 'react-markdown';
 import { useToast } from '@/hooks/use-toast';
+import { exportRecipeToPDF } from '@/lib/pdf-exporter';
 
 interface RecipeCardProps {
   recipe: SavedRecipe;
@@ -29,6 +31,7 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
   const [newTag, setNewTag] = useState('');
   const { toast } = useToast();
   const { updateRecipeTags, toggleFavorite } = useRecipes();
+  const { isPro } = useSubscription();
 
   const handleDelete = async () => {
     if (!confirm(`Delete "${recipe.recipeName}"?`)) return;
@@ -48,6 +51,42 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         variant: "destructive",
       });
       setIsDeleting(false);
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (!isPro) {
+      toast({
+        title: 'Pro Feature',
+        description: 'PDF export is available for Pro members only.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      exportRecipeToPDF({
+        name: recipe.recipeName || 'Untitled Recipe',
+        description: ('description' in recipe && recipe.description) || '',
+        ingredients: recipe.ingredients || '',
+        instructions: recipe.instructions || '',
+        garnish: recipe.garnish || '',
+        glassware: ('glassware' in recipe && recipe.glassware) || 'Standard glass',
+        difficultyLevel: ('difficultyLevel' in recipe && recipe.difficultyLevel) || 'Medium',
+        servingSize: ('servingSize' in recipe && recipe.servingSize) || '1 cocktail',
+        tips: ('tips' in recipe && recipe.tips) || '',
+      });
+
+      toast({
+        title: 'PDF Exported!',
+        description: 'Your recipe has been downloaded as a PDF.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Export Failed',
+        description: 'Failed to export PDF. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -357,10 +396,21 @@ ${window.location.origin}`.trim();
                 ) : (
                   <>
                     <Copy className="h-4 w-4" />
-                    Copy Recipe
+                    Copy
                   </>
                 )}
               </Button>
+              {isPro && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportPDF}
+                  className="gap-2"
+                >
+                  <FileDown className="h-4 w-4" />
+                  PDF
+                </Button>
+              )}
               <Button
                 variant="destructive"
                 size="sm"
