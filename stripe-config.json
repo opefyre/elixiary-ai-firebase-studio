@@ -1,0 +1,15 @@
+{
+  "productId": "prod_TDYOKt4vVCUmhU",
+  "prices": {
+    "earlyBirdMonthly": "price_1SH7HjCWzUrjiIx2Pteayl76",
+    "earlyBirdAnnual": "price_1SH7HjCWzUrjiIx2wVkAeFH5",
+    "proMonthly": "price_1SH7HkCWzUrjiIx2BHxW47aF",
+    "proAnnual": "price_1SH7HkCWzUrjiIx2K9DSIbEo"
+  },
+  "envVars": {
+    "STRIPE_EARLY_BIRD_MONTHLY_PRICE_ID": "price_1SH7HjCWzUrjiIx2Pteayl76",
+    "STRIPE_EARLY_BIRD_ANNUAL_PRICE_ID": "price_1SH7HjCWzUrjiIx2wVkAeFH5",
+    "STRIPE_PRO_MONTHLY_PRICE_ID": "price_1SH7HkCWzUrjiIx2BHxW47aF",
+    "STRIPE_PRO_ANNUAL_PRICE_ID": "price_1SH7HkCWzUrjiIx2K9DSIbEo"
+  }
+}

@@ -1,0 +1,47 @@
+============================================
+STRIPE ENVIRONMENT VARIABLES FOR VERCEL
+============================================
+Copy these to your Vercel project:
+https://vercel.com/your-project/settings/environment-variables
+Set for: Production, Preview, Development
+============================================
+
+Stripe API Keys (Get from Stripe Dashboard):
+STRIPE_SECRET_KEY=sk_test_... (from https://dashboard.stripe.com/test/apikeys)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... (from https://dashboard.stripe.com/test/apikeys)
+
+NEW - Add these 4 Price IDs:
+STRIPE_EARLY_BIRD_MONTHLY_PRICE_ID=price_1SH7HjCWzUrjiIx2Pteayl76
+STRIPE_EARLY_BIRD_ANNUAL_PRICE_ID=price_1SH7HjCWzUrjiIx2wVkAeFH5
+STRIPE_PRO_MONTHLY_PRICE_ID=price_1SH7HkCWzUrjiIx2BHxW47aF
+STRIPE_PRO_ANNUAL_PRICE_ID=price_1SH7HkCWzUrjiIx2K9DSIbEo
+
+WEBHOOK SECRET (Add after webhook setup):
+STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET_HERE
+
+============================================
+WEBHOOK SETUP INSTRUCTIONS:
+============================================
+1. Go to: https://dashboard.stripe.com/test/webhooks
+2. Click "Add endpoint"
+3. Endpoint URL: https://ai.elixiary.com/api/stripe/webhook
+4. Select these events:
+   - checkout.session.completed
+   - customer.subscription.updated
+   - customer.subscription.deleted
+   - invoice.payment_succeeded
+   - invoice.payment_failed
+5. Click "Add endpoint"
+6. Click on your new endpoint
+7. Click "Reveal" next to "Signing secret"
+8. Copy the secret (starts with whsec_)
+9. Add it to Vercel as STRIPE_WEBHOOK_SECRET
+
+============================================
+TESTING:
+============================================
+Test card: 4242 4242 4242 4242
+Expiry: Any future date
+CVC: Any 3 digits
+ZIP: Any 5 digits
+
