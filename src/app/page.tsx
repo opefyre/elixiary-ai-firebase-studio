@@ -31,19 +31,58 @@ export default function Home() {
         ) : user ? (
           <RecipeGenerationForm handleGenerateRecipe={handleGenerateRecipe} />
         ) : (
-          <Card className="text-center">
-            <CardHeader>
-              <CardTitle>Please Sign In</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-              <p className="text-muted-foreground">
-                You need to be signed in to generate cocktail recipes.
+          <div className="text-center space-y-8 py-8">
+            {/* Icon */}
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
+                <div className="relative text-7xl">🍹</div>
+              </div>
+            </div>
+
+            {/* Text */}
+            <div className="space-y-4">
+              <h2 className="font-headline text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Let's Get Mixing! 🎯
+              </h2>
+              <p className="text-muted-foreground text-base leading-relaxed max-w-md mx-auto">
+                Sign in to unlock AI-powered cocktail recipes tailored to your taste. 
+                No bartending experience needed.
               </p>
-              <Button asChild>
-                <Link href="/login">Sign In</Link>
+            </div>
+
+            {/* Feature highlights */}
+            <div className="flex flex-wrap justify-center gap-2 text-xs">
+              <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                ⚡ Generate in seconds
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                💾 Save favorites
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                🎲 Random ideas
+              </span>
+            </div>
+
+            {/* CTA Button */}
+            <div className="pt-2">
+              <Button 
+                asChild 
+                size="lg"
+                className="rounded-full px-10 py-6 text-base font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105"
+              >
+                <Link href="/login" className="gap-2">
+                  Start Creating
+                  <span className="text-lg">→</span>
+                </Link>
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Trust signal */}
+            <p className="text-xs text-muted-foreground/60">
+              Free account • Google sign-in • No credit card
+            </p>
+          </div>
         )}
       </section>
     </div>
