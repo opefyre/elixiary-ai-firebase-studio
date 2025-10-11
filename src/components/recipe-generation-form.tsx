@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import ReactMarkdown from "react-markdown";
 import {
   Form,
   FormControl,
@@ -341,9 +342,9 @@ ${window.location.origin}`.trim();
                   <span className="text-xl">🧪</span> Ingredients
                 </h4>
                 <div className="bg-muted/30 rounded-lg p-4">
-                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                    {recipe.ingredients}
-                  </p>
+                  <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
+                    <ReactMarkdown>{recipe.ingredients}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             )}
@@ -353,9 +354,9 @@ ${window.location.origin}`.trim();
                   <span className="text-xl">📝</span> Instructions
                 </h4>
                 <div className="bg-muted/30 rounded-lg p-4">
-                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                    {recipe.instructions}
-                  </p>
+                  <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
+                    <ReactMarkdown>{recipe.instructions}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             )}
@@ -365,9 +366,9 @@ ${window.location.origin}`.trim();
                   <span className="text-xl">🌿</span> Garnish
                 </h4>
                 <div className="bg-muted/30 rounded-lg p-4">
-                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                    {recipe.garnish}
-                  </p>
+                  <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
+                    <ReactMarkdown>{recipe.garnish}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             )}
@@ -377,9 +378,9 @@ ${window.location.origin}`.trim();
                   <span className="text-xl">💡</span> Pro Tips
                 </h4>
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                    {recipe.tips}
-                  </p>
+                  <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
+                    <ReactMarkdown>{recipe.tips}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             )}

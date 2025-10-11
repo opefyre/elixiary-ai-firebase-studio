@@ -89,4 +89,25 @@
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
+  
+  /* Markdown prose styling */
+  .prose {
+    @apply text-muted-foreground;
+  }
+  
+  .prose strong {
+    @apply text-foreground font-semibold;
+  }
+  
+  .prose p {
+    @apply my-2;
+  }
+  
+  .prose ul, .prose ol {
+    @apply my-2;
+  }
+  
+  .prose li {
+    @apply my-1;
+  }
 }
