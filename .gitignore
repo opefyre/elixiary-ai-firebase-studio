@@ -44,5 +44,16 @@ next-env.d.ts
 firebase-debug.log
 firestore-debug.log
 
-# internal documentation
+# internal documentation and setup guides
 PROJECT_INFO.md
+STRIPE_SETUP_GUIDE.md
+STRIPE_CUSTOMER_PORTAL_SETUP.md
+SUBSCRIPTION_PLAN.md
+TESTING_CHECKLIST.md
+PRO_FEATURES_STATUS.md
+CLEANUP_SUMMARY.md
+CLEANUP_DUPLICATE_SUBSCRIPTIONS.md
+COMPLETE_RESET_GUIDE.md
+VERCEL_ENV_VARS.txt
+stripe-config.json
+scripts/
