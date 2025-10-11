@@ -28,12 +28,8 @@ export async function POST(request: NextRequest) {
     firestore = firebase.firestore;
     console.log('Firebase Admin SDK initialized successfully');
     
-    // Test Firestore connection
-    console.log('Testing Firestore connection...');
-    const testRef = firestore.collection('test').doc('connection');
-    await testRef.set({ timestamp: new Date() });
-    await testRef.delete();
-    console.log('Firestore connection test successful');
+    // Skip Firestore connection test for now to avoid permission issues
+    console.log('Skipping Firestore connection test to avoid permission issues');
   } catch (error) {
     console.error('Firebase Admin SDK initialization failed:', error);
     console.error('Error details:', {
@@ -199,12 +195,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       stripePriceId: subscription.items.data[0].price.id,
       isEarlyBird: isEarlyBird,
       ...(earlyBirdNumber && { earlyBirdNumber }),
-      subscriptionStartDate: new Date(),
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      subscriptionStartDate: new Date().toISOString(),
+      currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     console.log('Creating user document with data:', userData);
     await userRef.set(userData);
@@ -220,11 +216,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       stripePriceId: subscription.items.data[0].price.id,
       isEarlyBird: isEarlyBird,
       ...(earlyBirdNumber && { earlyBirdNumber }),
-      subscriptionStartDate: new Date(),
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      subscriptionStartDate: new Date().toISOString(),
+      currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     };
     console.log('Updating user document with data:', updateData);
     await userRef.update(updateData);
@@ -251,10 +247,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription, fire
   if (userDoc.exists) {
     await userRef.update({
       subscriptionStatus: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -277,7 +273,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, fire
       subscriptionTier: 'free',
       subscriptionStatus: 'expired',
       cancelAtPeriodEnd: false,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -307,8 +303,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, f
   if (userDoc.exists) {
     await userRef.update({
       subscriptionStatus: 'active',
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      updatedAt: new Date(),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -338,7 +334,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, fire
   if (userDoc.exists) {
     await userRef.update({
       subscriptionStatus: 'past_due',
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
