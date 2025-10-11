@@ -127,31 +127,79 @@ export function RecipeGenerationForm({
       )}
 
       {recipe && recipe.recipeName && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-2xl">{recipe.recipeName}</CardTitle>
+        <Card className="mt-8 border-primary/20">
+          <CardHeader className="space-y-3">
+            <CardTitle className="text-3xl font-bold">{recipe.recipeName}</CardTitle>
+            {'description' in recipe && recipe.description && (
+              <p className="text-base text-muted-foreground italic">
+                {recipe.description}
+              </p>
+            )}
+            <div className="flex gap-4 text-sm">
+              {'glassware' in recipe && recipe.glassware && (
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  🍸 <span className="font-medium">{recipe.glassware}</span>
+                </span>
+              )}
+              {'difficultyLevel' in recipe && recipe.difficultyLevel && (
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  📊 <span className="font-medium">{recipe.difficultyLevel}</span>
+                </span>
+              )}
+              {'servingSize' in recipe && recipe.servingSize && (
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  🥤 <span className="font-medium">{recipe.servingSize}</span>
+                </span>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             {recipe.ingredients && (
               <div>
-                <h4 className="text-lg font-semibold">Ingredients</h4>
-                <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
-                  {recipe.ingredients}
-                </p>
+                <h4 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                  <span className="text-xl">🧪</span> Ingredients
+                </h4>
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                    {recipe.ingredients}
+                  </p>
+                </div>
               </div>
             )}
             {recipe.instructions && (
               <div>
-                <h4 className="text-lg font-semibold">Instructions</h4>
-                <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
-                  {recipe.instructions}
-                </p>
+                <h4 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                  <span className="text-xl">📝</span> Instructions
+                </h4>
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                    {recipe.instructions}
+                  </p>
+                </div>
               </div>
             )}
             {recipe.garnish && (
               <div>
-                <h4 className="text-lg font-semibold">Garnish</h4>
-                <p className="mt-1 text-muted-foreground">{recipe.garnish}</p>
+                <h4 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                  <span className="text-xl">🌿</span> Garnish
+                </h4>
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                    {recipe.garnish}
+                  </p>
+                </div>
+              </div>
+            )}
+            {'tips' in recipe && recipe.tips && (
+              <div>
+                <h4 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                  <span className="text-xl">💡</span> Pro Tips
+                </h4>
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                  <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                    {recipe.tips}
+                  </p>
+                </div>
               </div>
             )}
           </CardContent>
