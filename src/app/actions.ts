@@ -36,7 +36,19 @@ export async function handleGenerateRecipe(
         error: "The AI did not return a recipe. Please try a different prompt.",
       };
     }
-    return { recipe, error: null };
+    
+    // Fix: Convert literal \n to actual newlines
+    const fixedRecipe = {
+      ...recipe,
+      ingredients: recipe.ingredients?.replace(/\\n/g, '\n'),
+      instructions: recipe.instructions?.replace(/\\n/g, '\n'),
+      garnish: recipe.garnish?.replace(/\\n/g, '\n'),
+      ...(('tips' in recipe && recipe.tips) && {
+        tips: recipe.tips.replace(/\\n/g, '\n')
+      }),
+    };
+    
+    return { recipe: fixedRecipe, error: null };
   } catch (error: any) {
     console.error("Detailed Error:", error);
     const errorMessage = error.message || "An unknown error occurred. Please check the server logs.";
