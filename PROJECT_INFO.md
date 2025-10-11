@@ -43,7 +43,9 @@
 - `npm run typecheck` - TypeScript validation
 - `npm run lint` - ESLint validation
 
-## Deployment Ready
+## Deployment Status
+- ✅ **Live on Vercel**: https://elixiary-ai-firebase-studio.vercel.app/
+- ✅ Automatic deployments from GitHub main branch
 - ✅ Cleaned up codebase (60%+ reduction in files)
 - ✅ Removed unused dependencies
 - ✅ Simplified Firebase configuration (Auth only)
@@ -52,14 +54,18 @@
 - ✅ No linting errors
 
 ## Environment Variables
-- `GEMINI_API_KEY` - Required for AI recipe generation
-- `FIREBASE_PROJECT_ID` - Automatically provided by Firebase App Hosting
-- `NODE_ENV` - Set to 'production' for builds
+- `GEMINI_API_KEY` - Required for AI recipe generation (configured in Vercel)
+- Firebase configuration - Automatically loaded from `src/firebase/config.ts`
+
+## Deployment Platform
+- **Platform**: Vercel (Free tier)
+- **Framework**: Next.js 15.3.3 with full server-side support
+- **Auto-deploy**: Every push to `main` branch triggers automatic deployment
+- **Custom domains**: Can be added in Vercel dashboard
 
 ## Notes
 - App is stateless - no database required
 - All recipe generation happens in real-time via AI
-- Perfect for free-tier deployment (Firebase/Vercel)
-- Ready for CI/CD pipeline setup
-- GitHub Actions workflow fixed and ready for deployment
-- Secrets configured: GEMINI_API_KEY and FIREBASE_SERVICE_ACCOUNT
+- Perfect for free-tier deployment on Vercel
+- Automatic CI/CD via Vercel (no GitHub Actions needed)
+- Server Actions fully supported for AI functionality
