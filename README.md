@@ -1,63 +1,64 @@
-# Elixiary AI - AI-Powered Cocktail Recipe Generator 🍸
+# Elixiary AI 🍸
 
-Generate unique cocktail recipes with AI! Tell our AI mixologist what you're in the mood for, and it will create a custom cocktail recipe just for you.
+**AI-powered cocktail recipe generator** - Create unique, personalized cocktail recipes with artificial intelligence.
 
-## 🌐 Live Demo
-**Visit the app**: [https://ai.elixiary.com/](https://ai.elixiary.com/)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://ai.elixiary.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.3-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+
+## 🌐 [Try it Live →](https://ai.elixiary.com/)
+
+Generate custom cocktail recipes by describing what you're in the mood for. Our AI mixologist will create unique recipes with detailed instructions, ingredient lists, and professional tips.
 
 ## ✨ Features
-- 🤖 **AI-Powered Recipe Generation** - Uses Google Gemini to create unique cocktail recipes
-- 🔐 **User Authentication** - Email/password and Google OAuth sign-in
-- 🎲 **Random Suggestions** - Get inspiration with pre-made prompt suggestions
-- 🎨 **Modern UI** - Clean, responsive design with dark mode
-- ⚡ **Real-time Generation** - No database needed, all recipes generated on-demand
+
+- 🤖 **AI Recipe Generation** - Powered by Google Gemini 2.5
+- 💾 **Save Recipes** - Build your personal cocktail collection
+- 🔍 **Search & Filter** - Find recipes by ingredients, difficulty, or tags
+- 🏷️ **Custom Tags** - Organize recipes your way
+- ⭐ **Favorites** - Star your best recipes
+- 🛒 **Smart Shopping Lists** - Auto-sum ingredients from multiple recipes
+- 📤 **Share & Export** - Copy or share recipes instantly
+- 🔐 **Secure Authentication** - Google OAuth & email/password
+- 📱 **Fully Responsive** - Beautiful on all devices
 
 ## 🛠️ Tech Stack
-- **Framework**: Next.js 15.3.3
+
+- **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS + Radix UI
-- **AI**: Google Genkit + Gemini 1.0 Pro
+- **Styling**: Tailwind CSS
+- **AI**: Google Genkit + Gemini 2.5 Flash
+- **Database**: Firebase Firestore
 - **Auth**: Firebase Authentication
-- **Deployment**: Vercel
+- **Hosting**: Vercel
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 20+
-- npm or yarn
-- Gemini API key ([Get one here](https://aistudio.google.com/))
-
-### Installation
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/opefyre/elixiary-ai-firebase-studio.git
 cd elixiary-ai-firebase-studio
 
 # Install dependencies
 npm install
 
-# Set up environment variables
-# Create a .env.local file with:
-# GEMINI_API_KEY=your_gemini_api_key_here
+# Set environment variables
+# Create .env.local with your Gemini API key
 
 # Run development server
 npm run dev
 ```
 
-Visit [http://localhost:9002](http://localhost:9002) to see the app.
+Visit `http://localhost:9002`
 
-## 📦 Available Scripts
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run typecheck` - Type checking with TypeScript
+## 📜 License
 
-## 🌍 Deployment
-This app is deployed on Vercel with automatic deployments from the `main` branch.
+MIT License - feel free to use this project as you like.
 
-## 📄 License
-MIT
+## 🤝 Contributing
 
-## 👤 Author
-**opefyre** - [GitHub](https://github.com/opefyre)
+Contributions, issues, and feature requests are welcome!
+
+---
+
+Made with ❤️ using Next.js, Firebase, and AI
