@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Firebase
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
       - name: Install Firebase CLI
         run: npm install --global firebase-tools@latest
 
-      - name: Deploy to Firebase App Hosting
+      - name: Deploy to Firebase
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
@@ -40,4 +40,14 @@ jobs:
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$credentials_path"
           chmod 600 "$credentials_path"
           export GOOGLE_APPLICATION_CREDENTIALS="$credentials_path"
-          firebase apphosting:deploy --project studio-1063505923-cbb37
+          
+          # Check Firebase CLI version and available commands
+          echo "Firebase CLI version:"
+          firebase --version
+          
+          # Login and deploy
+          echo "Authenticating with Firebase..."
+          firebase login:ci --token "$FIREBASE_SERVICE_ACCOUNT"
+          
+          echo "Deploying to Firebase..."
+          firebase deploy --project studio-1063505923-cbb37 --non-interactive
