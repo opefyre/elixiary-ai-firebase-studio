@@ -23,7 +23,7 @@ export type GenerateCocktailRecipeInput = z.infer<
 const GenerateCocktailRecipeOutputSchema = z.object({
   recipeName: z.string().describe('A creative, appealing name for the cocktail. Should be catchy and match the theme.'),
   description: z.string().describe('A brief 1-2 sentence description of the cocktail, its flavor profile, and the experience.'),
-  ingredients: z.string().describe('A detailed list of ingredients with precise measurements. IMPORTANT: Put each ingredient on its own line, separated by newline characters (\\n). Start each line with a bullet point or dash. Example format:\n- 2 oz Gin\\n- 1 oz Fresh lemon juice\\n- 0.5 oz Simple syrup'),
+  ingredients: z.string().describe('A detailed list of ingredients with precise measurements. CRITICAL FORMATTING RULES:\n1. Each ingredient on its own line, separated by newline (\\n)\n2. Start each line with a dash (-)\n3. Format: QUANTITY UNIT INGREDIENT_NAME\n4. Be SPECIFIC and DECISIVE - no examples, no alternatives, no parentheses\n5. NO brand suggestions (e.g., Tanqueray)\n6. NO "or" options\n7. NO explanatory text in parentheses\n8. Use standard units: oz, ml, dash, barspoon\n9. Use generic names: "Gin" NOT "London Dry Gin (e.g., Tanqueray)"\n\nGOOD Examples:\n- 2 oz Gin\n- 1 oz Fresh lemon juice\n- 0.5 oz Simple syrup\n- 2 dashes Angostura bitters\n\nBAD Examples (DO NOT DO THIS):\n- 2 oz Aged Jamaican Rum (e.g., Appleton Estate)\n- 1 oz Gin or Vodka\n- 0.5 oz Simple syrup (or honey syrup)'),
   instructions: z
     .string()
     .describe('Clear, numbered step-by-step instructions for making the cocktail. IMPORTANT: Put each step on its own line, separated by newline characters (\\n). Number each step. Example format:\n1. Fill shaker with ice\\n2. Add all ingredients\\n3. Shake vigorously for 10 seconds'),
@@ -70,12 +70,29 @@ Your task is to create a unique, well-balanced cocktail recipe that perfectly ma
 - Specify DIFFICULTY level honestly
 
 **FORMAT GUIDELINES - EXTREMELY IMPORTANT:**
-- Ingredients: MUST have each ingredient on a SEPARATE LINE using newline (\\n). Format: "- 2 oz Gin\\n- 1 oz Lemon juice\\n- 0.5 oz Simple syrup"
-- Instructions: MUST have each step on a SEPARATE LINE using newline (\\n). Format: "1. Fill shaker with ice\\n2. Add ingredients\\n3. Shake for 10 seconds"
-- Tips: MUST have each tip on a SEPARATE LINE using newline (\\n). Format: "- Tip one here\\n- Tip two here\\n- Tip three here"
-- Be specific about techniques (e.g., "dry shake for 10 seconds", "strain through fine mesh", "express lemon peel over drink")
-- Include temperature notes (chilled glass, room temperature spirits, etc.)
-- NEVER write ingredients, instructions, or tips as continuous text - ALWAYS use line breaks (\\n)
+
+INGREDIENTS FORMAT (CRITICAL):
+- Each ingredient on a SEPARATE LINE with \\n
+- Format: "- QUANTITY UNIT NAME\\n"
+- Example: "- 2 oz Gin\\n- 1 oz Lemon juice\\n- 0.5 oz Simple syrup"
+- Use GENERIC names only: "Gin" NOT "London Dry Gin (e.g., Tanqueray)"
+- NO brand examples in parentheses
+- NO alternatives (no "or")
+- NO explanatory text
+- DECISIVE and SPECIFIC only
+- Standard units: oz, ml, dash, barspoon
+
+INSTRUCTIONS FORMAT:
+- Each step on a SEPARATE LINE using \\n
+- Format: "1. First step\\n2. Second step\\n3. Third step"
+- Be specific about techniques
+
+TIPS FORMAT:
+- Each tip on a SEPARATE LINE using \\n
+- Format: "- Tip one\\n- Tip two\\n- Tip three"
+- Keep tips concise
+
+CRITICAL: NEVER include brand suggestions, alternatives, or explanatory text in parentheses in the ingredients list!
 
 **TONE**: Professional yet approachable, passionate about craft cocktails, eager to share knowledge
 

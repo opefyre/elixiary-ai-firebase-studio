@@ -53,9 +53,10 @@ export function ShoppingListDialog({ selectedRecipes, isOpen, onClose, allRecipe
     return allRecipes.filter(r => localSelection.has(r.id));
   }, [allRecipes, localSelection]);
 
-  // Parse ingredients from all selected recipes
+  // Parse and sum ingredients from all selected recipes
   const parseIngredients = () => {
-    const ingredientMap = new Map<string, Set<string>>();
+    const ingredientMap = new Map<string, number>();
+    const ingredientUnits = new Map<string, string>();
     
     actualSelectedRecipes.forEach((recipe) => {
       if (!recipe.ingredients) return;
@@ -64,30 +65,54 @@ export function ShoppingListDialog({ selectedRecipes, isOpen, onClose, allRecipe
       lines.forEach((line) => {
         const cleaned = line.trim().replace(/^[-•*]\s*/, '');
         if (cleaned) {
-          // Extract ingredient name (after the measurement)
-          const parts = cleaned.split(/\s+/);
-          if (parts.length >= 3) {
-            const ingredient = parts.slice(2).join(' ');
-            const measurement = parts.slice(0, 2).join(' ');
+          // Parse: "2 oz Gin" or "1.5 ml Vodka" or "2 dashes Bitters"
+          const match = cleaned.match(/^([\d.]+)\s+([a-zA-Z]+)\s+(.+?)(\s*\(.*\))?$/);
+          
+          if (match) {
+            const quantity = parseFloat(match[1]);
+            const unit = match[2].toLowerCase();
+            let ingredient = match[3].trim();
             
-            if (!ingredientMap.has(ingredient)) {
-              ingredientMap.set(ingredient, new Set());
+            // Remove any parenthetical content (e.g., brand names)
+            ingredient = ingredient.replace(/\s*\(.*?\)\s*/g, '').trim();
+            
+            // Normalize ingredient name for grouping (lowercase for comparison)
+            const normalizedName = ingredient.toLowerCase();
+            
+            // Track total quantity
+            const key = normalizedName;
+            if (!ingredientMap.has(key)) {
+              ingredientMap.set(key, 0);
+              ingredientUnits.set(key, unit);
             }
-            ingredientMap.get(ingredient)!.add(measurement);
-          } else {
-            // If we can't parse, just add the whole line
-            if (!ingredientMap.has(cleaned)) {
-              ingredientMap.set(cleaned, new Set());
+            
+            // Only sum if same unit (oz + oz, ml + ml, etc.)
+            if (ingredientUnits.get(key) === unit) {
+              ingredientMap.set(key, ingredientMap.get(key)! + quantity);
+            } else {
+              // Different units - keep separate
+              const altKey = `${normalizedName}_${unit}`;
+              ingredientMap.set(altKey, (ingredientMap.get(altKey) || 0) + quantity);
+              ingredientUnits.set(altKey, unit);
             }
           }
         }
       });
     });
 
-    return Array.from(ingredientMap.entries()).map(([ingredient, measurements]) => ({
-      ingredient,
-      measurements: Array.from(measurements),
-    }));
+    return Array.from(ingredientMap.entries()).map(([key, total]) => {
+      const unit = ingredientUnits.get(key) || '';
+      // Get original case ingredient name (use first occurrence)
+      const ingredientName = key.replace(/_[a-z]+$/, '');
+      const displayName = ingredientName.charAt(0).toUpperCase() + ingredientName.slice(1);
+      
+      return {
+        ingredient: displayName,
+        quantity: total,
+        unit: unit,
+        display: `${total} ${unit} ${displayName}`,
+      };
+    }).sort((a, b) => a.ingredient.localeCompare(b.ingredient));
   };
 
   const ingredients = parseIngredients();
@@ -95,22 +120,25 @@ export function ShoppingListDialog({ selectedRecipes, isOpen, onClose, allRecipe
   // Group ingredients by category (simple heuristic)
   const categorizeIngredients = () => {
     const spirits = ingredients.filter(i => 
-      /gin|vodka|rum|tequila|whiskey|bourbon|scotch|brandy|cognac|liqueur|aperol|campari|vermouth|sake|mezcal|ouzo/i.test(i.ingredient)
+      /gin|vodka|rum|tequila|whiskey|bourbon|scotch|brandy|cognac|liqueur|aperol|campari|vermouth|sake|mezcal|ouzo|absinthe/i.test(i.ingredient)
     );
     const mixers = ingredients.filter(i => 
-      /juice|soda|water|tonic|ginger|cola|sprite|syrup|honey|sugar/i.test(i.ingredient)
+      /juice|soda|water|tonic|ginger|cola|sprite|syrup|honey|sugar|nectar|puree/i.test(i.ingredient)
+    );
+    const bitters = ingredients.filter(i =>
+      /bitters|bitter/i.test(i.ingredient)
     );
     const garnish = ingredients.filter(i => 
-      /peel|twist|cherry|olive|mint|herb|lime|lemon|orange|fruit|flower/i.test(i.ingredient)
+      /peel|twist|cherry|olive|mint|herb|lime|lemon|orange|fruit|flower|leaf|sprig|wheel|wedge/i.test(i.ingredient)
     );
     const other = ingredients.filter(i => 
-      !spirits.includes(i) && !mixers.includes(i) && !garnish.includes(i)
+      !spirits.includes(i) && !mixers.includes(i) && !garnish.includes(i) && !bitters.includes(i)
     );
 
-    return { spirits, mixers, garnish, other };
+    return { spirits, mixers, bitters, garnish, other };
   };
 
-  const { spirits, mixers, garnish, other } = categorizeIngredients();
+  const { spirits, mixers, bitters, garnish, other } = categorizeIngredients();
 
   const handleCopyList = async () => {
     const shoppingList = `
@@ -119,19 +147,23 @@ ${actualSelectedRecipes.length} ${actualSelectedRecipes.length === 1 ? 'Recipe' 
 
 ${spirits.length > 0 ? `
 🥃 SPIRITS & LIQUEURS
-${spirits.map(i => `• ${i.measurements.join(', ')} ${i.ingredient}`).join('\n')}
+${spirits.map(i => `• ${i.display}`).join('\n')}
 ` : ''}
 ${mixers.length > 0 ? `
 🧃 MIXERS & SYRUPS
-${mixers.map(i => `• ${i.measurements.join(', ')} ${i.ingredient}`).join('\n')}
+${mixers.map(i => `• ${i.display}`).join('\n')}
+` : ''}
+${bitters.length > 0 ? `
+🍶 BITTERS
+${bitters.map(i => `• ${i.display}`).join('\n')}
 ` : ''}
 ${garnish.length > 0 ? `
 🌿 GARNISH & FRESH INGREDIENTS
-${garnish.map(i => `• ${i.measurements.join(', ')} ${i.ingredient}`).join('\n')}
+${garnish.map(i => `• ${i.display}`).join('\n')}
 ` : ''}
 ${other.length > 0 ? `
 📦 OTHER INGREDIENTS
-${other.map(i => `• ${i.measurements.join(', ')} ${i.ingredient}`).join('\n')}
+${other.map(i => `• ${i.display}`).join('\n')}
 ` : ''}
 ---
 Generated by Elixiary AI 🍸
@@ -259,14 +291,11 @@ ${window.location.origin}
               <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 bg-muted/20 rounded-lg p-4">
                 {spirits.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                      🥃 Spirits & Liqueurs
-                    </h4>
-                    <ul className="space-y-1.5 text-sm">
+                    <h4 className="text-sm font-semibold mb-2">🥃 Spirits & Liqueurs</h4>
+                    <ul className="space-y-1.5">
                       {spirits.map((item, idx) => (
-                        <li key={idx} className="flex gap-2">
-                          <span className="text-muted-foreground shrink-0">•</span>
-                          <span className="text-muted-foreground">{item.measurements.join(', ')}</span>
+                        <li key={idx} className="text-sm flex items-baseline gap-2">
+                          <span className="text-primary font-semibold">{item.quantity} {item.unit}</span>
                           <span className="font-medium">{item.ingredient}</span>
                         </li>
                       ))}
@@ -276,14 +305,25 @@ ${window.location.origin}
 
                 {mixers.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                      🧃 Mixers & Syrups
-                    </h4>
-                    <ul className="space-y-1.5 text-sm">
+                    <h4 className="text-sm font-semibold mb-2">🧃 Mixers & Syrups</h4>
+                    <ul className="space-y-1.5">
                       {mixers.map((item, idx) => (
-                        <li key={idx} className="flex gap-2">
-                          <span className="text-muted-foreground shrink-0">•</span>
-                          <span className="text-muted-foreground">{item.measurements.join(', ')}</span>
+                        <li key={idx} className="text-sm flex items-baseline gap-2">
+                          <span className="text-primary font-semibold">{item.quantity} {item.unit}</span>
+                          <span className="font-medium">{item.ingredient}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {bitters.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">🍶 Bitters</h4>
+                    <ul className="space-y-1.5">
+                      {bitters.map((item, idx) => (
+                        <li key={idx} className="text-sm flex items-baseline gap-2">
+                          <span className="text-primary font-semibold">{item.quantity} {item.unit}</span>
                           <span className="font-medium">{item.ingredient}</span>
                         </li>
                       ))}
@@ -293,14 +333,11 @@ ${window.location.origin}
 
                 {garnish.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                      🌿 Garnish & Fresh
-                    </h4>
-                    <ul className="space-y-1.5 text-sm">
+                    <h4 className="text-sm font-semibold mb-2">🌿 Garnish & Fresh</h4>
+                    <ul className="space-y-1.5">
                       {garnish.map((item, idx) => (
-                        <li key={idx} className="flex gap-2">
-                          <span className="text-muted-foreground shrink-0">•</span>
-                          <span className="text-muted-foreground">{item.measurements.join(', ')}</span>
+                        <li key={idx} className="text-sm flex items-baseline gap-2">
+                          <span className="text-primary font-semibold">{item.quantity} {item.unit}</span>
                           <span className="font-medium">{item.ingredient}</span>
                         </li>
                       ))}
@@ -310,14 +347,11 @@ ${window.location.origin}
 
                 {other.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                      📦 Other
-                    </h4>
-                    <ul className="space-y-1.5 text-sm">
+                    <h4 className="text-sm font-semibold mb-2">📦 Other</h4>
+                    <ul className="space-y-1.5">
                       {other.map((item, idx) => (
-                        <li key={idx} className="flex gap-2">
-                          <span className="text-muted-foreground shrink-0">•</span>
-                          <span className="text-muted-foreground">{item.measurements.join(', ')}</span>
+                        <li key={idx} className="text-sm flex items-baseline gap-2">
+                          <span className="text-primary font-semibold">{item.quantity} {item.unit}</span>
                           <span className="font-medium">{item.ingredient}</span>
                         </li>
                       ))}
