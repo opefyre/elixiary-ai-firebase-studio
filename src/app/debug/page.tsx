@@ -55,8 +55,9 @@ export default function DebugPage() {
         console.log('User document path:', userDocRef.path);
         console.log('Attempting to read user document for:', user.uid);
         
+        let userDoc;
         try {
-          const userDoc = await getDoc(userDocRef);
+          userDoc = await getDoc(userDocRef);
           console.log('User document exists:', userDoc.exists());
           if (userDoc.exists()) {
             console.log('User document data:', userDoc.data());
