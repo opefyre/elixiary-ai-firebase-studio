@@ -42,8 +42,13 @@ jobs:
             echo "FIREBASE_SERVICE_ACCOUNT secret is not configured." >&2
             exit 1
           fi
-          echo "$FIREBASE_SERVICE_ACCOUNT" > "$HOME/firebase-service-account.json"
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-service-account.json" >> "$GITHUB_ENV"
+          credentials_path="$HOME/firebase_service_account.json"
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$credentials_path"
+          chmod 600 "$credentials_path"
+          {
+            echo "GOOGLE_APPLICATION_CREDENTIALS=$credentials_path"
+            echo "FIREBASE_CLI_LOGIN=service-account"
+          } >> "$GITHUB_ENV"
 
       - name: Install Firebase CLI
         run: npm install --global firebase-tools@latest
