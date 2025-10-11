@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useRecipes, useSubscription, useUser, useFirebase } from "@/firebase";
 import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
+import { UpgradeModal } from "@/components/upgrade-modal";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please describe what kind of cocktail you'd like").min(10, "Please provide more details about your desired cocktail (at least 10 characters)"),
@@ -76,11 +77,12 @@ export function RecipeGenerationForm({
   const [copied, setCopied] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { toast } = useToast();
   const { saveRecipe } = useRecipes();
   const { user } = useUser();
   const { firestore } = useFirebase();
-  const { canGenerateRecipe, remainingGenerations, isPro } = useSubscription();
+  const { canGenerateRecipe, canSaveRecipe, remainingGenerations, remainingSaves, isPro } = useSubscription();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -207,11 +209,7 @@ ${window.location.origin}`.trim();
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     // Check if user can generate (usage limit)
     if (!canGenerateRecipe) {
-      toast({
-        title: "Generation Limit Reached",
-        description: `You've used all ${remainingGenerations === 0 ? 'your free' : ''} recipes this month. Upgrade to Pro for unlimited generations!`,
-        variant: "destructive",
-      });
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -235,18 +233,27 @@ ${window.location.origin}`.trim();
       }
     }
     
-    // Auto-save recipe if generation was successful
+    // Auto-save recipe if generation was successful and user can save
     if (result.recipe && !result.error) {
-      try {
-        await saveRecipe(result.recipe, data.prompt);
-        setIsSaved(true);
+      if (canSaveRecipe) {
+        try {
+          await saveRecipe(result.recipe, data.prompt);
+          setIsSaved(true);
+          toast({
+            title: "Recipe Generated & Saved! ✨",
+            description: "Your cocktail recipe has been saved to your collection.",
+          });
+        } catch (err) {
+          // Silently fail auto-save, user can manually save if needed
+          console.error('Auto-save failed:', err);
+        }
+      } else {
+        // Can't save due to limit
         toast({
-          title: "Recipe Generated & Saved! ✨",
-          description: "Your cocktail recipe has been saved to your collection.",
+          title: "Recipe Generated! ⚠️",
+          description: "You've reached your storage limit (20 recipes). Delete some recipes or upgrade to Pro to save this one.",
+          variant: "default",
         });
-      } catch (err) {
-        // Silently fail auto-save, user can manually save if needed
-        console.error('Auto-save failed:', err);
       }
     }
   };
@@ -468,6 +475,13 @@ ${window.location.origin}`.trim();
           </CardContent>
         </Card>
       )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        open={showUpgradeModal} 
+        onOpenChange={setShowUpgradeModal}
+        reason="generation_limit"
+      />
     </div>
   );
 }
