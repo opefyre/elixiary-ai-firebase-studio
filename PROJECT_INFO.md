@@ -51,8 +51,14 @@
 - ✅ Production build successful
 - ✅ No linting errors
 
+## Environment Variables
+- `GEMINI_API_KEY` - Required for AI recipe generation
+- `FIREBASE_PROJECT_ID` - Automatically provided by Firebase App Hosting
+- `NODE_ENV` - Set to 'production' for builds
+
 ## Notes
 - App is stateless - no database required
 - All recipe generation happens in real-time via AI
 - Perfect for free-tier deployment (Firebase/Vercel)
 - Ready for CI/CD pipeline setup
+- GitHub Actions workflow fixed and ready for deployment
