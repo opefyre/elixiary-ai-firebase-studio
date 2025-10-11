@@ -25,11 +25,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container flex min-h-screen flex-col items-center justify-center overflow-hidden py-12 pt-20">
+    <div className="container flex min-h-screen flex-col items-center justify-center overflow-hidden py-12 pt-32 md:pt-20">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-10 text-center space-y-6">
           {/* Hero Icon */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-8 mt-4">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
               <div className="relative text-6xl">🍸</div>
