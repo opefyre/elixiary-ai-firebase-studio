@@ -19,6 +19,9 @@ export interface SavedRecipe extends GenerateCocktailRecipeOutput {
   userId: string;
   userPrompt: string;
   createdAt: any;
+  tags?: string[];
+  collection?: string;
+  isFavorite?: boolean;
 }
 
 export function useRecipes() {
@@ -82,12 +85,36 @@ export function useRecipes() {
     await deleteDoc(recipeRef);
   };
 
+  const updateRecipeTags = async (recipeId: string, tags: string[]) => {
+    if (!user) throw new Error('User must be authenticated');
+
+    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
+    await updateDoc(recipeRef, { tags });
+  };
+
+  const updateRecipeCollection = async (recipeId: string, collection: string) => {
+    if (!user) throw new Error('User must be authenticated');
+
+    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
+    await updateDoc(recipeRef, { collection });
+  };
+
+  const toggleFavorite = async (recipeId: string, isFavorite: boolean) => {
+    if (!user) throw new Error('User must be authenticated');
+
+    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
+    await updateDoc(recipeRef, { isFavorite });
+  };
+
   return {
     recipes,
     isLoading,
     error,
     saveRecipe,
     deleteRecipe,
+    updateRecipeTags,
+    updateRecipeCollection,
+    toggleFavorite,
   };
 }
 
