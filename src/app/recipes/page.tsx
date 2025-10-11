@@ -14,7 +14,6 @@ export default function RecipesPage() {
   const { user, isUserLoading } = useUser();
   const { recipes, isLoading, deleteRecipe } = useRecipes();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
   const [filterGlassware, setFilterGlassware] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -30,10 +29,6 @@ export default function RecipesPage() {
         (recipe.description && recipe.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (recipe.ingredients && recipe.ingredients.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Difficulty filter
-      const matchesDifficulty = filterDifficulty === 'all' || 
-        ('difficultyLevel' in recipe && recipe.difficultyLevel === filterDifficulty);
-
       // Glassware filter
       const matchesGlassware = filterGlassware === 'all' || 
         ('glassware' in recipe && recipe.glassware?.toLowerCase().includes(filterGlassware.toLowerCase()));
@@ -45,16 +40,11 @@ export default function RecipesPage() {
       // Favorites filter
       const matchesFavorite = !showFavoritesOnly || recipe.isFavorite;
 
-      return matchesSearch && matchesDifficulty && matchesGlassware && matchesTag && matchesFavorite;
+      return matchesSearch && matchesGlassware && matchesTag && matchesFavorite;
     });
-  }, [recipes, searchQuery, filterDifficulty, filterGlassware, filterTag, showFavoritesOnly]);
+  }, [recipes, searchQuery, filterGlassware, filterTag, showFavoritesOnly]);
 
-  // Get unique difficulty levels and glassware types
-  const difficulties = useMemo(() => {
-    const unique = new Set(recipes.map(r => 'difficultyLevel' in r ? r.difficultyLevel : '').filter(Boolean));
-    return Array.from(unique);
-  }, [recipes]);
-
+  // Get unique glassware types
   const glasswareTypes = useMemo(() => {
     const unique = new Set(recipes.map(r => 'glassware' in r ? r.glassware : '').filter(Boolean));
     return Array.from(unique);
@@ -174,22 +164,6 @@ export default function RecipesPage() {
                 )}
               </div>
 
-              {/* Difficulty Filter */}
-              {difficulties.length > 0 && (
-                <select
-                  value={filterDifficulty}
-                  onChange={(e) => setFilterDifficulty(e.target.value)}
-                  className="px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="all">All Difficulties</option>
-                  {difficulties.map((diff) => (
-                    <option key={diff} value={diff}>
-                      {diff}
-                    </option>
-                  ))}
-                </select>
-              )}
-
               {/* Glassware Filter */}
               {glasswareTypes.length > 0 && (
                 <select
@@ -207,13 +181,12 @@ export default function RecipesPage() {
               )}
 
               {/* Clear Filters */}
-              {(searchQuery || filterDifficulty !== 'all' || filterGlassware !== 'all') && (
+              {(searchQuery || filterGlassware !== 'all') && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     setSearchQuery('');
-                    setFilterDifficulty('all');
                     setFilterGlassware('all');
                   }}
                   className="gap-2"
