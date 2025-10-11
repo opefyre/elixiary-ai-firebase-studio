@@ -37,20 +37,27 @@ export default function AccountPage() {
 
     setIsLoadingPortal(true);
     try {
+      console.log('Requesting portal session for customer:', subscription.stripeCustomerId);
+      
       const response = await fetch('/api/stripe/create-portal-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
       });
 
-      if (!response.ok) throw new Error('Failed to create portal session');
+      const data = await response.json();
+      console.log('Portal session response:', { ok: response.ok, data });
 
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
+      if (!response.ok) {
+        throw new Error(data.details || data.error || 'Failed to create portal session');
+      }
+
+      window.location.href = data.url;
+    } catch (error: any) {
+      console.error('Portal error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to open billing portal. Please try again.',
+        description: error.message || 'Failed to open billing portal. Please try again.',
         variant: 'destructive',
       });
       setIsLoadingPortal(false);
