@@ -45,6 +45,21 @@ const luckyPrompts = [
   "A spicy and tropical tequila drink.",
   "A non-alcoholic mocktail that's fruity and fun.",
   "Create a unique cocktail using bourbon and pear.",
+  "A romantic Valentine's Day cocktail with champagne and strawberries.",
+  "An autumn-inspired drink with apple cider and warming spices.",
+  "A beachside vacation cocktail with rum and coconut.",
+  "A sophisticated martini variation for a dinner party.",
+  "A festive holiday drink with cranberry and rosemary.",
+  "A coffee-infused cocktail for after dinner.",
+  "A low-calorie vodka cocktail that's light and crisp.",
+  "A bold mezcal cocktail with smoky and citrus notes.",
+  "A floral and elegant cocktail with elderflower and cucumber.",
+  "A brunch-perfect cocktail with grapefruit and herbs.",
+  "A winter warmer with dark rum and chocolate.",
+  "A tiki-style cocktail with multiple rums and tropical fruits.",
+  "An Asian-inspired cocktail with sake and ginger.",
+  "A Mediterranean cocktail with ouzo and fresh herbs.",
+  "A spicy margarita with jalapeño and mango.",
 ];
 
 export function RecipeGenerationForm({
