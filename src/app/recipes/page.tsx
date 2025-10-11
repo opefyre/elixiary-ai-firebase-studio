@@ -1,5 +1,6 @@
 'use client';
 
+import type { Metadata } from "next";
 import { useUser, useRecipes } from '@/firebase';
 import { Loader2, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

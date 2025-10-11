@@ -7,8 +7,63 @@ import { FirebaseClientProvider } from "@/firebase";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Elixiary",
-  description: "AI-powered cocktail recipe discovery.",
+  metadataBase: new URL('https://ai.elixiary.com'),
+  title: {
+    default: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
+    template: '%s | Elixiary AI',
+  },
+  description: 'Generate unique cocktail recipes with AI! Tell our AI mixologist what you\'re in the mood for, and it will create a custom cocktail recipe just for you. Free cocktail recipe generator powered by Google Gemini.',
+  keywords: [
+    'cocktail recipes',
+    'AI cocktail generator',
+    'mixology',
+    'cocktail recipe generator',
+    'drink recipes',
+    'AI mixologist',
+    'free cocktail recipes',
+    'custom cocktail creator',
+    'bartending',
+    'cocktail ideas',
+  ],
+  authors: [{ name: 'Elixiary AI' }],
+  creator: 'Elixiary AI',
+  publisher: 'Elixiary AI',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://ai.elixiary.com',
+    title: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
+    description: 'Generate unique cocktail recipes with AI! Free cocktail recipe generator powered by Google Gemini.',
+    siteName: 'Elixiary AI',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Elixiary AI - Cocktail Recipe Generator',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
+    description: 'Generate unique cocktail recipes with AI!',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: '', // You'll add this after verifying in Google Search Console
+  },
 };
 
 export default function RootLayout({
