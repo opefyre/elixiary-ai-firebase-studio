@@ -85,30 +85,42 @@ export default function RecipesPage() {
 
             {/* Text */}
             <div className="space-y-3">
-              <h2 className="font-headline text-2xl md:text-3xl font-bold">
-                Your Recipe Collection
+              <h2 className="font-headline text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Ready to Build Your Bar?
               </h2>
-              <p className="text-muted-foreground text-base leading-relaxed">
-                Sign in to save and organize your favorite cocktail recipes. 
-                Build your personal mixology library.
+              <p className="text-muted-foreground text-base leading-relaxed max-w-sm mx-auto">
+                Save your AI-crafted cocktails, organize favorites, and never lose a great recipe again.
               </p>
+            </div>
+
+            {/* Feature pills */}
+            <div className="flex flex-wrap justify-center gap-2 text-xs">
+              <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                ✨ AI-Generated Recipes
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                🏷️ Smart Tags
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                🛒 Shopping Lists
+              </span>
             </div>
 
             {/* CTA Button */}
             <Button 
               asChild 
               size="lg"
-              className="rounded-full px-8 py-6 text-base font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+              className="rounded-full px-8 py-6 text-base font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105"
             >
               <Link href="/login" className="gap-2">
-                Sign In to Continue
+                Get Started Free
                 <span className="text-lg">→</span>
               </Link>
             </Button>
 
             {/* Subtle hint */}
             <p className="text-xs text-muted-foreground/60">
-              Free account • No credit card required
+              No credit card • Sign in with Google in seconds
             </p>
           </div>
         </div>
