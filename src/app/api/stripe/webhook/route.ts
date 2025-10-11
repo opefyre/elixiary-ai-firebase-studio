@@ -187,7 +187,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   if (!userDoc.exists) {
     console.log('User document does not exist, creating new document');
     // Create user document with subscription data
-    const userData = {
+    // Build user data with proper timestamp validation
+    const userData: any = {
       subscriptionTier: 'pro',
       subscriptionStatus: subscription.status,
       stripeCustomerId: session.customer as string,
@@ -196,19 +197,27 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       isEarlyBird: isEarlyBird,
       ...(earlyBirdNumber && { earlyBirdNumber }),
       subscriptionStartDate: new Date().toISOString(),
-      currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
+    // Only add timestamp fields if they exist and are valid
+    if (subscription.current_period_start) {
+      userData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
+    }
+    
+    if (subscription.current_period_end) {
+      userData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    }
     console.log('Creating user document with data:', userData);
     await userRef.set(userData);
     console.log('User document created successfully');
   } else {
     console.log('User document exists, updating...');
     // Update existing user document
-    const updateData = {
+    // Build update data with proper timestamp validation
+    const updateData: any = {
       subscriptionTier: 'pro',
       subscriptionStatus: subscription.status,
       stripeCustomerId: session.customer as string,
@@ -217,11 +226,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
       isEarlyBird: isEarlyBird,
       ...(earlyBirdNumber && { earlyBirdNumber }),
       subscriptionStartDate: new Date().toISOString(),
-      currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
       updatedAt: new Date().toISOString(),
     };
+
+    // Only add timestamp fields if they exist and are valid
+    if (subscription.current_period_start) {
+      updateData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
+    }
+    
+    if (subscription.current_period_end) {
+      updateData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    }
     console.log('Updating user document with data:', updateData);
     await userRef.update(updateData);
     console.log('User document updated successfully');
@@ -234,6 +250,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription, firestore: any) {
+  console.log('handleSubscriptionUpdated called for subscription:', subscription.id);
+  
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
@@ -241,17 +259,33 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription, fire
     return;
   }
 
+  console.log('Updating subscription for user:', userId);
+
   const userRef = firestore.collection('users').doc(userId);
   const userDoc = await userRef.get();
 
   if (userDoc.exists) {
-    await userRef.update({
+    // Build update data with proper timestamp validation
+    const updateData: any = {
       subscriptionStatus: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
       updatedAt: new Date().toISOString(),
-    });
+    };
+
+    // Only add timestamp fields if they exist and are valid
+    if (subscription.current_period_start) {
+      updateData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
+    }
+    
+    if (subscription.current_period_end) {
+      updateData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    }
+
+    console.log('Updating user document with data:', updateData);
+    await userRef.update(updateData);
+    console.log('User document updated successfully');
+  } else {
+    console.log('User document does not exist, skipping update');
   }
 
   console.log(`Subscription updated for user: ${userId}`);
