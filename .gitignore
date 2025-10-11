@@ -44,6 +44,9 @@ next-env.d.ts
 firebase-debug.log
 firestore-debug.log
 
+# google idx
+.idx/
+
 # internal documentation and setup guides
 PROJECT_INFO.md
 STRIPE_SETUP_GUIDE.md
