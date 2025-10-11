@@ -20,17 +20,23 @@ export function exportRecipeToPDF(recipe: RecipeData) {
   const contentWidth = pageWidth - 2 * margin;
   let yPosition = margin;
 
+  // Helper function to remove emojis and special characters that jsPDF can't render
+  const cleanText = (text: string): string => {
+    return text
+      .replace(/[\u{1F000}-\u{1FFFF}]/gu, '') // Remove emojis
+      .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
+      .trim();
+  };
+
   // Helper function to add wrapped text
   const addText = (text: string, fontSize: number, isBold: boolean = false, color: string = '#000000') => {
     doc.setFontSize(fontSize);
-    if (isBold) {
-      doc.setFont('helvetica', 'bold');
-    } else {
-      doc.setFont('helvetica', 'normal');
-    }
+    doc.setFont('helvetica', isBold ? 'bold' : 'normal');
     doc.setTextColor(color);
     
-    const lines = doc.splitTextToSize(text, contentWidth);
+    const sanitizedText = cleanText(text);
+    const lines = doc.splitTextToSize(sanitizedText, contentWidth);
+    
     lines.forEach((line: string) => {
       if (yPosition > pageHeight - margin) {
         doc.addPage();
@@ -39,71 +45,101 @@ export function exportRecipeToPDF(recipe: RecipeData) {
       doc.text(line, margin, yPosition);
       yPosition += fontSize * 0.5;
     });
-    yPosition += fontSize * 0.3; // Add spacing after text block
+    yPosition += fontSize * 0.3;
   };
 
-  // Header with cocktail emoji
+  // Add section header with decorative line
+  const addSectionHeader = (title: string) => {
+    // Add some spacing before section
+    yPosition += 3;
+    
+    // Section title
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor('#1a1a1a');
+    doc.text(title.toUpperCase(), margin, yPosition);
+    yPosition += 3;
+    
+    // Decorative underline
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPosition, margin + 40, yPosition);
+    yPosition += 8;
+  };
+
+  // Title
   doc.setFontSize(24);
-  doc.text('🍸', margin, yPosition);
-  yPosition += 10;
-
-  // Recipe name
-  addText(recipe.name, 22, true, '#1a1a1a');
-  yPosition += 5;
-
-  // Description
-  addText(recipe.description, 11, false, '#4a4a4a');
-  yPosition += 8;
-
-  // Metadata line
-  const metadata = `${recipe.glassware} | ${recipe.difficultyLevel} | ${recipe.servingSize}`;
-  addText(metadata, 10, false, '#6a6a6a');
-  yPosition += 10;
-
-  // Divider line
-  doc.setDrawColor(200, 200, 200);
-  doc.line(margin, yPosition, pageWidth - margin, yPosition);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#1a1a1a');
+  const cleanTitle = cleanText(recipe.name);
+  doc.text(cleanTitle, pageWidth / 2, yPosition, { align: 'center' });
   yPosition += 12;
 
-  // Ingredients section
-  addText('🧪 INGREDIENTS', 14, true, '#1a1a1a');
-  yPosition += 2;
-  const ingredientsList = recipe.ingredients.split('\n').filter(Boolean);
-  ingredientsList.forEach(ingredient => {
-    addText(`• ${ingredient.trim()}`, 10, false, '#2a2a2a');
-  });
+  // Description
+  if (recipe.description) {
+    addText(recipe.description, 11, false, '#4a4a4a');
+    yPosition += 5;
+  }
+
+  // Metadata line
+  const metadata = `Glass: ${recipe.glassware} | Difficulty: ${recipe.difficultyLevel} | Serving: ${recipe.servingSize}`;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'italic');
+  doc.setTextColor('#6a6a6a');
+  doc.text(cleanText(metadata), pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 10;
+
+  // Main divider line
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.8);
+  doc.line(margin, yPosition, pageWidth - margin, yPosition);
   yPosition += 8;
 
+  // Ingredients section
+  addSectionHeader('Ingredients');
+  const ingredientsList = recipe.ingredients.split('\n').filter(Boolean);
+  ingredientsList.forEach(ingredient => {
+    const cleaned = cleanText(ingredient.trim());
+    if (cleaned) {
+      addText(`- ${cleaned}`, 10, false, '#2a2a2a');
+    }
+  });
+
   // Instructions section
-  addText('📝 INSTRUCTIONS', 14, true, '#1a1a1a');
-  yPosition += 2;
+  addSectionHeader('Instructions');
   const instructionsList = recipe.instructions.split('\n').filter(Boolean);
   instructionsList.forEach((instruction, index) => {
-    addText(`${index + 1}. ${instruction.trim()}`, 10, false, '#2a2a2a');
-    yPosition += 3;
+    const cleaned = cleanText(instruction.trim());
+    if (cleaned) {
+      // Remove leading numbers if they exist (avoid "1. 1. Step")
+      const withoutNumber = cleaned.replace(/^\d+\.\s*/, '');
+      addText(`${index + 1}. ${withoutNumber}`, 10, false, '#2a2a2a');
+      yPosition += 2;
+    }
   });
-  yPosition += 5;
 
   // Garnish section
-  if (recipe.garnish) {
-    addText('🌿 GARNISH', 14, true, '#1a1a1a');
-    yPosition += 2;
+  if (recipe.garnish && recipe.garnish.trim()) {
+    addSectionHeader('Garnish');
     const garnishList = recipe.garnish.split('\n').filter(Boolean);
     garnishList.forEach(garnish => {
-      addText(garnish.trim(), 10, false, '#2a2a2a');
+      const cleaned = cleanText(garnish.trim());
+      if (cleaned) {
+        addText(`- ${cleaned}`, 10, false, '#2a2a2a');
+      }
     });
-    yPosition += 8;
   }
 
   // Pro tips section
-  if (recipe.tips) {
-    addText('💡 PRO TIPS', 14, true, '#1a1a1a');
-    yPosition += 2;
+  if (recipe.tips && recipe.tips.trim()) {
+    addSectionHeader('Pro Tips');
     const tipsList = recipe.tips.split('\n').filter(Boolean);
     tipsList.forEach(tip => {
-      addText(`• ${tip.trim()}`, 10, false, '#2a2a2a');
+      const cleaned = cleanText(tip.trim());
+      if (cleaned) {
+        addText(`- ${cleaned}`, 10, false, '#2a2a2a');
+      }
     });
-    yPosition += 8;
   }
 
   // Footer
@@ -112,13 +148,19 @@ export function exportRecipeToPDF(recipe: RecipeData) {
     yPosition = margin;
   }
   yPosition = pageHeight - 15;
+  
+  // Decorative line above footer
+  doc.setDrawColor(220, 220, 220);
+  doc.setLineWidth(0.3);
+  doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+  
+  // Footer text
   doc.setFontSize(8);
   doc.setTextColor('#999999');
   doc.setFont('helvetica', 'italic');
-  doc.text('Generated by Elixiary AI 🍸✨', pageWidth / 2, yPosition, { align: 'center' });
+  doc.text('Generated by Elixiary AI', pageWidth / 2, yPosition, { align: 'center' });
 
   // Save the PDF
-  const fileName = `${recipe.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+  const fileName = `${cleanText(recipe.name).replace(/\s+/g, '_').toLowerCase()}.pdf`;
   doc.save(fileName);
 }
-
