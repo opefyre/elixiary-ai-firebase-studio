@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Firebase App Hosting
 
 on:
   workflow_dispatch:
@@ -6,16 +6,8 @@ on:
     branches:
       - main
 
-concurrency:
-  group: firebase-hosting-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  FIREBASE_PROJECT_ID: studio-1063505923-cbb37
-
 jobs:
   deploy:
-    name: Build and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,7 +17,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -33,28 +24,13 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Configure Firebase credentials
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Deploy to Firebase App Hosting
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          set -euo pipefail
-          if [ -z "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
-            echo "FIREBASE_SERVICE_ACCOUNT secret is not configured." >&2
-            exit 1
-          fi
-          credentials_path="$HOME/firebase_service_account.json"
-          echo "$FIREBASE_SERVICE_ACCOUNT" > "$credentials_path"
-          chmod 600 "$credentials_path"
-          {
-            echo "GOOGLE_APPLICATION_CREDENTIALS=$credentials_path"
-            echo "FIREBASE_CLI_LOGIN=service-account"
-          } >> "$GITHUB_ENV"
-
-      - name: Install Firebase CLI
-        run: npm install --global firebase-tools@latest
-
-      - name: Enable Firebase web frameworks support
-        run: firebase experiments:enable webframeworks --project "$FIREBASE_PROJECT_ID"
-
-      - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --non-interactive
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$HOME/firebase_service_account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase_service_account.json"
+          firebase apphosting:deploy --project studio-1063505923-cbb37
