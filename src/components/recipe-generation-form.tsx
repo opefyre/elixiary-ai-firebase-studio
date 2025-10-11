@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRecipes } from "@/firebase";
 
 const formSchema = z.object({
-  prompt: z.string(),
+  prompt: z.string().min(1, "Please describe what kind of cocktail you'd like").min(10, "Please provide more details about your desired cocktail (at least 10 characters)"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -240,6 +240,7 @@ ${window.location.origin}`.trim();
                   <Textarea
                     placeholder="e.g., A refreshing gin-based cocktail for a hot summer day."
                     className="min-h-[100px] resize-none"
+                    required
                     {...field}
                   />
                 </FormControl>
