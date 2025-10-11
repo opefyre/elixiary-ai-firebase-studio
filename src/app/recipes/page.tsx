@@ -128,13 +128,18 @@ export default function RecipesPage() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setSelectedRecipeIds(new Set(filteredRecipes.map(r => r.id)));
+                      setSelectedRecipeIds(new Set());
                       setShowShoppingList(true);
                     }}
                     className="gap-2"
                   >
                     <ShoppingCart className="h-4 w-4" />
                     <span className="hidden sm:inline">Shopping List</span>
+                    {selectedRecipeIds.size > 0 && (
+                      <span className="ml-1 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
+                        {selectedRecipeIds.size}
+                      </span>
+                    )}
                   </Button>
                 </>
               )}
@@ -311,8 +316,10 @@ export default function RecipesPage() {
 
       <ShoppingListDialog
         selectedRecipes={recipes.filter(r => selectedRecipeIds.has(r.id))}
+        allRecipes={recipes}
         isOpen={showShoppingList}
         onClose={() => setShowShoppingList(false)}
+        onSelectionChange={setSelectedRecipeIds}
       />
     </div>
   );
