@@ -23,15 +23,15 @@ export type GenerateCocktailRecipeInput = z.infer<
 const GenerateCocktailRecipeOutputSchema = z.object({
   recipeName: z.string().describe('A creative, appealing name for the cocktail. Should be catchy and match the theme.'),
   description: z.string().describe('A brief 1-2 sentence description of the cocktail, its flavor profile, and the experience.'),
-  ingredients: z.string().describe('A detailed list of ingredients with precise measurements. Format as a bulleted list with each ingredient on a new line.'),
+  ingredients: z.string().describe('A detailed list of ingredients with precise measurements. IMPORTANT: Put each ingredient on its own line, separated by newline characters (\\n). Start each line with a bullet point or dash. Example format:\n- 2 oz Gin\\n- 1 oz Fresh lemon juice\\n- 0.5 oz Simple syrup'),
   instructions: z
     .string()
-    .describe('Clear, numbered step-by-step instructions for making the cocktail. Include preparation, mixing, and serving details.'),
-  garnish: z.string().describe('Detailed garnish suggestions with specific placement and presentation tips.'),
+    .describe('Clear, numbered step-by-step instructions for making the cocktail. IMPORTANT: Put each step on its own line, separated by newline characters (\\n). Number each step. Example format:\n1. Fill shaker with ice\\n2. Add all ingredients\\n3. Shake vigorously for 10 seconds'),
+  garnish: z.string().describe('Detailed garnish suggestions. If multiple options, separate with newline characters (\\n).'),
   glassware: z.string().describe('The recommended type of glass to serve the cocktail in.'),
   difficultyLevel: z.string().describe('Easy, Medium, or Hard - indicating the skill level required.'),
   servingSize: z.string().describe('Number of servings this recipe makes (e.g., "1 cocktail" or "Serves 2").'),
-  tips: z.string().describe('Professional mixologist tips and variations for this cocktail.'),
+  tips: z.string().describe('Professional mixologist tips and variations. IMPORTANT: If multiple tips, put each on its own line separated by newline characters (\\n). Use bullet points or dashes.'),
 });
 export type GenerateCocktailRecipeOutput = z.infer<
   typeof GenerateCocktailRecipeOutputSchema
@@ -69,11 +69,13 @@ Your task is to create a unique, well-balanced cocktail recipe that perfectly ma
 - Add creative GARNISH ideas
 - Specify DIFFICULTY level honestly
 
-**FORMAT GUIDELINES:**
-- Ingredients: Use bullet points (•) with precise measurements
-- Instructions: Use numbered steps (1., 2., 3., etc.)
+**FORMAT GUIDELINES - EXTREMELY IMPORTANT:**
+- Ingredients: MUST have each ingredient on a SEPARATE LINE using newline (\\n). Format: "- 2 oz Gin\\n- 1 oz Lemon juice\\n- 0.5 oz Simple syrup"
+- Instructions: MUST have each step on a SEPARATE LINE using newline (\\n). Format: "1. Fill shaker with ice\\n2. Add ingredients\\n3. Shake for 10 seconds"
+- Tips: MUST have each tip on a SEPARATE LINE using newline (\\n). Format: "- Tip one here\\n- Tip two here\\n- Tip three here"
 - Be specific about techniques (e.g., "dry shake for 10 seconds", "strain through fine mesh", "express lemon peel over drink")
 - Include temperature notes (chilled glass, room temperature spirits, etc.)
+- NEVER write ingredients, instructions, or tips as continuous text - ALWAYS use line breaks (\\n)
 
 **TONE**: Professional yet approachable, passionate about craft cocktails, eager to share knowledge
 
