@@ -272,6 +272,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, fire
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, firestore: any) {
+  // Check if invoice has a subscription
+  if (!invoice.subscription) {
+    console.log('Invoice has no subscription, skipping payment succeeded handler');
+    return;
+  }
+
   const subscription = await stripe.subscriptions.retrieve(
     invoice.subscription as string
   );
@@ -297,6 +303,12 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, f
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, firestore: any) {
+  // Check if invoice has a subscription
+  if (!invoice.subscription) {
+    console.log('Invoice has no subscription, skipping payment failed handler');
+    return;
+  }
+
   const subscription = await stripe.subscriptions.retrieve(
     invoice.subscription as string
   );
