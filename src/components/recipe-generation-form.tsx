@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRecipes, useSubscription, useUser, useFirebase } from "@/firebase";
 import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
 import { UpgradeModal } from "@/components/upgrade-modal";
+import { CustomizationDialog, type CustomizationOptions } from "@/components/customization-dialog";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please describe what kind of cocktail you'd like").min(10, "Please provide more details about your desired cocktail (at least 10 characters)"),
@@ -78,6 +79,7 @@ export function RecipeGenerationForm({
   const [isSaved, setIsSaved] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [customization, setCustomization] = useState<CustomizationOptions | null>(null);
   const { toast } = useToast();
   const { saveRecipe } = useRecipes();
   const { user } = useUser();
@@ -219,7 +221,30 @@ ${window.location.origin}`.trim();
     setIsSaved(false);
     setCurrentPrompt(data.prompt);
     
-    const result = await handleGenerateRecipe(data);
+    // Enhance prompt with customization if provided
+    let enhancedPrompt = data.prompt;
+    if (customization) {
+      const customDetails = [];
+      
+      if (customization.complexity) {
+        customDetails.push(`${customization.complexity} complexity`);
+      }
+      if (customization.alcoholLevel) {
+        customDetails.push(`${customization.alcoholLevel} alcohol level`);
+      }
+      if (customization.sweetness) {
+        customDetails.push(`${customization.sweetness} sweetness`);
+      }
+      if (customization.dietary && customization.dietary.length > 0) {
+        customDetails.push(customization.dietary.join(', '));
+      }
+      
+      if (customDetails.length > 0) {
+        enhancedPrompt += ` [Preferences: ${customDetails.join(', ')}]`;
+      }
+    }
+    
+    const result = await handleGenerateRecipe({ prompt: enhancedPrompt });
     setRecipe(result.recipe);
     setError(result.error);
     setIsLoading(false);
@@ -295,24 +320,35 @@ ${window.location.origin}`.trim();
             </div>
           )}
 
-          <div className="flex justify-center pt-2 gap-4">
-            <Button type="submit" disabled={isLoading || !canGenerateRecipe} size="lg">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Generate Recipe
-                </>
-              )}
-            </Button>
-            <Button type="button" variant="outline" size="lg" onClick={handleRandomPrompt} aria-label="I'm feeling lucky">
-                <Dices className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col sm:flex-row justify-center items-center pt-2 gap-3">
+            <div className="flex gap-3">
+              <Button type="submit" disabled={isLoading || !canGenerateRecipe} size="lg">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    Generate Recipe
+                  </>
+                )}
+              </Button>
+              <Button type="button" variant="outline" size="lg" onClick={handleRandomPrompt} aria-label="I'm feeling lucky">
+                  <Dices className="h-4 w-4" />
+              </Button>
+            </div>
+            <CustomizationDialog 
+              onApply={setCustomization}
+              isPro={isPro}
+            />
           </div>
+          {customization && (
+            <div className="text-center text-sm text-muted-foreground mt-2">
+              ✨ Customization active: {customization.complexity} complexity, {customization.alcoholLevel} alcohol, {customization.sweetness} sweetness
+            </div>
+          )}
         </form>
       </Form>
 
