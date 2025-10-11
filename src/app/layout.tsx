@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
 import { OfflineWarning } from "@/components/offline-warning";
 import { FirebaseClientProvider } from "@/firebase";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -89,6 +90,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
+        <GoogleAnalytics />
         <FirebaseClientProvider>
           <a href="#main-content" className="skip-link">
             Skip to main content
