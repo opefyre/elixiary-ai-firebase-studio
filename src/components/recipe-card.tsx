@@ -320,7 +320,7 @@ ${window.location.origin}`.trim();
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2 border-t border-border">
                 <Clock className="h-3 w-3" />
                 <span>{formatDate(recipe.createdAt)}</span>
-              </div>
+        </div>
             )}
 
             <div className="flex items-center justify-center pt-2 text-sm text-primary/60 group-hover:text-primary transition-colors">
@@ -380,15 +380,15 @@ ${window.location.origin}`.trim();
                 >
                   {isEditingTags ? 'Done' : 'Edit'}
                 </Button>
-              </div>
-
+          </div>
+          
               <div className="flex flex-wrap gap-2">
                 {recipe.tags && recipe.tags.map((tag) => (
                   <span
                     key={tag}
                     className="bg-accent/50 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5"
                   >
-                    {tag}
+                {tag}
                     {isEditingTags && (
                       <button
                         onClick={() => handleRemoveTag(tag)}

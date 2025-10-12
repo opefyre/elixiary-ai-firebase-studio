@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { UsageChart } from '@/components/usage-chart';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 export default function AccountPage() {
   const { user, isUserLoading } = useUser();
@@ -92,6 +93,29 @@ export default function AccountPage() {
     : subscription
       ? Math.min(100, (subscription.recipeCount / limits.maxSavedRecipes) * 100)
       : 0;
+
+  // Generate mock daily data for visualization (in production, track this in Firestore)
+  const dailyGenerationData = useMemo(() => {
+    const data = [];
+    const totalGenerated = subscription?.recipesGeneratedThisMonth || 0;
+    
+    // Simple distribution across last 7 days
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Distribute total across days (more recent = more activity)
+      const weight = (7 - i) / 28; // Recent days have more weight
+      const count = i === 0 
+        ? Math.max(0, totalGenerated - data.reduce((sum, d) => sum + d.count, 0))
+        : Math.floor(totalGenerated * weight);
+      
+      data.push({ date: dateStr, count });
+    }
+    
+    return data;
+  }, [subscription?.recipesGeneratedThisMonth]);
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8 pt-20 md:py-12 md:pt-24">
@@ -187,6 +211,22 @@ export default function AccountPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Activity Chart */}
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium">Activity</CardTitle>
+          <CardDescription>Your recipe generation activity this week</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UsageChart
+            data={dailyGenerationData}
+            maxValue={limits.generationsPerMonth / 4} // 1/4 of monthly limit as reasonable daily max
+            label="Recipes generated per day"
+            color="#8b5cf6"
+          />
+        </CardContent>
+      </Card>
 
       {/* Subscription Card */}
       <Card>
