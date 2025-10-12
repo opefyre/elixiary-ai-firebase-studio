@@ -36,20 +36,11 @@ export const metadata: Metadata = {
     title: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
     description: 'Generate unique cocktail recipes with AI! Free cocktail recipe generator powered by Google Gemini.',
     siteName: 'Elixiary AI',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Elixiary AI - Cocktail Recipe Generator',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
     description: 'Generate unique cocktail recipes with AI!',
-    images: ['/og-image.png'],
   },
   robots: {
     index: true,
