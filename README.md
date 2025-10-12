@@ -23,9 +23,9 @@ Generate custom cocktail recipes by describing what you're in the mood for. Our 
 
 ### 💎 Pro Tier
 - ✨ **Unlimited Recipes** - Generate & save as many as you want
-- 🖼️ **AI-Generated Images** - Cocktail photos via Gemini Imagen (Coming Soon)
-- 📄 **PDF Export** - Beautiful formatted recipe cards (Coming Soon)
-- 🎨 **Advanced Customization** - Fine-tune complexity & flavors (Coming Soon)
+- 📄 **PDF Export** - Beautiful formatted recipe cards
+- 🎨 **Advanced Customization** - Fine-tune complexity & flavors
+- 🖼️ **Recipe Visuals** - Unique gradient visuals for each cocktail
 - 🎯 **Priority Support** - Get help faster
 
 ### 🔥 Special Offer

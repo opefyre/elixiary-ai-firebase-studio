@@ -304,15 +304,15 @@ export default function AccountPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span>AI-generated cocktail images</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                   <span>PDF export with beautiful formatting</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                   <span>Advanced customization options</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  <span>Recipe visuals & theming</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary" />
