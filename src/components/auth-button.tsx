@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { LogIn, LogOut, Crown, Settings, CreditCard, TrendingUp } from 'lucide-react';
+import { LogIn, LogOut, Crown, Settings, CreditCard, BookOpen, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 import Link from 'next/link';
 import {
@@ -24,7 +26,44 @@ import {
 export function AuthButton() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
-  const { isPro, remainingGenerations, subscription } = useSubscription();
+  const { isPro, subscription } = useSubscription();
+  const { toast } = useToast();
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+
+  const handleManageBilling = async () => {
+    if (!subscription?.stripeCustomerId) {
+      toast({
+        title: 'Error',
+        description: 'No billing information found.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoadingPortal(true);
+    try {
+      const response = await fetch('/api/stripe/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.details || data.error || 'Failed to create portal session');
+      }
+
+      window.location.href = data.url;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to open billing portal.',
+        variant: 'destructive',
+      });
+      setIsLoadingPortal(false);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -83,7 +122,7 @@ export function AuthButton() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-72" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col space-y-1">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">{user.displayName || 'User'}</p>
               {isPro && (
@@ -98,51 +137,34 @@ export function AuthButton() {
         </DropdownMenuLabel>
         
         <DropdownMenuSeparator />
-        
-        {/* Usage Stats */}
-        <div className="px-2 py-2">
-          <div className="text-xs text-muted-foreground mb-2">This Month</div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Recipes</span>
-              <span className="font-medium">
-                {isPro ? '∞' : `${remainingGenerations} left`}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Saved</span>
-              <span className="font-medium">
-                {subscription?.recipeCount || 0}
-                {!isPro && '/20'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
           <Link href="/account" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
-            <span>Account Settings</span>
+            <span>My Account</span>
           </Link>
         </DropdownMenuItem>
 
-        {isPro && (
-          <DropdownMenuItem asChild>
-            <Link href="/pricing" className="cursor-pointer">
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Billing</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem asChild>
+          <Link href="/recipes" className="cursor-pointer">
+            <BookOpen className="mr-2 h-4 w-4" />
+            <span>My Recipes</span>
+          </Link>
+        </DropdownMenuItem>
 
-        {!isPro && (
-          <DropdownMenuItem asChild>
-            <Link href="/pricing" className="cursor-pointer">
-              <Crown className="mr-2 h-4 w-4 text-yellow-500" />
-              <span>Upgrade to Pro</span>
-            </Link>
+        {isPro && subscription?.stripeCustomerId && (
+          <DropdownMenuItem onClick={handleManageBilling} disabled={isLoadingPortal}>
+            {isLoadingPortal ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Manage Billing</span>
+              </>
+            )}
           </DropdownMenuItem>
         )}
 

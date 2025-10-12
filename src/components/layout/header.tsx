@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { AuthButton } from "@/components/auth-button";
-import { BookOpen } from "lucide-react";
+import { Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
@@ -14,9 +14,9 @@ export function Header() {
         </Link>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/recipes" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">My Recipes</span>
+            <Link href="/pricing" className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-yellow-500" />
+              <span className="hidden sm:inline">Pricing</span>
             </Link>
           </Button>
           <AuthButton />
