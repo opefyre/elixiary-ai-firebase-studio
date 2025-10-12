@@ -11,12 +11,13 @@ import {
   DialogTitle,
   DialogDescription
 } from '@/components/ui/dialog';
-import { Trash2, Eye, Clock, Share2, Copy, Check, Tag, X, Star, FileDown } from 'lucide-react';
+import { Trash2, Eye, Clock, Share2, Copy, Check, Tag, X, Star, FileDown, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { SavedRecipe, useRecipes } from '@/firebase/firestore/use-recipes';
 import { useSubscription } from '@/firebase';
 import ReactMarkdown from 'react-markdown';
 import { useToast } from '@/hooks/use-toast';
 import { exportRecipeToPDF } from '@/lib/pdf-exporter';
+import { generateCocktailGradient } from '@/lib/generate-cocktail-gradient';
 
 interface RecipeCardProps {
   recipe: SavedRecipe;
@@ -29,8 +30,9 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
   const [copied, setCopied] = useState(false);
   const [isEditingTags, setIsEditingTags] = useState(false);
   const [newTag, setNewTag] = useState('');
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const { toast } = useToast();
-  const { updateRecipeTags, toggleFavorite } = useRecipes();
+  const { updateRecipeTags, toggleFavorite, updateRecipeImage } = useRecipes();
   const { isPro } = useSubscription();
 
   const handleDelete = async () => {
@@ -51,6 +53,52 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         variant: "destructive",
       });
       setIsDeleting(false);
+    }
+  };
+
+  const handleGenerateImage = async () => {
+    if (!isPro) {
+      toast({
+        title: 'Pro Feature',
+        description: 'Image generation is available for Pro members only.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (recipe.imageUrl) {
+      toast({
+        title: 'Image Already Generated',
+        description: 'This recipe already has an image.',
+      });
+      return;
+    }
+
+    setIsGeneratingImage(true);
+    try {
+      // Generate beautiful gradient image
+      const imageDataUrl = generateCocktailGradient({
+        name: recipe.recipeName || 'Untitled Recipe',
+        ingredients: recipe.ingredients || '',
+        glassware: ('glassware' in recipe && recipe.glassware) || 'Standard glass',
+        difficultyLevel: ('difficultyLevel' in recipe && recipe.difficultyLevel) || 'Medium',
+      });
+
+      // Save image to recipe
+      await updateRecipeImage(recipe.id, imageDataUrl);
+
+      toast({
+        title: 'Image Generated!',
+        description: 'Your cocktail now has a beautiful visual.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Generation Failed',
+        description: 'Failed to generate image. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingImage(false);
     }
   };
 
@@ -400,6 +448,27 @@ ${window.location.origin}`.trim();
                   </>
                 )}
               </Button>
+              {isPro && !recipe.imageUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateImage}
+                  disabled={isGeneratingImage}
+                  className="gap-2"
+                >
+                  {isGeneratingImage ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="h-4 w-4" />
+                      Image
+                    </>
+                  )}
+                </Button>
+              )}
               {isPro && (
                 <Button
                   variant="outline"
@@ -422,6 +491,17 @@ ${window.location.origin}`.trim();
               </Button>
             </div>
           </DialogHeader>
+
+          {/* Recipe Image */}
+          {recipe.imageUrl && (
+            <div className="relative w-full h-48 rounded-lg overflow-hidden border border-primary/20">
+              <img 
+                src={recipe.imageUrl} 
+                alt={recipe.recipeName} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
 
           <div className="space-y-6 pt-6 border-t">
             {recipe.ingredients && (

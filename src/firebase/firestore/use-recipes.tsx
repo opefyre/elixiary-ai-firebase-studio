@@ -24,6 +24,8 @@ export interface SavedRecipe extends GenerateCocktailRecipeOutput {
   tags?: string[];
   collection?: string;
   isFavorite?: boolean;
+  imageUrl?: string;
+  imagePrompt?: string;
 }
 
 export function useRecipes() {
@@ -114,6 +116,16 @@ export function useRecipes() {
     await updateDoc(recipeRef, { isFavorite });
   };
 
+  const updateRecipeImage = async (recipeId: string, imageUrl: string, imagePrompt?: string) => {
+    if (!user) throw new Error('User must be authenticated');
+
+    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
+    await updateDoc(recipeRef, { 
+      imageUrl,
+      ...(imagePrompt && { imagePrompt }),
+    });
+  };
+
   return {
     recipes,
     isLoading,
@@ -123,6 +135,7 @@ export function useRecipes() {
     updateRecipeTags,
     updateRecipeCollection,
     toggleFavorite,
+    updateRecipeImage,
   };
 }
 
