@@ -94,33 +94,19 @@ export default function AccountPage() {
       ? Math.min(100, (subscription.recipeCount / limits.maxSavedRecipes) * 100)
       : 0;
 
-  // Generate mock daily data for visualization
-  const dailyGenerationData = useMemo(() => {
-    const totalGenerated = subscription?.recipesGeneratedThisMonth || 0;
-    const data: { date: string; count: number }[] = [];
+  // Generate daily data for visualization
+  const dailyGenerationData: { date: string; count: number }[] = [];
+  const totalGenerated = subscription?.recipesGeneratedThisMonth || 0;
+  
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
     
-    // Create 7 days of data
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
-      return date.toISOString().split('T')[0];
-    });
-
-    // Distribute total across days
-    let remaining = totalGenerated;
-    days.forEach((date, index) => {
-      const isLastDay = index === days.length - 1;
-      const weight = (index + 1) / 28; // Recent days weighted more
-      const count = isLastDay 
-        ? remaining 
-        : Math.min(remaining, Math.floor(totalGenerated * weight));
-      
-      data.push({ date, count });
-      remaining -= count;
-    });
-    
-    return data;
-  }, [subscription?.recipesGeneratedThisMonth]);
+    // Simple distribution: most on recent days
+    const count = i === 0 ? Math.ceil(totalGenerated * 0.3) : Math.floor(totalGenerated * 0.1);
+    dailyGenerationData.push({ date: dateStr, count: Math.min(count, totalGenerated) });
+  }
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8 pt-20 md:py-12 md:pt-24">
