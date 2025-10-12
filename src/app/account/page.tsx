@@ -94,25 +94,30 @@ export default function AccountPage() {
       ? Math.min(100, (subscription.recipeCount / limits.maxSavedRecipes) * 100)
       : 0;
 
-  // Generate mock daily data for visualization (in production, track this in Firestore)
+  // Generate mock daily data for visualization
   const dailyGenerationData = useMemo(() => {
-    const data = [];
     const totalGenerated = subscription?.recipesGeneratedThisMonth || 0;
+    const data: { date: string; count: number }[] = [];
     
-    // Simple distribution across last 7 days
-    for (let i = 6; i >= 0; i--) {
+    // Create 7 days of data
+    const days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      date.setDate(date.getDate() - (6 - i));
+      return date.toISOString().split('T')[0];
+    });
+
+    // Distribute total across days
+    let remaining = totalGenerated;
+    days.forEach((date, index) => {
+      const isLastDay = index === days.length - 1;
+      const weight = (index + 1) / 28; // Recent days weighted more
+      const count = isLastDay 
+        ? remaining 
+        : Math.min(remaining, Math.floor(totalGenerated * weight));
       
-      // Distribute total across days (more recent = more activity)
-      const weight = (7 - i) / 28; // Recent days have more weight
-      const count = i === 0 
-        ? Math.max(0, totalGenerated - data.reduce((sum, d) => sum + d.count, 0))
-        : Math.floor(totalGenerated * weight);
-      
-      data.push({ date: dateStr, count });
-    }
+      data.push({ date, count });
+      remaining -= count;
+    });
     
     return data;
   }, [subscription?.recipesGeneratedThisMonth]);
