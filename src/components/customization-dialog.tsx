@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Settings2, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 
 export interface CustomizationOptions {
   complexity?: 'simple' | 'moderate' | 'complex';
@@ -34,6 +35,7 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
   const [alcoholLevel, setAlcoholLevel] = useState<'low' | 'medium' | 'strong'>('medium');
   const [sweetness, setSweetness] = useState<'dry' | 'balanced' | 'sweet'>('balanced');
   const [dietary, setDietary] = useState<string[]>([]);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const dietaryOptions = [
     { id: 'vegan', label: 'Vegan' },
@@ -67,25 +69,31 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
     );
   };
 
+  const handleButtonClick = () => {
+    if (!isPro) {
+      setShowUpgradeDialog(true);
+    } else {
+      setIsOpen(true);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="gap-2"
-          disabled={!isPro}
-        >
-          <Settings2 className="h-4 w-4" />
-          Customize
-          {isPro ? (
-            <Badge variant="secondary" className="ml-1 gap-1 px-1.5">
-              <Crown className="h-3 w-3" />
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="ml-1">Pro</Badge>
-          )}
-        </Button>
-      </DialogTrigger>
+    <>
+      <Button
+        variant="outline"
+        className="gap-2"
+        onClick={handleButtonClick}
+      >
+        <Settings2 className="h-4 w-4" />
+        Customize
+        {!isPro && (
+          <Badge variant="secondary" className="ml-1 gap-1 px-1.5">
+            <Crown className="h-3 w-3" />
+          </Badge>
+        )}
+      </Button>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -217,6 +225,15 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
         </div>
       </DialogContent>
     </Dialog>
+
+      <FeatureUpgradeDialog
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        featureName="Advanced Customization"
+        featureDescription="Fine-tune your recipes with advanced options: complexity levels, alcohol strength, sweetness preferences, and dietary restrictions."
+        featureIcon={<Settings2 className="h-8 w-8 text-white" />}
+      />
+    </>
   );
 }
 
