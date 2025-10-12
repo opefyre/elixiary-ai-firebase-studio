@@ -18,11 +18,11 @@ Generate custom cocktail recipes by describing what you're in the mood for. Our 
 - 🔍 **Search & Filter** - Find recipes by ingredients or tags
 - 🏷️ **Custom Tags** - Organize recipes your way
 - ⭐ **Favorites** - Star your best recipes
-- 🛒 **Smart Shopping Lists** - Auto-sum ingredients from multiple recipes
-- 📤 **Share & Export** - Copy or share recipes instantly
+- 📤 **Share & Copy** - Share recipes instantly
 
 ### 💎 Pro Tier
 - ✨ **Unlimited Recipes** - Generate & save as many as you want
+- 🛒 **Smart Shopping Lists** - Auto-sum ingredients from multiple recipes
 - 📄 **PDF Export** - Beautiful formatted recipe cards
 - 🎨 **Advanced Customization** - Fine-tune complexity & flavors
 - 🖼️ **Recipe Visuals** - Unique gradient visuals for each cocktail

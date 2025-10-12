@@ -186,11 +186,15 @@ function PricingContent() {
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Shopping list generator</span>
+                <span>Search & filter recipes</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <span>Tags & collections</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Share & copy recipes</span>
               </li>
             </ul>
           </CardContent>
@@ -319,6 +323,10 @@ function PricingContent() {
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <span className="font-medium">Unlimited saved recipes</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Smart shopping list generator</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />

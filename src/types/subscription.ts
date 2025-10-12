@@ -49,6 +49,7 @@ export interface UsageLimits {
   canGenerateImages: boolean;
   canExportPDF: boolean;
   canUseAdvancedCustomization: boolean;
+  canUseShoppingList: boolean;
 }
 
 export const FREE_TIER_LIMITS: UsageLimits = {
@@ -57,6 +58,7 @@ export const FREE_TIER_LIMITS: UsageLimits = {
   canGenerateImages: false,
   canExportPDF: false,
   canUseAdvancedCustomization: false,
+  canUseShoppingList: false,
 };
 
 export const PRO_TIER_LIMITS: UsageLimits = {
@@ -65,6 +67,7 @@ export const PRO_TIER_LIMITS: UsageLimits = {
   canGenerateImages: true,
   canExportPDF: true,
   canUseAdvancedCustomization: true,
+  canUseShoppingList: true,
 };
 
 export function getLimitsForTier(tier: SubscriptionTier): UsageLimits {

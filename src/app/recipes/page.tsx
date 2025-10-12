@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useUser, useRecipes } from '@/firebase';
-import { Loader2, BookOpen, Search, Filter, X, ShoppingCart, Star, Tag } from 'lucide-react';
+import { useUser, useRecipes, useSubscription } from '@/firebase';
+import { Loader2, BookOpen, Search, Filter, X, ShoppingCart, Star, Tag, Crown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { RecipeCard } from '@/components/recipe-card';
 import { ShoppingListDialog } from '@/components/shopping-list-dialog';
@@ -13,6 +15,8 @@ import { ShoppingListDialog } from '@/components/shopping-list-dialog';
 export default function RecipesPage() {
   const { user, isUserLoading } = useUser();
   const { recipes, isLoading, deleteRecipe } = useRecipes();
+  const { isPro } = useSubscription();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterGlassware, setFilterGlassware] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string>('all');
@@ -158,6 +162,14 @@ export default function RecipesPage() {
                   <Button
                     variant="outline"
                     onClick={() => {
+                      if (!isPro) {
+                        toast({
+                          title: 'Pro Feature',
+                          description: 'Shopping list is available for Pro members only.',
+                          variant: 'destructive',
+                        });
+                        return;
+                      }
                       setSelectedRecipeIds(new Set());
                       setShowShoppingList(true);
                     }}
@@ -165,7 +177,12 @@ export default function RecipesPage() {
                   >
                     <ShoppingCart className="h-4 w-4" />
                     <span className="hidden sm:inline">Shopping List</span>
-                    {selectedRecipeIds.size > 0 && (
+                    {!isPro && (
+                      <Badge variant="secondary" className="ml-1 h-4 px-1">
+                        <Crown className="h-3 w-3" />
+                      </Badge>
+                    )}
+                    {isPro && selectedRecipeIds.size > 0 && (
                       <span className="ml-1 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
                         {selectedRecipeIds.size}
                       </span>
