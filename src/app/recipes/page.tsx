@@ -7,22 +7,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { RecipeCard } from '@/components/recipe-card';
 import { ShoppingListDialog } from '@/components/shopping-list-dialog';
+import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 
 export default function RecipesPage() {
   const { user, isUserLoading } = useUser();
   const { recipes, isLoading, deleteRecipe } = useRecipes();
   const { isPro } = useSubscription();
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterGlassware, setFilterGlassware] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [selectedRecipeIds, setSelectedRecipeIds] = useState<Set<string>>(new Set());
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   // Filter and search recipes
   const filteredRecipes = useMemo(() => {
@@ -163,11 +163,7 @@ export default function RecipesPage() {
                     variant="outline"
                     onClick={() => {
                       if (!isPro) {
-                        toast({
-                          title: 'Pro Feature',
-                          description: 'Shopping list is available for Pro members only.',
-                          variant: 'destructive',
-                        });
+                        setShowUpgradeDialog(true);
                         return;
                       }
                       setSelectedRecipeIds(new Set());
@@ -350,6 +346,14 @@ export default function RecipesPage() {
         isOpen={showShoppingList}
         onClose={() => setShowShoppingList(false)}
         onSelectionChange={setSelectedRecipeIds}
+      />
+
+      <FeatureUpgradeDialog
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        featureName="Shopping List"
+        featureDescription="Generate smart shopping lists from your recipes with auto-summed quantities. Perfect for grocery shopping!"
+        featureIcon={<ShoppingCart className="h-8 w-8 text-white" />}
       />
     </div>
   );

@@ -18,6 +18,7 @@ import ReactMarkdown from 'react-markdown';
 import { useToast } from '@/hooks/use-toast';
 import { exportRecipeToPDF } from '@/lib/pdf-exporter';
 import { generateCocktailGradient } from '@/lib/generate-cocktail-gradient';
+import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 
 interface RecipeCardProps {
   recipe: SavedRecipe;
@@ -31,6 +32,8 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
   const [isEditingTags, setIsEditingTags] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [upgradeFeature, setUpgradeFeature] = useState<{name: string; description: string; icon: React.ReactNode} | null>(null);
   const { toast } = useToast();
   const { updateRecipeTags, toggleFavorite, updateRecipeImage } = useRecipes();
   const { isPro } = useSubscription();
@@ -58,11 +61,12 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
 
   const handleGenerateImage = async () => {
     if (!isPro) {
-      toast({
-        title: 'Pro Feature',
-        description: 'Image generation is available for Pro members only.',
-        variant: 'destructive',
+      setUpgradeFeature({
+        name: 'Recipe Visuals',
+        description: 'Generate beautiful, unique gradient visuals for your cocktails based on ingredients and characteristics.',
+        icon: <ImageIcon className="h-8 w-8 text-white" />,
       });
+      setShowUpgradeDialog(true);
       return;
     }
 
@@ -104,11 +108,12 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
 
   const handleExportPDF = () => {
     if (!isPro) {
-      toast({
-        title: 'Pro Feature',
-        description: 'PDF export is available for Pro members only.',
-        variant: 'destructive',
+      setUpgradeFeature({
+        name: 'PDF Export',
+        description: 'Export your recipes as beautifully formatted PDFs with colors, sections, and professional styling.',
+        icon: <FileDown className="h-8 w-8 text-white" />,
       });
+      setShowUpgradeDialog(true);
       return;
     }
 
@@ -558,6 +563,19 @@ ${window.location.origin}`.trim();
           </div>
         </DialogContent>
       </Dialog>
+
+      {upgradeFeature && (
+        <FeatureUpgradeDialog
+          isOpen={showUpgradeDialog}
+          onClose={() => {
+            setShowUpgradeDialog(false);
+            setUpgradeFeature(null);
+          }}
+          featureName={upgradeFeature.name}
+          featureDescription={upgradeFeature.description}
+          featureIcon={upgradeFeature.icon}
+        />
+      )}
     </>
   );
 }
