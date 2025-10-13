@@ -80,6 +80,7 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
   return (
     <>
       <Button
+        type="button"
         variant="outline"
         className="gap-2"
         onClick={handleButtonClick}
