@@ -172,6 +172,15 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     return url;
   };
 
+  const formatTagText = (tag: string) => {
+    // Remove 'style' prefix if it exists and format to proper case
+    let formatted = tag.replace(/^style\s+/i, '').replace(/_/g, ' ');
+    // Convert to title case
+    return formatted.replace(/\w\S*/g, (txt) => 
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 pt-24">
       {/* Back Button */}
@@ -203,78 +212,75 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       {/* Recipe Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {recipes.map((recipe) => (
-          <Card key={recipe.id} className="group hover:shadow-lg transition-shadow">
-            <CardContent className="p-0">
-              {/* Recipe Image */}
-              <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden">
-                {recipe.imageUrl ? (
-                  <Image
-                    src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
-                    alt={recipe.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : null}
-                
-                {/* Fallback placeholder - only show if no image */}
-                {!recipe.imageUrl && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                    <Martini className="h-16 w-16 text-primary/30" />
-                  </div>
-                )}
-                
-                {/* Difficulty Badge */}
-                <div className="absolute top-2 right-2">
-                  <Badge className={getDifficultyColor(recipe.difficulty)}>
-                    {recipe.difficulty}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Recipe Info */}
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                  {recipe.name}
-                </h3>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    {recipe.prepTime}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Zap className="h-4 w-4" />
-                    {recipe.glassware}
-                  </div>
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {recipe.tags.slice(0, 3).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag.replace(/_/g, ' ')}
-                    </Badge>
-                  ))}
-                  {recipe.tags.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{recipe.tags.length - 3}
-                    </Badge>
+          <Link key={recipe.id} href={`/curated/recipe/${recipe.id}`} className="block">
+            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
+              <CardContent className="p-0 h-full flex flex-col">
+                {/* Recipe Image */}
+                <div className="relative h-64 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
+                  {recipe.imageUrl ? (
+                    <Image
+                      src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
+                      alt={recipe.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                      <Martini className="h-16 w-16 text-primary/30" />
+                    </div>
                   )}
+                  
+                  {/* Difficulty Badge */}
+                  <div className="absolute top-3 right-3">
+                    <Badge className={getDifficultyColor(recipe.difficulty)}>
+                      {recipe.difficulty}
+                    </Badge>
+                  </div>
                 </div>
 
-                {/* View Recipe Button */}
-                <Button asChild className="w-full">
-                  <Link href={`/curated/recipe/${recipe.id}`}>
-                    View Recipe
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Recipe Info */}
+                <div className="p-4 flex flex-col flex-grow">
+                  <h3 className="font-semibold text-lg mb-3 line-clamp-2 flex-grow">
+                    {recipe.name}
+                  </h3>
+                  
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="text-xs">{recipe.prepTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Zap className="h-3.5 w-3.5" />
+                      <span className="text-xs">{recipe.glassware}</span>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1 mb-3 mt-auto">
+                    {recipe.tags.slice(0, 2).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
+                        {formatTagText(tag)}
+                      </Badge>
+                    ))}
+                    {recipe.tags.length > 2 && (
+                      <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
+                        +{recipe.tags.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Subtle click indicator */}
+                  <div className="flex items-center justify-center text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <span>Click to view details</span>
+                    <ChevronRight className="h-3 w-3 ml-1" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 

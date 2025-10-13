@@ -262,6 +262,15 @@ export default function CuratedPage() {
     return <Martini className="h-5 w-5" />;
   };
 
+  const formatTagText = (tag: string) => {
+    // Remove 'style' prefix if it exists and format to proper case
+    let formatted = tag.replace(/^style\s+/i, '').replace(/_/g, ' ');
+    // Convert to title case
+    return formatted.replace(/\w\S*/g, (txt) => 
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+  };
+
   const getGoogleDriveThumbnail = (url: string) => {
     if (!url) return null;
     
@@ -474,7 +483,7 @@ export default function CuratedPage() {
                   <div className="flex flex-wrap gap-1 mb-3 mt-auto">
                     {recipe.tags.slice(0, 2).map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
-                        {tag.replace(/_/g, ' ')}
+                        {formatTagText(tag)}
                       </Badge>
                     ))}
                     {recipe.tags.length > 2 && (

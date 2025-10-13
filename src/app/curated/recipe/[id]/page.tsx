@@ -153,6 +153,15 @@ Source: ${recipe.source}
     return url;
   };
 
+  const formatTagText = (tag: string) => {
+    // Remove 'style' prefix if it exists and format to proper case
+    let formatted = tag.replace(/^style\s+/i, '').replace(/_/g, ' ');
+    // Convert to title case
+    return formatted.replace(/\w\S*/g, (txt) => 
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -315,7 +324,7 @@ Source: ${recipe.source}
               <div className="flex flex-wrap gap-2">
                 {recipe.tags.map((tag) => (
                   <Badge key={tag} variant="secondary">
-                    {tag.replace(/_/g, ' ')}
+                    {formatTagText(tag)}
                   </Badge>
                 ))}
               </div>
@@ -330,43 +339,41 @@ Source: ${recipe.source}
           <h2 className="text-2xl font-bold mb-6">More {recipe.category}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {relatedRecipes.map((relatedRecipe) => (
-              <Card key={relatedRecipe.id} className="group hover:shadow-lg transition-shadow">
-                <CardContent className="p-0">
-                  <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden">
-                    {relatedRecipe.imageUrl ? (
-                      <Image
-                        src={getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl}
-                        alt={relatedRecipe.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : null}
-                    
-                    {/* Fallback placeholder */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                      <Martini className="h-8 w-8 text-primary/30" />
+              <Link key={relatedRecipe.id} href={`/curated/recipe/${relatedRecipe.id}`} className="block">
+                <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
+                  <CardContent className="p-0 h-full flex flex-col">
+                    <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
+                      {relatedRecipe.imageUrl ? (
+                        <Image
+                          src={getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl}
+                          alt={relatedRecipe.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                          <Martini className="h-8 w-8 text-primary/30" />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <div className="p-3">
-                    <h3 className="font-semibold text-sm mb-2 line-clamp-2">
-                      {relatedRecipe.name}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                      <Clock className="h-3 w-3" />
-                      {relatedRecipe.prepTime}
+                    <div className="p-3 flex flex-col flex-grow">
+                      <h3 className="font-semibold text-sm mb-2 line-clamp-2 flex-grow">
+                        {relatedRecipe.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                        <Clock className="h-3 w-3" />
+                        {relatedRecipe.prepTime}
+                      </div>
+                      <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        Click to view details
+                      </div>
                     </div>
-                    <Button asChild size="sm" className="w-full">
-                      <Link href={`/curated/recipe/${relatedRecipe.id}`}>
-                        View Recipe
-                        <ChevronRight className="h-3 w-3 ml-1" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
