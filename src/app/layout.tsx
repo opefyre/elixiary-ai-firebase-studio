@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
 import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { AuthGuard } from "@/components/auth-guard";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -101,7 +102,9 @@ export default function RootLayout({
             <div className="absolute top-1/3 right-[20%] h-28 w-28 animate-float text-primary/10">
               <Sprout className="h-full w-full" />
             </div>
-            <main id="main-content" className="relative z-10 flex-1">{children}</main>
+            <main id="main-content" className="relative z-10 flex-1">
+              <AuthGuard>{children}</AuthGuard>
+            </main>
             <Footer />
           </div>
           <Toaster />

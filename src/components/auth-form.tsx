@@ -101,7 +101,10 @@ export function AuthForm() {
       // Send email verification
       await sendEmailVerification(userCredential.user);
       
-      setSuccessMessage('Account created! Please check your email to verify your account.');
+      // Sign out the user immediately after signup
+      await auth.signOut();
+      
+      setSuccessMessage('Account created! Please check your email to verify your account before signing in.');
       
       // Clear the form
       signUpForm.reset();
