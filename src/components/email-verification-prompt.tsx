@@ -27,7 +27,9 @@ export function EmailVerificationPrompt() {
     
     setIsSending(true);
     try {
-      await sendEmailVerification(user);
+      await sendEmailVerification(user, {
+        url: `${window.location.origin}/login?verified=true`
+      });
       toast({
         title: 'Verification email sent',
         description: 'Please check your email and click the verification link.',

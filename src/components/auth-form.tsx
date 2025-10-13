@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/firebase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const signInSchema = z.object({
@@ -55,6 +55,8 @@ export function AuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const signInForm = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -65,6 +67,14 @@ export function AuthForm() {
     resolver: zodResolver(signUpSchema),
     defaultValues: { email: '', password: '', confirmPassword: '' },
   });
+
+  // Check for verification success in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('verified') === 'true') {
+      setSuccessMessage('Email verified successfully! You can now sign in.');
+    }
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -98,13 +108,14 @@ export function AuthForm() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       
-      // Send email verification
-      await sendEmailVerification(userCredential.user);
+      // Send email verification with custom action URL
+      await sendEmailVerification(userCredential.user, {
+        url: `${window.location.origin}/login?verified=true`
+      });
       
-      // Sign out the user immediately after signup
-      await auth.signOut();
-      
-      setSuccessMessage('Account created! Please check your email to verify your account before signing in.');
+      // Show verification success page instead of signing out
+      setUserEmail(data.email);
+      setShowVerificationSuccess(true);
       
       // Clear the form
       signUpForm.reset();
@@ -148,6 +159,56 @@ export function AuthForm() {
       Sign in with Google
     </Button>
   );
+
+  const VerificationSuccessCard = () => (
+    <Card className="w-full max-w-md mx-auto">
+      <CardContent className="p-8 text-center">
+        <div className="mx-auto mb-6 h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+          <CheckCircle className="h-8 w-8 text-green-600" />
+        </div>
+        
+        <h2 className="text-2xl font-bold mb-4">Check Your Email!</h2>
+        
+        <div className="space-y-4 mb-6">
+          <p className="text-muted-foreground">
+            We've sent a verification email to:
+          </p>
+          <p className="font-semibold text-lg">{userEmail}</p>
+          <p className="text-sm text-muted-foreground">
+            Please check your inbox and click the verification link to activate your account.
+          </p>
+        </div>
+
+        <Alert className="mb-6">
+          <Mail className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Can't find the email?</strong> Check your spam folder. 
+            Verification emails are sent from <strong>noreply@elixiary.com</strong>
+          </AlertDescription>
+        </Alert>
+
+        <div className="space-y-3">
+          <Button 
+            onClick={() => setShowVerificationSuccess(false)}
+            variant="outline"
+            className="w-full"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Sign In
+          </Button>
+          
+          <p className="text-xs text-muted-foreground">
+            After verifying your email, you can sign in and start creating cocktails!
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Show verification success page if user just signed up
+  if (showVerificationSuccess) {
+    return <VerificationSuccessCard />;
+  }
 
   return (
     <Card>
