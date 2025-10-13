@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/firebase';
 import { Loader2, Mail, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { sendWelcomeEmail } from '@/app/actions/welcome-email';
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -81,7 +82,18 @@ export function AuthForm() {
     setError(null);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      
+      // Check if this is a new user (first time signing up)
+      if (result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
+        // This is a new user, send welcome email
+        try {
+          await sendWelcomeEmail(result.user.email!, result.user.displayName || undefined);
+        } catch (emailError) {
+          // Don't fail the sign-in if welcome email fails
+          console.error('Welcome email failed:', emailError);
+        }
+      }
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -112,6 +124,14 @@ export function AuthForm() {
       await sendEmailVerification(userCredential.user, {
         url: `${window.location.origin}/login?verified=true`
       });
+      
+      // Send welcome email
+      try {
+        await sendWelcomeEmail(data.email, userCredential.user.displayName || undefined);
+      } catch (emailError) {
+        // Don't fail the sign-up if welcome email fails
+        console.error('Welcome email failed:', emailError);
+      }
       
       // Show verification success page instead of signing out
       setUserEmail(data.email);
