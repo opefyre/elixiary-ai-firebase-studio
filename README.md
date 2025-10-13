@@ -57,7 +57,7 @@ npm install
 
 # Set environment variables
 # Create .env.local with:
-# - GEMINI_API_KEY=your_key
+# - GEMINI_API_KEY=SECRET
 # - Firebase config
 # - Stripe keys (for Pro features)
 
@@ -83,10 +83,10 @@ src/
 
 ```env
 # Required
-GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=SECRET
 
 # Firebase (required)
-NEXT_PUBLIC_FIREBASE_CONFIG=your_firebase_config_json
+NEXT_PUBLIC_FIREBASE_CONFIG=SECRET
 
 # Stripe (optional - for Pro features)
 STRIPE_SECRET_KEY=sk_...
