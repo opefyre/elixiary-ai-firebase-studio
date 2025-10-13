@@ -1,137 +1,188 @@
-# Elixiary AI 🍸
+# 🍸 Elixiary AI
 
-**AI-powered cocktail recipe generator** - Create unique, personalized cocktail recipes with artificial intelligence.
+**AI-Powered Cocktail Recipe Generator**
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://ai.elixiary.com/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist what you're in the mood for, and it will create a custom cocktail recipe just for you.
 
-## 🌐 [Try it Live →](https://ai.elixiary.com/)
-
-Generate custom cocktail recipes by describing what you're in the mood for. Our AI mixologist will create unique recipes with detailed instructions, ingredient lists, and professional tips.
-
-## ✨ Features
-
-### 🆓 Free Tier
-- 🤖 **AI Recipe Generation** - 10 recipes/month powered by Google Gemini 2.5
-- 💾 **Save Recipes** - Store up to 20 recipes
-- 🔍 **Search & Filter** - Find recipes by ingredients or tags
-- 🏷️ **Custom Tags** - Organize recipes your way
-- ⭐ **Favorites** - Star your best recipes
-- 📤 **Share & Copy** - Share recipes instantly
-
-### 💎 Pro Tier
-- ✨ **Unlimited Recipes** - Generate & save as many as you want
-- 🛒 **Smart Shopping Lists** - Auto-sum ingredients from multiple recipes
-- 📄 **PDF Export** - Beautiful formatted recipe cards
-- 🎨 **Advanced Customization** - Fine-tune complexity & flavors
-- 🖼️ **Recipe Visuals** - Unique gradient visuals for each cocktail
-- 🎯 **Priority Support** - Get help faster
-
-### 🔥 Special Offer
-**70% OFF for first 50 users!** 
-- Monthly: $1.49/month (reg. $4.99)
-- Annual: $14.99/year (reg. $49)
-
-## 🛠️ Tech Stack
-
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + Radix UI
-- **AI**: Google Genkit + Gemini 2.5 Flash
-- **Database**: Firebase Firestore
-- **Auth**: Firebase Authentication
-- **Payments**: Stripe
-- **Hosting**: Vercel
-- **Analytics**: Google Analytics
-
-## 🚀 Quick Start
-
-```bash
-# Clone repository
-git clone https://github.com/opefyre/elixiary-ai-firebase-studio.git
-cd elixiary-ai-firebase-studio
-
-# Install dependencies
-npm install
-
-# Set environment variables
-# Create .env.local with:
-# - GEMINI_API_KEY=SECRET
-# - Firebase config
-# - Stripe keys (for Pro features)
-
-# Run development server
-npm run dev
-```
-
-Visit `http://localhost:9002`
-
-## 🏗️ Project Structure
-
-```
-src/
-├── ai/              # Google Genkit AI flows
-├── app/             # Next.js App Router pages
-├── components/      # React components
-├── firebase/        # Firebase configuration & hooks
-├── lib/             # Utility functions
-└── types/           # TypeScript type definitions
-```
-
-## 🔐 Environment Variables
-
-```env
-# Required
-GEMINI_API_KEY=SECRET
-
-# Firebase (required)
-NEXT_PUBLIC_FIREBASE_CONFIG=SECRET
-
-# Stripe (optional - for Pro features)
-STRIPE_SECRET_KEY=sk_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_EARLY_BIRD_MONTHLY_PRICE_ID=price_...
-STRIPE_EARLY_BIRD_ANNUAL_PRICE_ID=price_...
-STRIPE_PRO_MONTHLY_PRICE_ID=price_...
-STRIPE_PRO_ANNUAL_PRICE_ID=price_...
-
-# Google Analytics (optional)
-NEXT_PUBLIC_GA_ID=G-...
-```
-
-## 📝 Available Scripts
-
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run typecheck    # Run TypeScript type checking
-```
-
-## 🔒 Security
-
-- Firebase Authentication for secure user management
-- Firestore security rules for data protection
-- Stripe webhook signature verification
-- Server-side subscription validation
-- No sensitive data in client-side code
-
-## 📄 License
-
-MIT License - feel free to use this project as you like.
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-## 📞 Support
-
-- **Website**: [ai.elixiary.com](https://ai.elixiary.com)
-- **Issues**: [GitHub Issues](https://github.com/opefyre/elixiary-ai-firebase-studio/issues)
+🌐 **Live App**: [ai.elixiary.com](https://ai.elixiary.com)
 
 ---
 
-Made with ❤️ using Next.js, Firebase, Stripe, and AI
+## ✨ Features
+
+### 🆓 **Free Tier**
+- Generate 10 cocktail recipes per month
+- Save up to 20 favorite recipes
+- Recipe search and filtering
+- Share recipes via copy/share API
+- Basic recipe customization
+
+### 👑 **Pro Tier** ($4.99/month)
+- **Unlimited** recipe generation
+- **Unlimited** recipe saves
+- **PDF Export** - Beautiful recipe downloads
+- **Advanced Customization** - Control complexity, alcohol level, sweetness, dietary preferences
+- **Shopping List Generator** - Smart ingredient lists with quantity summing
+- **Customer Portal** - Self-service billing management
+
+---
+
+## 🚀 Tech Stack
+
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Firebase Admin SDK
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Auth (Google OAuth)
+- **Payments**: Stripe (subscriptions)
+- **AI**: Google Gemini 2.5 Flash
+- **Deployment**: Vercel
+- **Analytics**: Google Analytics
+
+---
+
+## 🛠️ Development Setup
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- Firebase project
+- Stripe account
+- Google AI API key
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/opefyre/elixiary-ai-firebase-studio.git
+   cd elixiary-ai-firebase-studio
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Variables**
+   Create `.env.local`:
+   ```bash
+   # Firebase
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+   
+   # Google AI
+   GOOGLE_AI_API_KEY=your_gemini_api_key
+   
+   # Stripe (Test Mode)
+   STRIPE_SECRET_KEY=sk_test_...
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   
+   # Stripe Price IDs (Test)
+   STRIPE_EARLY_BIRD_MONTHLY_PRICE_ID=price_test_...
+   STRIPE_EARLY_BIRD_ANNUAL_PRICE_ID=price_test_...
+   STRIPE_PRO_MONTHLY_PRICE_ID=price_test_...
+   STRIPE_PRO_ANNUAL_PRICE_ID=price_test_...
+   ```
+
+4. **Run development server**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🔧 Production Setup
+
+### Stripe Live Mode
+
+1. **Complete Stripe account setup** (business info, bank details, verification)
+2. **Get live API keys** from [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
+3. **Create live products** using `scripts/setup-stripe-live.ts`:
+   ```bash
+   export STRIPE_SECRET_KEY=sk_live_your_key_here
+   npx tsx scripts/setup-stripe-live.ts
+   ```
+4. **Update Vercel environment variables** with live keys and price IDs
+5. **Configure live webhook** pointing to `https://ai.elixiary.com/api/stripe/webhook`
+6. **Redeploy** the application
+
+### Firebase Setup
+
+1. **Deploy Firestore rules**:
+   ```bash
+   firebase deploy --only firestore:rules
+   ```
+
+2. **Configure authorized domains** in Firebase Console:
+   - `ai.elixiary.com`
+   - `localhost` (for development)
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js app router
+│   ├── api/stripe/        # Stripe webhook & checkout
+│   ├── account/          # User account dashboard
+│   ├── pricing/          # Subscription pricing
+│   ├── privacy/          # Privacy policy & terms
+│   └── recipes/          # User's saved recipes
+├── components/            # React components
+│   ├── layout/           # Header, footer
+│   ├── ui/               # Reusable UI components
+│   └── ...               # Feature components
+├── firebase/             # Firebase configuration
+├── lib/                  # Utilities (PDF export, analytics)
+└── types/                # TypeScript definitions
+```
+
+---
+
+## 🔐 Security
+
+- **Firebase Security Rules**: Users can only access their own data
+- **Stripe Webhook Verification**: All webhooks verified with signatures
+- **Environment Variables**: All secrets stored securely in Vercel
+- **Authentication**: Google OAuth with Firebase Auth
+- **API Protection**: All routes require authentication
+
+---
+
+## 📊 Analytics & Monitoring
+
+- **Google Analytics**: Page views, user interactions
+- **Custom Events**: Recipe generation, subscriptions, feature usage
+- **Stripe Dashboard**: Payment monitoring, subscription analytics
+- **Firebase Console**: User data, error monitoring
+- **Vercel Analytics**: Performance, deployment monitoring
+
+---
+
+## 🚀 Deployment
+
+The app is automatically deployed to Vercel on every push to `main` branch.
+
+**Production URL**: https://ai.elixiary.com
+
+---
+
+## 📝 License
+
+This project is private and proprietary. All rights reserved.
+
+---
+
+## 🤝 Support
+
+- **Email**: hello@elixiary.com
+- **Website**: [ai.elixiary.com](https://ai.elixiary.com)
+
+---
+
+**Built with ❤️ for cocktail enthusiasts**
