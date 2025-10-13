@@ -49,12 +49,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@elixiary.com" className="hover:text-primary transition-colors">
+                <a href="mailto:hello@elixiary.com" className="hover:text-primary transition-colors">
                   Contact Support
                 </a>
               </li>
               <li>
-                <a href="mailto:feedback@elixiary.com" className="hover:text-primary transition-colors">
+                <a href="mailto:hello@elixiary.com" className="hover:text-primary transition-colors">
                   Send Feedback
                 </a>
               </li>
