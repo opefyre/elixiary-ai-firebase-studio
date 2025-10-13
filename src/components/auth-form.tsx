@@ -27,7 +27,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/firebase';
 import { Loader2, Mail, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { sendWelcomeEmail } from '@/app/actions/welcome-email';
 
 const signInSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -84,14 +83,23 @@ export function AuthForm() {
     try {
       const result = await signInWithPopup(auth, provider);
       
-      // Check if this is a new user (first time signing up)
-      if (result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
-        // This is a new user, send welcome email
+      // Check if this is a new user (first time sign-in)
+      const isNewUser = result.user.metadata.creationTime === result.user.metadata.lastSignInTime;
+      
+      if (isNewUser) {
+        // Send welcome email for new Google users
         try {
-          await sendWelcomeEmail(result.user.email!, result.user.displayName || undefined);
+          await fetch('/api/send-welcome-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: result.user.email,
+              displayName: result.user.displayName || result.user.email?.split('@')[0]
+            }),
+          });
         } catch (emailError) {
-          // Don't fail the sign-in if welcome email fails
-          console.error('Welcome email failed:', emailError);
+          console.error('Failed to send welcome email:', emailError);
+          // Don't fail sign-in if welcome email fails
         }
       }
     } catch (error: any) {
@@ -127,10 +135,17 @@ export function AuthForm() {
       
       // Send welcome email
       try {
-        await sendWelcomeEmail(data.email, userCredential.user.displayName || undefined);
+        await fetch('/api/send-welcome-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: data.email,
+            displayName: userCredential.user.displayName || data.email.split('@')[0]
+          }),
+        });
       } catch (emailError) {
-        // Don't fail the sign-up if welcome email fails
-        console.error('Welcome email failed:', emailError);
+        console.error('Failed to send welcome email:', emailError);
+        // Don't fail sign-up if welcome email fails
       }
       
       // Show verification success page instead of signing out
