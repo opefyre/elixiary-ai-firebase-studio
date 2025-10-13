@@ -9,6 +9,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  sendEmailVerification,
 } from 'firebase/auth';
 
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,7 @@ export function AuthForm() {
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const signInForm = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -92,8 +94,17 @@ export function AuthForm() {
   const onSignUpSubmit = async (data: SignUpFormValues) => {
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      
+      // Send email verification
+      await sendEmailVerification(userCredential.user);
+      
+      setSuccessMessage('Account created! Please check your email to verify your account.');
+      
+      // Clear the form
+      signUpForm.reset();
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -239,6 +250,15 @@ export function AuthForm() {
                 <Alert variant="destructive">
                   <AlertTitle>Authentication Failed</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="pt-4">
+                <Alert>
+                  <AlertTitle>Success!</AlertTitle>
+                  <AlertDescription>{successMessage}</AlertDescription>
                 </Alert>
               </div>
             )}
