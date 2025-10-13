@@ -34,8 +34,13 @@ const signInSchema = z.object({
 
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-  confirmPassword: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  password: z.string()
+    .min(8, { message: 'Password must be at least 8 characters.' })
+    .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter.' })
+    .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter.' })
+    .regex(/[0-9]/, { message: 'Password must contain at least one number.' })
+    .regex(/[^A-Za-z0-9]/, { message: 'Password must contain at least one special character.' }),
+  confirmPassword: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -271,11 +276,14 @@ export function AuthForm() {
                         <FormControl>
                           <Input
                             type="password"
-                            placeholder="At least 6 characters"
+                            placeholder="At least 8 chars, upper, lower, number, special"
                             {...field}
                             disabled={isLoading}
                           />
                         </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          Password must contain: 8+ characters, uppercase, lowercase, number, and special character
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
