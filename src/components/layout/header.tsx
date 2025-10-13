@@ -20,7 +20,7 @@ export function Header() {
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/privacy">Privacy</Link>
+            <Link href="/privacy">Privacy & Terms</Link>
           </Button>
           <AuthButton />
         </div>

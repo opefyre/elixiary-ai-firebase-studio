@@ -3,18 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Lock, Eye, Database, Users, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "Privacy Policy for Elixiary AI - How we collect, use, and protect your data",
+  title: "Privacy Policy & Terms",
+  description: "Privacy Policy and Terms of Service for Elixiary AI",
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 pt-24 max-w-4xl">
       <div className="text-center mb-8">
         <Shield className="h-16 w-16 mx-auto text-primary mb-4" />
-        <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
+        <h1 className="text-4xl font-bold mb-4">Privacy Policy & Terms</h1>
         <p className="text-muted-foreground text-lg">
-          Simple, transparent privacy policy. We respect your data.
+          Simple, transparent policies. We respect your data and want you to understand our terms.
         </p>
         <p className="text-sm text-muted-foreground mt-2">
           Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -33,8 +33,8 @@ export default function PrivacyPage() {
             <div>
               <h3 className="font-semibold mb-2">When You Sign In</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Your email address and name (from Google)</li>
-                <li>Your profile picture (optional)</li>
+                <li>Your email address and name (required from Google)</li>
+                <li>Your profile picture (required from Google)</li>
               </ul>
             </div>
             <div>
@@ -103,38 +103,10 @@ export default function PrivacyPage() {
             <div>
               <h3 className="font-semibold mb-2">How Long We Keep Data</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Your account data: Until you delete your account</li>
-                <li>Your recipes: Until you delete them or your account</li>
+                <li>Your recipes: Until you delete them</li>
                 <li>Usage stats: Anonymized after 2 years</li>
                 <li>Payment records: As required by law</li>
               </ul>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              Third-Party Services
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">Who We Work With</h3>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li><strong>Google:</strong> For sign-in and AI recipe generation</li>
-                <li><strong>Firebase:</strong> For storing your data securely</li>
-                <li><strong>Stripe:</strong> For processing Pro subscription payments</li>
-                <li><strong>Vercel:</strong> For hosting the app</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">We Don't Share Your Data</h3>
-              <p className="text-muted-foreground">
-                We don't sell, rent, or share your personal information with anyone else. 
-                The only exception is sharing your recipe prompts with Google's AI to generate recipes.
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -152,9 +124,43 @@ export default function PrivacyPage() {
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                 <li>View and download your saved recipes</li>
                 <li>Delete any recipe you've saved</li>
-                <li>Delete your entire account and all data</li>
                 <li>Cancel your Pro subscription anytime</li>
                 <li>Contact us with any privacy questions</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Terms of Service</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-2">Using Our Service</h3>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>You must be 18+ to use this service</li>
+                <li>You're responsible for your account and recipes</li>
+                <li>Don't use the service for illegal activities</li>
+                <li>We can modify or discontinue the service anytime</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">AI-Generated Content</h3>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>Recipes are generated by AI and may not be perfect</li>
+                <li>Always drink responsibly and follow safety guidelines</li>
+                <li>We're not responsible for any health effects</li>
+                <li>Check ingredients for allergies before consuming</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Payments & Refunds</h3>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>Pro subscriptions are billed monthly or annually</li>
+                <li>You can cancel anytime through your account</li>
+                <li>No refunds for partial periods</li>
+                <li>We may change pricing with 30 days notice</li>
               </ul>
             </div>
           </CardContent>
