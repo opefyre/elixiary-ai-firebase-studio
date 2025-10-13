@@ -163,6 +163,13 @@ export function AuthButton() {
           </Link>
         </DropdownMenuItem>
 
+        <DropdownMenuItem asChild>
+          <Link href="/pricing" className="cursor-pointer">
+            <Crown className="mr-2 h-4 w-4" />
+            <span>Pricing</span>
+          </Link>
+        </DropdownMenuItem>
+
         {isPro && subscription?.stripeCustomerId && (
           <DropdownMenuItem onClick={handleManageBilling} disabled={isLoadingPortal}>
             {isLoadingPortal ? (

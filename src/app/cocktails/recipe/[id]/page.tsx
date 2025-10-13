@@ -199,9 +199,9 @@ Source: ${recipe.source}
       {/* Back Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
-          <Link href="/curated">
+          <Link href="/cocktails">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Curated Recipes
+            Back to Cocktails
           </Link>
         </Button>
       </div>
@@ -332,7 +332,7 @@ Source: ${recipe.source}
           <h2 className="text-2xl font-bold mb-6">More {recipe.category}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {relatedRecipes.map((relatedRecipe) => (
-              <Link key={relatedRecipe.id} href={`/curated/recipe/${relatedRecipe.id}`} className="block">
+              <Link key={relatedRecipe.id} href={`/cocktails/recipe/${relatedRecipe.id}`} className="block">
                 <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                   <CardContent className="p-0 h-full flex flex-col">
                     <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">

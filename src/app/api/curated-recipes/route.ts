@@ -12,62 +12,50 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const difficulty = searchParams.get('difficulty');
     const search = searchParams.get('search');
-    const tags = searchParams.get('tags')?.split(',');
-    const moods = searchParams.get('moods')?.split(',');
-    const sortBy = searchParams.get('sortBy') || 'name';
-    const sortOrder = searchParams.get('sortOrder') || 'asc';
+    const tags = searchParams.get('tags')?.split(',').filter(Boolean);
 
-    // Build query
-    let query = adminDb.collection('curated-recipes');
+    // Get all recipes and filter client-side to avoid complex Firestore indexes
+    const allRecipesSnapshot = await adminDb.collection('curated-recipes')
+      .orderBy('name', 'asc')
+      .get();
 
-    // Apply filters
-    if (category) {
-      query = query.where('categoryId', '==', category);
-    }
-    if (difficulty) {
-      query = query.where('difficulty', '==', difficulty);
-    }
-    if (tags && tags.length > 0) {
-      query = query.where('tags', 'array-contains-any', tags);
-    }
-    if (moods && moods.length > 0) {
-      query = query.where('moods', 'array-contains-any', moods);
-    }
-
-    // Apply sorting
-    query = query.orderBy(sortBy, sortOrder as 'asc' | 'desc');
-
-    // Apply pagination
-    const offset = (page - 1) * limit;
-    query = query.offset(offset).limit(limit);
-
-    // Execute query
-    const snapshot = await query.get();
-    const recipes = snapshot.docs.map(doc => ({
+    let recipes = allRecipesSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
 
-    // If search is provided, filter results client-side
-    let filteredRecipes = recipes;
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredRecipes = recipes.filter(recipe => 
-        recipe.name.toLowerCase().includes(searchLower) ||
-        recipe.ingredients.some((ing: any) => 
-          ing.name.toLowerCase().includes(searchLower) ||
-          ing.ingredient.toLowerCase().includes(searchLower)
-        ) ||
-        recipe.tags.some((tag: string) => tag.toLowerCase().includes(searchLower))
+    // Apply filters
+    if (category) {
+      recipes = recipes.filter(recipe => recipe.categoryId === category);
+    }
+    if (difficulty) {
+      recipes = recipes.filter(recipe => recipe.difficulty === difficulty);
+    }
+    if (tags && tags.length > 0) {
+      recipes = recipes.filter(recipe => 
+        tags.some(tag => recipe.tags && recipe.tags.includes(tag))
       );
     }
+    if (search) {
+      const searchLower = search.toLowerCase();
+      recipes = recipes.filter(recipe => {
+        const name = recipe.name?.toLowerCase() || '';
+        const ingredients = recipe.ingredients?.map((ing: any) => ing.name?.toLowerCase()).join(' ') || '';
+        const tags = recipe.tags?.join(' ').toLowerCase() || '';
+        const category = recipe.category?.toLowerCase() || '';
+        
+        const searchText = `${name} ${ingredients} ${tags} ${category}`;
+        return searchText.includes(searchLower);
+      });
+    }
 
-    // Get total count for pagination
-    const totalSnapshot = await adminDb.collection('curated-recipes').get();
-    const total = totalSnapshot.size;
+    // Apply pagination
+    const total = recipes.length;
+    const offset = (page - 1) * limit;
+    const paginatedRecipes = recipes.slice(offset, offset + limit);
 
     return NextResponse.json({
-      recipes: filteredRecipes,
+      recipes: paginatedRecipes,
       pagination: {
         page,
         limit,
