@@ -31,29 +31,48 @@ export default function PrivacyPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h3 className="font-semibold mb-2">Account Information</h3>
+              <h3 className="font-semibold mb-2">Account Information (Google OAuth)</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Email address (when you sign in with Google)</li>
-                <li>Display name and profile picture (from Google account)</li>
-                <li>Account creation date and last login time</li>
+                <li>Email address</li>
+                <li>Display name</li>
+                <li>Profile picture URL</li>
+                <li>Firebase User ID (unique identifier)</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Usage Data</h3>
+              <h3 className="font-semibold mb-2">Recipe Data</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Cocktail recipes you generate and save</li>
-                <li>Recipe generation count and usage patterns</li>
-                <li>Subscription status and billing information (Pro users)</li>
-                <li>App interactions and feature usage</li>
+                <li>Cocktail recipes you generate (name, ingredients, instructions)</li>
+                <li>User prompts you enter for recipe generation</li>
+                <li>Recipe tags and favorites</li>
+                <li>Recipe creation timestamps</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Technical Data</h3>
+              <h3 className="font-semibold mb-2">Usage Tracking</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Device information and browser type</li>
-                <li>IP address and general location</li>
-                <li>App performance and error logs</li>
-                <li>Cookies and similar tracking technologies</li>
+                <li>Number of recipes generated per month</li>
+                <li>Number of recipes saved</li>
+                <li>Subscription tier (Free/Pro)</li>
+                <li>Account creation date</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Subscription Data (Pro Users Only)</h3>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>Stripe customer ID</li>
+                <li>Stripe subscription ID</li>
+                <li>Subscription status and billing dates</li>
+                <li>Early bird status (if applicable)</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Analytics Data</h3>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>Page views and navigation (Google Analytics)</li>
+                <li>Recipe generation events</li>
+                <li>Recipe sharing and copying events</li>
+                <li>Sign-in/sign-out events</li>
               </ul>
             </div>
           </CardContent>
@@ -70,27 +89,28 @@ export default function PrivacyPage() {
             <div>
               <h3 className="font-semibold mb-2">Service Provision</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Generate personalized cocktail recipes using AI</li>
+                <li>Generate personalized cocktail recipes using Google Gemini AI</li>
                 <li>Save and organize your favorite recipes</li>
-                <li>Provide shopping lists and recipe customization</li>
-                <li>Manage your subscription and billing</li>
+                <li>Track usage limits for Free vs Pro tiers</li>
+                <li>Process subscription payments (Pro users)</li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Service Improvement</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Analyze usage patterns to improve our AI models</li>
-                <li>Fix bugs and enhance app performance</li>
-                <li>Develop new features based on user needs</li>
-                <li>Monitor service reliability and security</li>
+                <li>Monitor app performance and fix bugs</li>
+                <li>Analyze usage patterns to improve features</li>
+                <li>Track recipe generation success rates</li>
+                <li>Ensure service reliability and security</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Communication</h3>
+              <h3 className="font-semibold mb-2">Analytics & Insights</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Send important service updates and notifications</li>
-                <li>Provide customer support when requested</li>
-                <li>Share promotional offers (with your consent)</li>
+                <li>Track page views and user engagement (Google Analytics)</li>
+                <li>Monitor recipe generation and sharing events</li>
+                <li>Understand user behavior to improve the app</li>
+                <li>Generate anonymized usage statistics</li>
               </ul>
             </div>
           </CardContent>
@@ -117,9 +137,10 @@ export default function PrivacyPage() {
               <h3 className="font-semibold mb-2">Data Retention</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                 <li>Account data: Retained while your account is active</li>
-                <li>Recipe data: Retained until you delete your account</li>
-                <li>Usage analytics: Anonymized after 2 years</li>
-                <li>Billing data: Retained as required by law</li>
+                <li>Recipe data: Retained until you delete your account or individual recipes</li>
+                <li>Usage tracking: Retained for subscription management and monthly limits</li>
+                <li>Analytics data: Anonymized and retained for up to 2 years</li>
+                <li>Subscription data: Retained as required by law for billing records</li>
               </ul>
             </div>
           </CardContent>
@@ -136,17 +157,18 @@ export default function PrivacyPage() {
             <div>
               <h3 className="font-semibold mb-2">Service Providers</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li><strong>Google:</strong> Authentication, AI services (Gemini), Analytics</li>
-                <li><strong>Firebase:</strong> Database, hosting, and backend services</li>
-                <li><strong>Vercel:</strong> Application hosting and CDN</li>
-                <li><strong>Stripe:</strong> Payment processing (Pro users only)</li>
+                <li><strong>Google:</strong> Authentication (OAuth), AI services (Gemini), Analytics</li>
+                <li><strong>Firebase:</strong> Database storage, user authentication, hosting</li>
+                <li><strong>Vercel:</strong> Application hosting and content delivery</li>
+                <li><strong>Stripe:</strong> Payment processing (Pro subscriptions only)</li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Data Sharing</h3>
               <p className="text-muted-foreground">
-                We do not sell, rent, or share your personal information with third parties except as described in this policy. 
-                We may share anonymized, aggregated data for research and analytics purposes.
+                We do not sell, rent, or share your personal information with third parties except as described above. 
+                We may share anonymized, aggregated data for research and analytics purposes. 
+                Your recipe content is not shared with third parties except for AI processing through Google Gemini.
               </p>
             </div>
           </CardContent>
@@ -163,19 +185,19 @@ export default function PrivacyPage() {
             <div>
               <h3 className="font-semibold mb-2">Account Control</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Access and download your recipe data</li>
-                <li>Update your account information</li>
+                <li>View and download your saved recipes</li>
                 <li>Delete individual recipes or your entire account</li>
                 <li>Manage your subscription and billing preferences</li>
+                <li>Update your account information through Google</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Privacy Controls</h3>
+              <h3 className="font-semibold mb-2">Data Rights</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Opt out of promotional communications</li>
-                <li>Request data portability</li>
-                <li>Object to certain data processing</li>
-                <li>Withdraw consent where applicable</li>
+                <li>Request a copy of your data</li>
+                <li>Request deletion of your account and data</li>
+                <li>Opt out of analytics tracking (disable cookies)</li>
+                <li>Contact us with privacy concerns</li>
               </ul>
             </div>
           </CardContent>
