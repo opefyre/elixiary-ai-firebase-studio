@@ -75,6 +75,17 @@ export function AuthButton() {
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+    
+    // Force account selection and show consent screen
+    provider.setCustomParameters({
+      prompt: 'select_account consent',
+      hd: '', // Don't restrict to specific domain
+    });
+    
+    // Add scopes explicitly
+    provider.addScope('email');
+    provider.addScope('profile');
+    
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {

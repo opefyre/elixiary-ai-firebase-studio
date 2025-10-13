@@ -80,6 +80,17 @@ export function AuthForm() {
     setIsLoading(true);
     setError(null);
     const provider = new GoogleAuthProvider();
+    
+    // Force account selection and show consent screen
+    provider.setCustomParameters({
+      prompt: 'select_account consent',
+      hd: '', // Don't restrict to specific domain
+    });
+    
+    // Add scopes explicitly
+    provider.addScope('email');
+    provider.addScope('profile');
+    
     try {
       const result = await signInWithPopup(auth, provider);
       
