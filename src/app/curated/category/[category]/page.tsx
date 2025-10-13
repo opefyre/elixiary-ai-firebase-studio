@@ -160,6 +160,17 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     );
   }
 
+  const getGoogleDriveThumbnail = (url: string) => {
+    if (!url) return null;
+    
+    // Convert Google Drive file URL to direct image URL
+    const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+    if (fileId) {
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}`;
+    }
+    return url;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 pt-24">
       {/* Back Button */}
@@ -197,16 +208,20 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden">
                 {recipe.imageUrl ? (
                   <Image
-                    src={recipe.imageUrl}
+                    src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
                     alt={recipe.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <Martini className="h-16 w-16 text-primary/30" />
-                  </div>
-                )}
+                ) : null}
+                
+                {/* Fallback placeholder */}
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                  <Martini className="h-16 w-16 text-primary/30" />
+                </div>
                 
                 {/* Difficulty Badge */}
                 <div className="absolute top-2 right-2">

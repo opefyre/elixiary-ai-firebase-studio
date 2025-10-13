@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Search, 
   Filter, 
@@ -115,6 +116,29 @@ export default function CuratedPage() {
 
   const fetchRecipes = async () => {
     try {
+      // If there's a search query, use the search API
+      if (searchQuery && searchQuery.trim().length >= 2) {
+        const params = new URLSearchParams({
+          q: searchQuery.trim(),
+          limit: '20',
+          offset: ((page - 1) * 20).toString()
+        });
+
+        const response = await fetch(`/api/curated-recipes/search?${params}`);
+        const data = await response.json();
+
+        if (page === 1) {
+          setRecipes(data.recipes);
+        } else {
+          setRecipes(prev => [...prev, ...data.recipes]);
+        }
+
+        setHasMore(data.hasMore);
+        setIsSearching(false);
+        return;
+      }
+
+      // Regular filtered search
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '20'
@@ -123,7 +147,6 @@ export default function CuratedPage() {
       if (selectedCategory) params.append('category', selectedCategory);
       if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
       if (selectedTags.length > 0) params.append('tags', selectedTags.join(','));
-      if (searchQuery) params.append('search', searchQuery);
 
       const response = await fetch(`/api/curated-recipes?${params}`);
       const data = await response.json();
@@ -145,9 +168,15 @@ export default function CuratedPage() {
   // Debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchQuery.trim()) {
+      if (searchQuery.trim().length >= 2) {
         setIsSearching(true);
         setPage(1);
+        setRecipes([]); // Clear current recipes
+        fetchRecipes();
+      } else if (searchQuery.trim().length === 0) {
+        // If search is cleared, reload all recipes
+        setPage(1);
+        setRecipes([]);
         fetchRecipes();
       }
     }, 500);
@@ -198,10 +227,10 @@ export default function CuratedPage() {
   const getGoogleDriveThumbnail = (url: string) => {
     if (!url) return null;
     
-    // Convert Google Drive file URL to thumbnail URL
+    // Convert Google Drive file URL to direct image URL
     const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
     if (fileId) {
-      return `https://drive.google.com/thumbnail?id=${fileId[1]}&sz=w400-h300`;
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}`;
     }
     return url;
   };
@@ -250,58 +279,45 @@ export default function CuratedPage() {
           )}
         </div>
 
-        {/* Compact Filter Section */}
-        <div className="space-y-4">
-          {/* Category Filter - Dropdown Style */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(null)}
-              className="text-xs"
-            >
-              All
-            </Button>
-            {categories.slice(0, 6).map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category.id)}
-                className="text-xs"
-              >
-                {category.name}
-              </Button>
-            ))}
-            {categories.length > 6 && (
-              <Button variant="outline" size="sm" className="text-xs">
-                +{categories.length - 6} more
-              </Button>
-            )}
+        {/* Filter Section with Dropdowns */}
+        <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
+          {/* Category Filter */}
+          <div className="flex-1">
+            <Select value={selectedCategory || "all"} onValueChange={(value: string) => setSelectedCategory(value === "all" ? null : value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name} ({category.recipeCount})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Difficulty Filter - Compact */}
-          <div className="flex gap-1 justify-center">
-            {['All', 'Easy', 'Medium', 'Hard'].map((difficulty) => (
-              <Button
-                key={difficulty}
-                variant={selectedDifficulty === (difficulty === 'All' ? null : difficulty) ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedDifficulty(difficulty === 'All' ? null : difficulty)}
-                className="text-xs px-3"
-              >
-                {difficulty}
-              </Button>
-            ))}
+          {/* Difficulty Filter */}
+          <div className="flex-1">
+            <Select value={selectedDifficulty || "all"} onValueChange={(value: string) => setSelectedDifficulty(value === "all" ? null : value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Difficulty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Levels</SelectItem>
+                <SelectItem value="Easy">Easy</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="Hard">Hard</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Clear Filters */}
           {(selectedCategory || selectedDifficulty || selectedTags.length > 0 || searchQuery) && (
-            <div className="text-center">
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs">
-                Clear All Filters
-              </Button>
-            </div>
+            <Button variant="outline" size="sm" onClick={clearFilters} className="whitespace-nowrap">
+              Clear Filters
+            </Button>
           )}
         </div>
       </div>

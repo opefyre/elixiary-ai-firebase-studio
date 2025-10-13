@@ -144,10 +144,10 @@ Source: ${recipe.source}
   const getGoogleDriveThumbnail = (url: string) => {
     if (!url) return null;
     
-    // Convert Google Drive file URL to thumbnail URL
+    // Convert Google Drive file URL to direct image URL
     const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
     if (fileId) {
-      return `https://drive.google.com/thumbnail?id=${fileId[1]}&sz=w800-h600`;
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}`;
     }
     return url;
   };
