@@ -218,10 +218,12 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                   />
                 ) : null}
                 
-                {/* Fallback placeholder */}
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                  <Martini className="h-16 w-16 text-primary/30" />
-                </div>
+                {/* Fallback placeholder - only show if no image */}
+                {!recipe.imageUrl && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                    <Martini className="h-16 w-16 text-primary/30" />
+                  </div>
+                )}
                 
                 {/* Difficulty Badge */}
                 <div className="absolute top-2 right-2">

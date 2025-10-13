@@ -272,12 +272,42 @@ export default function CuratedPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-64" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <Skeleton key={i} className="h-64 w-full" />
+      <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="space-y-8">
+          {/* Header Skeleton */}
+          <div className="text-center space-y-4">
+            <Skeleton className="h-10 w-64 mx-auto" />
+            <Skeleton className="h-6 w-96 mx-auto" />
+          </div>
+
+          {/* Search and Filters Skeleton */}
+          <div className="space-y-6">
+            <div className="max-w-md mx-auto">
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
+              <Skeleton className="h-10 flex-1" />
+              <Skeleton className="h-10 flex-1" />
+            </div>
+          </div>
+
+          {/* Recipe Grid Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="h-48 w-full" />
+                <CardContent className="p-5 space-y-3">
+                  <Skeleton className="h-6 w-full" />
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-20" />
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -389,86 +419,118 @@ export default function CuratedPage() {
       {/* Recipe Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {recipes.map((recipe) => (
-          <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm">
-            <CardContent className="p-0">
-              {/* Recipe Image */}
-              <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden">
-                {recipe.imageUrl ? (
-                  <Image
-                    src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
-                    alt={recipe.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      // Fallback to placeholder if image fails to load
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : null}
-                
-                {/* Fallback placeholder */}
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                  <Martini className="h-12 w-12 text-primary/40" />
-                </div>
-                
-                {/* Difficulty Badge */}
-                <div className="absolute top-3 right-3">
-                  <Badge className={`${getDifficultyColor(recipe.difficulty)} text-xs font-medium px-2 py-1`}>
-                    {recipe.difficulty}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Recipe Info */}
-              <div className="p-5">
-                <h3 className="font-semibold text-lg mb-3 line-clamp-2 leading-tight">
-                  {recipe.name}
-                </h3>
-                
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span className="text-xs">{recipe.prepTime}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-3.5 w-3.5" />
-                    <span className="text-xs">{recipe.glassware}</span>
-                  </div>
-                </div>
-
-                {/* Tags - Only show 2 most relevant */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {recipe.tags.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
-                      {tag.replace(/_/g, ' ')}
-                    </Badge>
-                  ))}
-                  {recipe.tags.length > 2 && (
-                    <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
-                      +{recipe.tags.length - 2}
-                    </Badge>
+          <Link key={recipe.id} href={`/curated/recipe/${recipe.id}`} className="block">
+            <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm cursor-pointer h-full">
+              <CardContent className="p-0 h-full flex flex-col">
+                {/* Recipe Image */}
+                <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
+                  {recipe.imageUrl ? (
+                    <Image
+                      src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
+                      alt={recipe.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        // Fallback to placeholder if image fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                      <Martini className="h-12 w-12 text-primary/40" />
+                    </div>
                   )}
+                  
+                  {/* Difficulty Badge */}
+                  <div className="absolute top-3 right-3">
+                    <Badge className={`${getDifficultyColor(recipe.difficulty)} text-xs font-medium px-2 py-1`}>
+                      {recipe.difficulty}
+                    </Badge>
+                  </div>
                 </div>
 
-                {/* View Recipe Button */}
-                <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                  <Link href={`/curated/recipe/${recipe.id}`} className="flex items-center justify-center gap-2">
-                    <span>View Recipe</span>
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Recipe Info - Better organized and distributed */}
+                <div className="p-5 flex flex-col flex-grow">
+                  <h3 className="font-semibold text-lg mb-3 line-clamp-2 leading-tight">
+                    {recipe.name}
+                  </h3>
+                  
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="text-xs">{recipe.prepTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Zap className="h-3.5 w-3.5" />
+                      <span className="text-xs">{recipe.glassware}</span>
+                    </div>
+                  </div>
+
+                  {/* Tags - Better spacing and alignment */}
+                  <div className="flex flex-wrap gap-1 mb-3 mt-auto">
+                    {recipe.tags.slice(0, 2).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
+                        {tag.replace(/_/g, ' ')}
+                      </Badge>
+                    ))}
+                    {recipe.tags.length > 2 && (
+                      <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
+                        +{recipe.tags.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Subtle click indicator */}
+                  <div className="flex items-center justify-center text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <span>Click to view details</span>
+                    <ChevronRight className="h-3 w-3 ml-1" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
       {/* Load More */}
-      {hasMore && (
+      {hasMore && !isSearching && (
         <div className="text-center">
-          <Button onClick={handleLoadMore} variant="outline">
-            Load More Recipes
+          <Button onClick={handleLoadMore} variant="outline" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading more recipes...
+              </>
+            ) : (
+              'Load More Recipes'
+            )}
           </Button>
+        </div>
+      )}
+
+      {/* Search Loading State */}
+      {isSearching && (
+        <div className="text-center py-8">
+          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Searching through 495 recipes...</span>
+          </div>
+        </div>
+      )}
+
+      {/* No Search Results State */}
+      {searchQuery && searchQuery.trim().length >= 3 && !isSearching && recipes.length === 0 && (
+        <div className="text-center py-12">
+          <div className="max-w-md mx-auto">
+            <Search className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No recipes found</h3>
+            <p className="text-muted-foreground mb-4">
+              No recipes match your search for "<span className="font-medium">{searchQuery}</span>"
+            </p>
+            <Button variant="outline" onClick={() => setSearchQuery('')}>
+              Clear search
+            </Button>
+          </div>
         </div>
       )}
 
