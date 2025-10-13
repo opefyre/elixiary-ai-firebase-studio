@@ -7,6 +7,7 @@ import { z } from 'zod';
 import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth';
 
@@ -21,6 +22,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
@@ -30,7 +32,17 @@ const signInSchema = z.object({
   password: z.string().min(1, { message: 'Password is required.' }),
 });
 
+const signUpSchema = z.object({
+  email: z.string().email({ message: 'Invalid email address.' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  confirmPassword: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 type SignInFormValues = z.infer<typeof signInSchema>;
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export function AuthForm() {
   const auth = useAuth();
@@ -40,6 +52,11 @@ export function AuthForm() {
   const signInForm = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: { email: '', password: '' },
+  });
+
+  const signUpForm = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { email: '', password: '', confirmPassword: '' },
   });
 
   const handleGoogleSignIn = async () => {
@@ -60,6 +77,18 @@ export function AuthForm() {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSignUpSubmit = async (data: SignUpFormValues) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -104,81 +133,183 @@ export function AuthForm() {
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="space-y-4">
-          <GoogleSignInButton />
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="signin" className="space-y-4 mt-6">
+            <GoogleSignInButton />
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or continue with email
-              </span>
-            </div>
-          </div>
-
-          {error && (
-            <div className="pt-4">
-              <Alert variant="destructive">
-                <AlertTitle>Authentication Failed</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            </div>
-          )}
-
-          <Form {...signInForm}>
-            <form
-              onSubmit={signInForm.handleSubmit(onSignInSubmit)}
-              className="space-y-6"
-            >
-              <div className="space-y-4">
-                <FormField
-                  control={signInForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="m@example.com"
-                          {...field}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={signInForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          {...field}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
               </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Sign In
-              </Button>
-            </form>
-          </Form>
-        </div>
+            {error && (
+              <div className="pt-4">
+                <Alert variant="destructive">
+                  <AlertTitle>Authentication Failed</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            <Form {...signInForm}>
+              <form
+                onSubmit={signInForm.handleSubmit(onSignInSubmit)}
+                className="space-y-6"
+              >
+                <div className="space-y-4">
+                  <FormField
+                    control={signInForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="m@example.com"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signInForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Sign In
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+
+          <TabsContent value="signup" className="space-y-4 mt-6">
+            <GoogleSignInButton />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
+            {error && (
+              <div className="pt-4">
+                <Alert variant="destructive">
+                  <AlertTitle>Authentication Failed</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            <Form {...signUpForm}>
+              <form
+                onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
+                className="space-y-6"
+              >
+                <div className="space-y-4">
+                  <FormField
+                    control={signUpForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="m@example.com"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signUpForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="At least 6 characters"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signUpForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Confirm your password"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Sign Up
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
