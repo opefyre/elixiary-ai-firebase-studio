@@ -12,7 +12,6 @@ import {
   ArrowLeft,
   Share2,
   Copy,
-  ChevronRight,
   Crown
 } from 'lucide-react';
 import Link from 'next/link';
@@ -209,7 +208,7 @@ Source: ${recipe.source}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recipe Image */}
         <div className="space-y-4">
-          <div className="relative h-96 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
+          <div className="relative h-[600px] bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
             {recipe.imageUrl ? (
               <Image
                 src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
@@ -359,9 +358,6 @@ Source: ${recipe.source}
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                         <Clock className="h-3 w-3" />
                         {relatedRecipe.prepTime}
-                      </div>
-                      <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        Click to view details
                       </div>
                     </div>
                   </CardContent>

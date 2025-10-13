@@ -10,7 +10,6 @@ import {
   Zap, 
   Martini,
   ArrowLeft,
-  ChevronRight,
   Loader2
 } from 'lucide-react';
 import Link from 'next/link';
@@ -272,11 +271,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                     )}
                   </div>
 
-                  {/* Subtle click indicator */}
-                  <div className="flex items-center justify-center text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <span>Click to view details</span>
-                    <ChevronRight className="h-3 w-3 ml-1" />
-                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -13,7 +13,6 @@ import {
   Clock, 
   Zap, 
   Martini,
-  ChevronRight,
   Loader2
 } from 'lucide-react';
 import Link from 'next/link';
@@ -368,14 +367,6 @@ export default function CuratedPage() {
           </div>
         )}
         
-        {/* Search Instructions */}
-        {searchQuery && searchQuery.trim().length > 0 && searchQuery.trim().length < 3 && (
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              Type at least 3 characters to search
-            </p>
-          </div>
-        )}
 
         {/* Filter Section with Dropdowns */}
         <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
@@ -484,11 +475,6 @@ export default function CuratedPage() {
                     )}
                   </div>
 
-                  {/* Subtle click indicator */}
-                  <div className="flex items-center justify-center text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <span>Click to view details</span>
-                    <ChevronRight className="h-3 w-3 ml-1" />
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -503,10 +489,10 @@ export default function CuratedPage() {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading more recipes...
+                Loading...
               </>
             ) : (
-              'Load More Recipes'
+              'Load More'
             )}
           </Button>
         </div>
@@ -517,7 +503,7 @@ export default function CuratedPage() {
         <div className="text-center py-8">
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Searching through 495 recipes...</span>
+            <span>Searching...</span>
           </div>
         </div>
       )}
