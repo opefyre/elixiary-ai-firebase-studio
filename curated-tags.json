@@ -1,0 +1,359 @@
+[
+  {
+    "id": "style_shot",
+    "name": "Shot",
+    "type": "style",
+    "count": 26,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "strength_strong",
+    "name": "Strong",
+    "type": "strength",
+    "count": 50,
+    "color": "#ef4444"
+  },
+  {
+    "id": "flavor_intense",
+    "name": "Intense",
+    "type": "flavor",
+    "count": 31,
+    "color": "#10b981"
+  },
+  {
+    "id": "flavor_coffee",
+    "name": "Coffee",
+    "type": "flavor",
+    "count": 40,
+    "color": "#10b981"
+  },
+  {
+    "id": "diet_dairy",
+    "name": "Dairy",
+    "type": "diet",
+    "count": 96,
+    "color": "#84cc16"
+  },
+  {
+    "id": "texture_creamy",
+    "name": "Creamy",
+    "type": "texture",
+    "count": 91,
+    "color": "#f97316"
+  },
+  {
+    "id": "style_new_era",
+    "name": "New Era",
+    "type": "style",
+    "count": 78,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "flavor_fruity",
+    "name": "Fruity",
+    "type": "flavor",
+    "count": 126,
+    "color": "#10b981"
+  },
+  {
+    "id": "strength_moderate",
+    "name": "Moderate",
+    "type": "strength",
+    "count": 167,
+    "color": "#ef4444"
+  },
+  {
+    "id": "serve_long",
+    "name": "Long",
+    "type": "serve",
+    "count": 69,
+    "color": "#06b6d4"
+  },
+  {
+    "id": "setting_beach",
+    "name": "Beach",
+    "type": "setting",
+    "count": 15,
+    "color": "#6366f1"
+  },
+  {
+    "id": "style_tiki",
+    "name": "Tiki",
+    "type": "style",
+    "count": 28,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "flavor_sweet",
+    "name": "Sweet",
+    "type": "flavor",
+    "count": 82,
+    "color": "#10b981"
+  },
+  {
+    "id": "serve_frozen",
+    "name": "Frozen",
+    "type": "serve",
+    "count": 42,
+    "color": "#06b6d4"
+  },
+  {
+    "id": "season_summer",
+    "name": "Summer",
+    "type": "season",
+    "count": 42,
+    "color": "#f59e0b"
+  },
+  {
+    "id": "serve_on_rocks",
+    "name": "On Rocks",
+    "type": "serve",
+    "count": 39,
+    "color": "#06b6d4"
+  },
+  {
+    "id": "occ_party",
+    "name": "Party",
+    "type": "occasion",
+    "count": 45,
+    "color": "#ec4899"
+  },
+  {
+    "id": "style_classic",
+    "name": "Classic",
+    "type": "style",
+    "count": 146,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "flavor_sour",
+    "name": "Sour",
+    "type": "flavor",
+    "count": 33,
+    "color": "#10b981"
+  },
+  {
+    "id": "style_contemporary_classic",
+    "name": "Contemporary Classic",
+    "type": "style",
+    "count": 172,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "flavor_citrus",
+    "name": "Citrus",
+    "type": "flavor",
+    "count": 188,
+    "color": "#10b981"
+  },
+  {
+    "id": "style_sour_family",
+    "name": "Sour Family",
+    "type": "style",
+    "count": 28,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "serve_up",
+    "name": "Up",
+    "type": "serve",
+    "count": 69,
+    "color": "#06b6d4"
+  },
+  {
+    "id": "flavor_savory",
+    "name": "Savory",
+    "type": "flavor",
+    "count": 20,
+    "color": "#10b981"
+  },
+  {
+    "id": "occ_brunch",
+    "name": "Brunch",
+    "type": "occasion",
+    "count": 85,
+    "color": "#ec4899"
+  },
+  {
+    "id": "diet_egg",
+    "name": "Egg",
+    "type": "diet",
+    "count": 11,
+    "color": "#84cc16"
+  },
+  {
+    "id": "style_highball",
+    "name": "Highball",
+    "type": "style",
+    "count": 5,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "flavor_bitter",
+    "name": "Bitter",
+    "type": "flavor",
+    "count": 20,
+    "color": "#10b981"
+  },
+  {
+    "id": "flavor_chocolate",
+    "name": "Chocolate",
+    "type": "flavor",
+    "count": 16,
+    "color": "#10b981"
+  },
+  {
+    "id": "serve_hot",
+    "name": "Hot",
+    "type": "serve",
+    "count": 17,
+    "color": "#06b6d4"
+  },
+  {
+    "id": "serve_bubbly",
+    "name": "Bubbly",
+    "type": "serve",
+    "count": 51,
+    "color": "#06b6d4"
+  },
+  {
+    "id": "style_spritz",
+    "name": "Spritz",
+    "type": "style",
+    "count": 21,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "flavor_nutty",
+    "name": "Nutty",
+    "type": "flavor",
+    "count": 5,
+    "color": "#10b981"
+  },
+  {
+    "id": "diet_vegan",
+    "name": "Vegan",
+    "type": "diet",
+    "count": 5,
+    "color": "#84cc16"
+  },
+  {
+    "id": "strength_low_abv",
+    "name": "Low Abv",
+    "type": "strength",
+    "count": 20,
+    "color": "#ef4444"
+  },
+  {
+    "id": "season_autumn",
+    "name": "Autumn",
+    "type": "season",
+    "count": 7,
+    "color": "#f59e0b"
+  },
+  {
+    "id": "flavor_spicy",
+    "name": "Spicy",
+    "type": "flavor",
+    "count": 16,
+    "color": "#10b981"
+  },
+  {
+    "id": "style_punch",
+    "name": "Punch",
+    "type": "style",
+    "count": 8,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "origin_asia",
+    "name": "Origin Asia",
+    "type": "other",
+    "count": 1,
+    "color": "#6b7280"
+  },
+  {
+    "id": "appearance_dark",
+    "name": "Appearance Dark",
+    "type": "other",
+    "count": 3,
+    "color": "#6b7280"
+  },
+  {
+    "id": "holiday_halloween",
+    "name": "Holiday Halloween",
+    "type": "other",
+    "count": 3,
+    "color": "#6b7280"
+  },
+  {
+    "id": "origin_brazil",
+    "name": "Origin Brazil",
+    "type": "other",
+    "count": 6,
+    "color": "#6b7280"
+  },
+  {
+    "id": "season_winter",
+    "name": "Winter",
+    "type": "season",
+    "count": 11,
+    "color": "#f59e0b"
+  },
+  {
+    "id": "tech_shaken",
+    "name": "Tech Shaken",
+    "type": "other",
+    "count": 3,
+    "color": "#6b7280"
+  },
+  {
+    "id": "holiday_christmas",
+    "name": "Holiday Christmas",
+    "type": "other",
+    "count": 8,
+    "color": "#6b7280"
+  },
+  {
+    "id": "tech_built",
+    "name": "Tech Built",
+    "type": "other",
+    "count": 1,
+    "color": "#6b7280"
+  },
+  {
+    "id": "flavor_herbal",
+    "name": "Herbal",
+    "type": "flavor",
+    "count": 1,
+    "color": "#10b981"
+  },
+  {
+    "id": "origin_spain",
+    "name": "Origin Spain",
+    "type": "other",
+    "count": 1,
+    "color": "#6b7280"
+  },
+  {
+    "id": "season_spring",
+    "name": "Spring",
+    "type": "season",
+    "count": 1,
+    "color": "#f59e0b"
+  },
+  {
+    "id": "texture_fizzy",
+    "name": "Fizzy",
+    "type": "texture",
+    "count": 1,
+    "color": "#f97316"
+  },
+  {
+    "id": "occ_date_night",
+    "name": "Date Night",
+    "type": "occasion",
+    "count": 1,
+    "color": "#ec4899"
+  }
+]

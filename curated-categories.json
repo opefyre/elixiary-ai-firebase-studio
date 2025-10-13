@@ -1,0 +1,164 @@
+[
+  {
+    "id": "cat_shot_shooter",
+    "name": "Shots & Shooters",
+    "description": "Discover 25 shots & shooters recipes",
+    "recipeCount": 25,
+    "icon": "ShotGlass",
+    "color": "#ef4444",
+    "sortOrder": 2
+  },
+  {
+    "id": "cat_beer_cocktail",
+    "name": "Beer Cocktails",
+    "description": "Discover 17 beer cocktails recipes",
+    "recipeCount": 17,
+    "icon": "Beer",
+    "color": "#f59e0b",
+    "sortOrder": 6
+  },
+  {
+    "id": "cat_frozen_blended",
+    "name": "Frozen & Blended",
+    "description": "Discover 10 frozen & blended recipes",
+    "recipeCount": 10,
+    "icon": "Snowflake",
+    "color": "#06b6d4",
+    "sortOrder": 5
+  },
+  {
+    "id": "cat_tiki_tropical",
+    "name": "Tiki & Tropical",
+    "description": "Discover 16 tiki & tropical recipes",
+    "recipeCount": 16,
+    "icon": "PalmTree",
+    "color": "#10b981",
+    "sortOrder": 4
+  },
+  {
+    "id": "cat_highball_long",
+    "name": "Highballs & Long Drinks",
+    "description": "Discover 74 highballs & long drinks recipes",
+    "recipeCount": 74,
+    "icon": "GlassWater",
+    "color": "#8b5cf6",
+    "sortOrder": 3
+  },
+  {
+    "id": "cat_coffee_tea",
+    "name": "Coffee & Tea Cocktails",
+    "description": "Discover 41 coffee & tea cocktails recipes",
+    "recipeCount": 41,
+    "icon": "Coffee",
+    "color": "#92400e",
+    "sortOrder": 7
+  },
+  {
+    "id": "cat_short_shaken_citrus",
+    "name": "Short Shaken Citrus",
+    "description": "Discover 64 short shaken citrus recipes",
+    "recipeCount": 64,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_soft_zero_proof",
+    "name": "Soft Zero Proof",
+    "description": "Discover 87 soft zero proof recipes",
+    "recipeCount": 87,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_milk_egg_cream",
+    "name": "Milk Egg Cream",
+    "description": "Discover 20 milk egg cream recipes",
+    "recipeCount": 20,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_spritz_sparkling",
+    "name": "Spritz Sparkling",
+    "description": "Discover 20 spritz sparkling recipes",
+    "recipeCount": 20,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_short_spirit_forward",
+    "name": "Short Spirit Forward",
+    "description": "Discover 47 short spirit forward recipes",
+    "recipeCount": 47,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_wine_vermouth_aperitif",
+    "name": "Wine Vermouth Aperitif",
+    "description": "Discover 4 wine vermouth aperitif recipes",
+    "recipeCount": 4,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_hot",
+    "name": "Hot",
+    "description": "Discover 17 hot recipes",
+    "recipeCount": 17,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_unknown_other",
+    "name": "Unknown Other",
+    "description": "Discover 14 unknown other recipes",
+    "recipeCount": 14,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_liqueur_cordial",
+    "name": "Liqueur Cordial",
+    "description": "Discover 7 liqueur cordial recipes",
+    "recipeCount": 7,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_punch_party",
+    "name": "Punch Party",
+    "description": "Discover 17 punch party recipes",
+    "recipeCount": 17,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_digestif_after_dinner",
+    "name": "Digestif After Dinner",
+    "description": "Discover 7 digestif after dinner recipes",
+    "recipeCount": 7,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  },
+  {
+    "id": "cat_smash_julep_swizzle",
+    "name": "Smash Julep Swizzle",
+    "description": "Discover 9 smash julep swizzle recipes",
+    "recipeCount": 9,
+    "icon": "Martini",
+    "color": "#8b5cf6",
+    "sortOrder": 10
+  }
+]

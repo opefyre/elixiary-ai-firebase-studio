@@ -27,6 +27,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/curated" className="hover:text-primary transition-colors">
+                  Curated Recipes
+                </Link>
+              </li>
+              <li>
                 <Link href="/recipes" className="hover:text-primary transition-colors">
                   My Recipes
                 </Link>
