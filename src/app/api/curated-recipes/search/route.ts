@@ -16,31 +16,36 @@ export async function GET(request: NextRequest) {
 
     const searchLower = query.toLowerCase().trim();
 
-    // Search across all recipes using array-contains for keywords
-    let searchQuery = adminDb.collection('curated-recipes')
-      .where('searchKeywords', 'array-contains', searchLower)
+    // Get all recipes and filter client-side (since Firestore composite indexes are complex)
+    // This is acceptable for 495 recipes as it's a reasonable dataset size
+    const allRecipesSnapshot = await adminDb.collection('curated-recipes')
       .orderBy('name', 'asc')
-      .offset(offset)
-      .limit(limit);
+      .get();
 
-    const snapshot = await searchQuery.get();
-    const recipes = snapshot.docs.map(doc => ({
+    const allRecipes = allRecipesSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
     }));
 
-    // Get total count for search results
-    const countSnapshot = await adminDb.collection('curated-recipes')
-      .where('searchKeywords', 'array-contains', searchLower)
-      .count()
-      .get();
+    // Filter recipes based on search query
+    const filteredRecipes = allRecipes.filter(recipe => {
+      const name = recipe.name?.toLowerCase() || '';
+      const ingredients = recipe.ingredients?.map((ing: any) => ing.name?.toLowerCase()).join(' ') || '';
+      const tags = recipe.tags?.join(' ').toLowerCase() || '';
+      const category = recipe.category?.toLowerCase() || '';
+      
+      const searchText = `${name} ${ingredients} ${tags} ${category}`;
+      return searchText.includes(searchLower);
+    });
 
-    const total = countSnapshot.data().count;
+    // Apply pagination
+    const paginatedRecipes = filteredRecipes.slice(offset, offset + limit);
+    const total = filteredRecipes.length;
 
     return NextResponse.json({ 
-      recipes, 
+      recipes: paginatedRecipes, 
       total,
-      hasMore: offset + recipes.length < total
+      hasMore: offset + paginatedRecipes.length < total
     });
 
   } catch (error: any) {

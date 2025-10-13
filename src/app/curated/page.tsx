@@ -73,6 +73,8 @@ export default function CuratedPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [lastSearchQuery, setLastSearchQuery] = useState('');
 
   // Fetch initial data
   useEffect(() => {
@@ -116,8 +118,10 @@ export default function CuratedPage() {
 
   const fetchRecipes = async () => {
     try {
+      setSearchError(null);
+      
       // If there's a search query, use the search API
-      if (searchQuery && searchQuery.trim().length >= 2) {
+      if (searchQuery && searchQuery.trim().length >= 3) {
         const params = new URLSearchParams({
           q: searchQuery.trim(),
           limit: '20',
@@ -125,15 +129,24 @@ export default function CuratedPage() {
         });
 
         const response = await fetch(`/api/curated-recipes/search?${params}`);
+        
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+        
         const data = await response.json();
 
-        if (page === 1) {
-          setRecipes(data.recipes);
-        } else {
-          setRecipes(prev => [...prev, ...data.recipes]);
+        if (data.error) {
+          throw new Error(data.error);
         }
 
-        setHasMore(data.hasMore);
+        if (page === 1) {
+          setRecipes(data.recipes || []);
+        } else {
+          setRecipes(prev => [...prev, ...(data.recipes || [])]);
+        }
+
+        setHasMore(data.hasMore || false);
         setIsSearching(false);
         return;
       }
@@ -149,40 +162,62 @@ export default function CuratedPage() {
       if (selectedTags.length > 0) params.append('tags', selectedTags.join(','));
 
       const response = await fetch(`/api/curated-recipes?${params}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch recipes: ${response.status}`);
+      }
+      
       const data = await response.json();
 
-      if (page === 1) {
-        setRecipes(data.recipes);
-      } else {
-        setRecipes(prev => [...prev, ...data.recipes]);
+      if (data.error) {
+        throw new Error(data.error);
       }
 
-      setHasMore(data.pagination.hasNext);
+      if (page === 1) {
+        setRecipes(data.recipes || []);
+      } else {
+        setRecipes(prev => [...prev, ...(data.recipes || [])]);
+      }
+
+      setHasMore(data.pagination?.hasNext || false);
       setIsSearching(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching recipes:', error);
+      setSearchError(error.message || 'Failed to fetch recipes');
       setIsSearching(false);
     }
   };
 
-  // Debounced search
+  // Optimized debounced search with better rate limiting
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchQuery.trim().length >= 2) {
-        setIsSearching(true);
-        setPage(1);
-        setRecipes([]); // Clear current recipes
-        fetchRecipes();
-      } else if (searchQuery.trim().length === 0) {
-        // If search is cleared, reload all recipes
-        setPage(1);
-        setRecipes([]);
-        fetchRecipes();
+      const trimmedQuery = searchQuery.trim();
+      
+      // Only search if query is different from last search (prevents duplicate requests)
+      if (trimmedQuery !== lastSearchQuery) {
+        setLastSearchQuery(trimmedQuery);
+        
+        if (trimmedQuery.length >= 3) {
+          // Only search with 3+ characters to reduce server load
+          setIsSearching(true);
+          setPage(1);
+          setRecipes([]); // Clear current recipes
+          fetchRecipes();
+        } else if (trimmedQuery.length === 0) {
+          // If search is cleared, reload all recipes
+          setPage(1);
+          setRecipes([]);
+          fetchRecipes();
+        } else {
+          // For 1-2 characters, clear results but don't search yet
+          setRecipes([]);
+          setHasMore(false);
+        }
       }
-    }, 500);
+    }, 800); // Increased debounce time to 800ms
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery, lastSearchQuery]);
 
   const handleSearch = () => {
     setPage(1);
@@ -256,7 +291,18 @@ export default function CuratedPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4">Curated Cocktails</h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Discover our collection of {recipes.length > 0 ? '495+' : ''} professionally curated cocktail recipes from around the world.
+          {searchQuery && searchQuery.trim().length >= 3 ? (
+            <>
+              Search results for "<span className="font-semibold text-primary">{searchQuery}</span>"
+              {recipes.length > 0 && (
+                <span className="block text-sm mt-1">
+                  Found {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </>
+          ) : (
+            `Discover our collection of ${recipes.length > 0 ? '495+' : ''} professionally curated cocktail recipes from around the world.`
+          )}
         </p>
       </div>
 
@@ -278,6 +324,24 @@ export default function CuratedPage() {
             </div>
           )}
         </div>
+        
+        {/* Search Error Display */}
+        {searchError && (
+          <div className="text-center">
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-md">
+              Search error: {searchError}
+            </p>
+          </div>
+        )}
+        
+        {/* Search Instructions */}
+        {searchQuery && searchQuery.trim().length > 0 && searchQuery.trim().length < 3 && (
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Type at least 3 characters to search
+            </p>
+          </div>
+        )}
 
         {/* Filter Section with Dropdowns */}
         <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
