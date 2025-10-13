@@ -208,7 +208,7 @@ Source: ${recipe.source}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recipe Image */}
         <div className="space-y-4">
-          <div className="relative h-[600px] bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
+          <div className="relative h-[800px] bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
             {recipe.imageUrl ? (
               <Image
                 src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
@@ -329,12 +329,12 @@ Source: ${recipe.source}
       {relatedRecipes.length > 0 && (
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-6">More {recipe.category}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {relatedRecipes.map((relatedRecipe) => (
               <Link key={relatedRecipe.id} href={`/cocktails/recipe/${relatedRecipe.id}`} className="block">
                 <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                   <CardContent className="p-0 h-full flex flex-col">
-                    <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
+                    <div className="relative h-60 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
                       {relatedRecipe.imageUrl ? (
                         <Image
                           src={getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl}
