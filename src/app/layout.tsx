@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
 import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
@@ -87,7 +88,7 @@ export default function RootLayout({
             Skip to main content
           </a>
           <Header />
-          <div className="relative">
+          <div className="relative min-h-screen flex flex-col">
             <div className="absolute top-1/4 left-1/4 h-32 w-32 animate-float text-primary/10 [animation-delay:-2s]">
               <Martini className="h-full w-full" />
             </div>
@@ -100,7 +101,8 @@ export default function RootLayout({
             <div className="absolute top-1/3 right-[20%] h-28 w-28 animate-float text-primary/10">
               <Sprout className="h-full w-full" />
             </div>
-            <main id="main-content" className="relative z-10">{children}</main>
+            <main id="main-content" className="relative z-10 flex-1">{children}</main>
+            <Footer />
           </div>
           <Toaster />
           <OfflineWarning />
