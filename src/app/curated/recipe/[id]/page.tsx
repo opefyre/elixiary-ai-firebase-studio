@@ -1,19 +1,3 @@
-import { Metadata } from 'next';
-
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  // This would ideally fetch the recipe data to generate dynamic metadata
-  // For now, we'll use static metadata
-  return {
-    title: 'Cocktail Recipe | Elixiary AI',
-    description: 'Discover this curated cocktail recipe with detailed ingredients and instructions.',
-    openGraph: {
-      title: 'Cocktail Recipe | Elixiary AI',
-      description: 'Discover this curated cocktail recipe with detailed ingredients and instructions.',
-      type: 'article',
-    },
-  };
-}
-
 'use client';
 
 import { useState, useEffect } from 'react';

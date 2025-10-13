@@ -1,15 +1,3 @@
-import { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Curated Cocktails | Elixiary AI',
-  description: 'Discover our collection of 495+ professionally curated cocktail recipes from around the world. Browse by category, difficulty, and style.',
-  openGraph: {
-    title: 'Curated Cocktails | Elixiary AI',
-    description: 'Discover our collection of 495+ professionally curated cocktail recipes from around the world.',
-    type: 'website',
-  },
-};
-
 'use client';
 
 import { useState, useEffect } from 'react';
