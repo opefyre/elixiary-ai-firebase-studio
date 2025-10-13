@@ -96,7 +96,7 @@ export default function Home() {
               </Link>
             </p>
           <p className="text-xs text-muted-foreground/60">
-            © 2024 Elixiary AI. All rights reserved.
+            © {new Date().getFullYear()} Elixiary AI. All rights reserved.
           </p>
         </div>
       </footer>
