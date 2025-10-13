@@ -141,6 +141,17 @@ Source: ${recipe.source}
     }
   };
 
+  const getGoogleDriveThumbnail = (url: string) => {
+    if (!url) return null;
+    
+    // Convert Google Drive file URL to thumbnail URL
+    const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+    if (fileId) {
+      return `https://drive.google.com/thumbnail?id=${fileId[1]}&sz=w800-h600`;
+    }
+    return url;
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -174,7 +185,7 @@ Source: ${recipe.source}
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-24">
       {/* Back Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
@@ -191,16 +202,21 @@ Source: ${recipe.source}
           <div className="relative h-96 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
             {recipe.imageUrl ? (
               <Image
-                src={recipe.imageUrl}
+                src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
                 alt={recipe.name}
                 fill
                 className="object-cover"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  e.currentTarget.style.display = 'none';
+                }}
               />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <Martini className="h-24 w-24 text-primary/30" />
-              </div>
-            )}
+            ) : null}
+            
+            {/* Fallback placeholder */}
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+              <Martini className="h-24 w-24 text-primary/30" />
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -316,16 +332,20 @@ Source: ${recipe.source}
                   <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden">
                     {relatedRecipe.imageUrl ? (
                       <Image
-                        src={relatedRecipe.imageUrl}
+                        src={getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl}
                         alt={relatedRecipe.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Martini className="h-8 w-8 text-primary/30" />
-                      </div>
-                    )}
+                    ) : null}
+                    
+                    {/* Fallback placeholder */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                      <Martini className="h-8 w-8 text-primary/30" />
+                    </div>
                   </div>
                   <div className="p-3">
                     <h3 className="font-semibold text-sm mb-2 line-clamp-2">
