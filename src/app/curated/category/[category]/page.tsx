@@ -163,10 +163,11 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const getGoogleDriveThumbnail = (url: string) => {
     if (!url) return null;
     
-    // Convert Google Drive file URL to direct image URL
+    // Convert Google Drive file URL to optimized image URL
     const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
     if (fileId) {
-      return `https://lh3.googleusercontent.com/d/${fileId[1]}`;
+      // Use optimized size for category page cards - w400 for thumbnails
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}=w400-h600-p`;
     }
     return url;
   };

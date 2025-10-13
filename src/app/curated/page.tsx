@@ -109,10 +109,11 @@ export default function CuratedPage() {
 
       setCategories(categoriesData.categories);
       setTags(tagsData.tags);
+      
+      // Don't set loading to false here - wait for recipes to load
     } catch (error) {
       console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only set to false on error
     }
   };
 
@@ -181,10 +182,12 @@ export default function CuratedPage() {
 
       setHasMore(data.pagination?.hasNext || false);
       setIsSearching(false);
+      setLoading(false); // Set loading to false when recipes are loaded
     } catch (error: any) {
       console.error('Error fetching recipes:', error);
       setSearchError(error.message || 'Failed to fetch recipes');
       setIsSearching(false);
+      setLoading(false); // Set loading to false even on error
     }
   };
 
@@ -262,10 +265,11 @@ export default function CuratedPage() {
   const getGoogleDriveThumbnail = (url: string) => {
     if (!url) return null;
     
-    // Convert Google Drive file URL to direct image URL
+    // Convert Google Drive file URL to optimized image URL
     const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
     if (fileId) {
-      return `https://lh3.googleusercontent.com/d/${fileId[1]}`;
+      // Use optimized size for faster loading - w400 for card thumbnails
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}=w400-h600-p`;
     }
     return url;
   };
@@ -295,7 +299,7 @@ export default function CuratedPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 12 }).map((_, i) => (
               <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-64 w-full" />
                 <CardContent className="p-5 space-y-3">
                   <Skeleton className="h-6 w-full" />
                   <div className="flex justify-between">
@@ -423,7 +427,7 @@ export default function CuratedPage() {
             <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm cursor-pointer h-full">
               <CardContent className="p-0 h-full flex flex-col">
                 {/* Recipe Image */}
-                <div className="relative h-48 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
+                <div className="relative h-64 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
                   {recipe.imageUrl ? (
                     <Image
                       src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}

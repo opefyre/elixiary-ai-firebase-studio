@@ -144,10 +144,11 @@ Source: ${recipe.source}
   const getGoogleDriveThumbnail = (url: string) => {
     if (!url) return null;
     
-    // Convert Google Drive file URL to direct image URL
+    // Convert Google Drive file URL to optimized image URL
     const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
     if (fileId) {
-      return `https://lh3.googleusercontent.com/d/${fileId[1]}`;
+      // Use higher resolution for detail page - w800 for main image
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}=w800-h1200-p`;
     }
     return url;
   };
