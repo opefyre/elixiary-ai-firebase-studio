@@ -85,6 +85,21 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {/* Footer */}
+      <footer className="mt-16 pt-8 border-t border-border/50">
+        <div className="text-center space-y-4">
+          <p className="text-sm text-muted-foreground">
+            By using Elixiary AI, you agree to our{' '}
+            <Link href="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </Link>
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            © 2024 Elixiary AI. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

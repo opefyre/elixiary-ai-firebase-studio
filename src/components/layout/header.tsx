@@ -19,6 +19,9 @@ export function Header() {
               <span className="hidden sm:inline">Pricing</span>
             </Link>
           </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/privacy">Privacy</Link>
+          </Button>
           <AuthButton />
         </div>
       </div>
