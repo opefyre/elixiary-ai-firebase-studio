@@ -32,7 +32,9 @@ export function SaveRecipeButton({
 
   const isSaved = isRecipeSaved(recipeId);
 
-  const handleClick = async () => {
+  const handleClick = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking the star button
+    
     if (!isPro) {
       setShowUpgradeDialog(true);
       return;
