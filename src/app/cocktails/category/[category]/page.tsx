@@ -12,7 +12,6 @@ import {
   ArrowLeft,
   Loader2
 } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { SaveRecipeButton } from '@/components/save-recipe-button';
 
@@ -212,9 +211,12 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       {/* Recipe Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-8">
         {recipes.map((recipe) => (
-          <Link key={recipe.id} href={`/cocktails/recipe/${recipe.id}`} className="block">
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
-              <CardContent className="p-0 h-full flex flex-col">
+          <Card 
+            key={recipe.id} 
+            className="group hover:shadow-lg transition-all duration-300 cursor-pointer h-full"
+            onClick={() => window.location.href = `/cocktails/recipe/${recipe.id}`}
+          >
+            <CardContent className="p-0 h-full flex flex-col">
                 {/* Recipe Image */}
                 <div className="relative h-80 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
                   {recipe.imageUrl ? (
@@ -287,7 +289,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 </div>
               </CardContent>
             </Card>
-          </Link>
         ))}
       </div>
 
