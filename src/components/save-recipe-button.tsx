@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, HeartOff, Crown, Loader2, Star } from 'lucide-react';
+import { Crown, Loader2, Star } from 'lucide-react';
 import { useSavedRecipes } from '@/hooks/use-saved-recipes';
 import { useSubscription } from '@/firebase';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
@@ -61,10 +61,8 @@ export function SaveRecipeButton({
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
-        ) : isSaved ? (
-          <Star className="h-4 w-4 text-yellow-500 fill-current" />
         ) : (
-          <Heart className="h-4 w-4" />
+          <Star className={`h-4 w-4 ${isSaved ? 'text-yellow-500 fill-current' : ''}`} />
         )}
         {showText && (
           <span>

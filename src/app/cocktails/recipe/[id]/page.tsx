@@ -17,7 +17,6 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { SaveRecipeButton } from '@/components/save-recipe-button';
 
 interface CuratedRecipe {
   id: string;
@@ -204,13 +203,6 @@ Source: ${recipe.source}
             Back to Cocktails
           </Link>
         </Button>
-        <SaveRecipeButton 
-          recipeId={recipe.id} 
-          recipeData={recipe}
-          variant="default"
-          size="sm"
-          showText={true}
-        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

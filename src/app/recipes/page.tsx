@@ -182,15 +182,6 @@ export default function RecipesPage() {
               {recipes.length > 0 && (
                 <>
                   <Button
-                    variant={showFavoritesOnly ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                    className="gap-2"
-                  >
-                    <Star className={`h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                    <span className="hidden sm:inline">Favorites</span>
-                  </Button>
-                  <Button
                     variant="outline"
                     onClick={() => {
                       if (!isPro) {

@@ -23,8 +23,6 @@ import {
   FileDown, 
   Image as ImageIcon, 
   Loader2,
-  Heart,
-  HeartOff,
   Zap
 } from 'lucide-react';
 import { useRecipes } from '@/firebase/firestore/use-recipes';
@@ -399,7 +397,7 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                     }}
                     className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   >
-                    <HeartOff className="h-4 w-4" />
+                    <Star className="h-4 w-4" />
                   </Button>
                 )}
               </div>
