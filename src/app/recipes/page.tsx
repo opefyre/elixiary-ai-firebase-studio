@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useUser, useRecipes, useSubscription } from '@/firebase';
 import { useSavedRecipes } from '@/hooks/use-saved-recipes';
-import { Loader2, BookOpen, Search, Filter, X, ShoppingCart, Star, Tag, Crown, Heart } from 'lucide-react';
+import { Loader2, BookOpen, Search, Filter, X, ShoppingCart, Star, Tag, Crown, Heart, Clock, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

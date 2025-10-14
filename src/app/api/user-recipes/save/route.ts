@@ -6,8 +6,6 @@ export async function POST(request: NextRequest) {
     const { adminDb } = initializeFirebaseServer();
     const { recipeId, userId, recipeData } = await request.json();
 
-    console.log('Save recipe request:', { recipeId, userId, recipeData: !!recipeData });
-
     if (!recipeId || !userId || !recipeData) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -34,13 +32,11 @@ export async function POST(request: NextRequest) {
       source: 'curated'
     };
 
-    const docRef = await adminDb.collection('user-saved-recipes').add(savedRecipe);
-    console.log('Recipe saved with ID:', docRef.id);
+    await adminDb.collection('user-saved-recipes').add(savedRecipe);
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Recipe saved successfully',
-      id: docRef.id
+      message: 'Recipe saved successfully'
     });
 
   } catch (error: any) {

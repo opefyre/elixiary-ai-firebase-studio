@@ -25,16 +25,12 @@ export function useSavedRecipes() {
 
     setLoading(true);
     try {
-      console.log('Fetching saved recipes for user:', user.uid);
       const response = await fetch(`/api/user-recipes/saved?userId=${user.uid}`);
       const data = await response.json();
-
-      console.log('Saved recipes response:', { status: response.status, data });
 
       if (response.ok) {
         setSavedRecipes(data.savedRecipes || []);
         setSavedRecipeIds(new Set(data.savedRecipes?.map((r: SavedRecipe) => r.recipeId) || []));
-        console.log('Saved recipes loaded:', data.savedRecipes?.length || 0);
       } else {
         console.error('Error fetching saved recipes:', data.error);
       }
@@ -54,8 +50,6 @@ export function useSavedRecipes() {
   const saveRecipe = useCallback(async (recipeId: string, recipeData: any) => {
     if (!user) return false;
 
-    console.log('Saving recipe:', { recipeId, userId: user.uid, recipeData: !!recipeData });
-
     try {
       const response = await fetch('/api/user-recipes/save', {
         method: 'POST',
@@ -68,7 +62,6 @@ export function useSavedRecipes() {
       });
 
       const data = await response.json();
-      console.log('Save recipe response:', { status: response.status, data });
 
       if (response.ok) {
         // Optimistic update
@@ -77,8 +70,6 @@ export function useSavedRecipes() {
           title: 'Recipe Saved!',
           description: 'Added to your saved recipes collection.',
         });
-        // Refresh the saved recipes list
-        fetchSavedRecipes();
         return true;
       } else {
         toast({
@@ -97,7 +88,7 @@ export function useSavedRecipes() {
       });
       return false;
     }
-  }, [user, toast, fetchSavedRecipes]);
+  }, [user, toast]);
 
   // Unsave a recipe
   const unsaveRecipe = useCallback(async (recipeId: string) => {
