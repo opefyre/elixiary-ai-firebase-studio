@@ -29,7 +29,6 @@ import {
   Zap
 } from 'lucide-react';
 import { useRecipes } from '@/firebase/firestore/use-recipes';
-import { useSavedRecipes } from '@/hooks/use-saved-recipes';
 import { useSubscription } from '@/firebase';
 import ReactMarkdown from 'react-markdown';
 import { useToast } from '@/hooks/use-toast';
@@ -75,14 +74,12 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   const [upgradeFeature, setUpgradeFeature] = useState<{name: string; description: string; icon: React.ReactNode} | null>(null);
   
   const { toast } = useToast();
-  const { updateRecipeTags, toggleFavorite, updateRecipeImage } = useRecipes();
-  const { isRecipeSaved, saveRecipe, unsaveRecipe } = useSavedRecipes();
+  const { updateRecipeTags, updateRecipeImage } = useRecipes();
   const { isPro } = useSubscription();
 
   const isAIRecipe = recipe.source === 'ai';
   const isCuratedRecipe = recipe.source === 'curated';
   const isSaved = isCuratedRecipe || (isAIRecipe && recipe.isFavorite);
-  const isCuratedSaved = isCuratedRecipe && isRecipeSaved(recipe.id);
 
   const recipeName = isAIRecipe ? recipe.recipeName : recipe.name;
   const recipeImage = recipe.imageUrl;
@@ -146,17 +143,6 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
     }
   };
 
-  const handleToggleFavorite = async () => {
-    if (isCuratedRecipe) {
-      if (isCuratedSaved) {
-        await unsaveRecipe(recipe.id);
-      } else {
-        await saveRecipe(recipe.id, recipe);
-      }
-    } else if (isAIRecipe) {
-      await toggleFavorite(recipe.id, !recipe.isFavorite);
-    }
-  };
 
   const handleGenerateImage = async () => {
     if (!isPro) {
@@ -395,19 +381,6 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
               </div>
 
               <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleToggleFavorite}
-                  className="gap-1"
-                >
-                  {isSaved ? (
-                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                  ) : (
-                    <Heart className="h-4 w-4" />
-                  )}
-                </Button>
-                
                 {(isAIRecipe && onDelete) && (
                   <Button
                     variant="ghost"
