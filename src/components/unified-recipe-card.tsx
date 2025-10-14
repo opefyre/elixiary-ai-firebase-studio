@@ -142,22 +142,31 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
 
 
   const handleGenerateImage = async () => {
-    if (!isPro) {
-      setUpgradeFeature({
-        name: "AI Image Generation",
-        description: "Generate beautiful cocktail images with AI",
-        icon: <ImageIcon className="h-8 w-8 text-white" />
+    if (!recipeName) {
+      toast({
+        title: "Error",
+        description: "Recipe name is required to generate an image.",
+        variant: "destructive",
       });
-      setShowUpgradeDialog(true);
       return;
     }
 
     setIsGeneratingImage(true);
     try {
-      // This would call your image generation API
+      // Generate beautiful gradient image
+      const imageDataUrl = generateCocktailGradient({
+        name: recipeName,
+        ingredients: isAIRecipe ? (recipe.ingredients as string) : (recipe.ingredients as Array<any>).map(i => i.ingredient).join(', '),
+        glassware: recipeGlassware || 'Standard glass',
+        difficultyLevel: recipe.difficulty || 'Medium',
+      });
+
+      // Save image to recipe
+      await updateRecipeImage(recipe.id, imageDataUrl);
+
       toast({
-        title: "Image Generation",
-        description: "This feature is coming soon!",
+        title: "Image Generated!",
+        description: "Your cocktail now has a beautiful visual.",
       });
     } catch (error) {
       toast({
