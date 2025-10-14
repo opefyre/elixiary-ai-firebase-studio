@@ -11,17 +11,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
     }
 
-    // Get user's saved recipes
+    // Get user's saved recipes (without orderBy to avoid index requirement)
     const query = await adminDb
       .collection('user-saved-recipes')
       .where('userId', '==', userId)
-      .orderBy('savedAt', 'desc')
       .get();
 
     const savedRecipes = query.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Sort by savedAt in descending order (newest first)
+    savedRecipes.sort((a, b) => {
+      const aTime = a.savedAt?.toDate?.() || new Date(a.savedAt);
+      const bTime = b.savedAt?.toDate?.() || new Date(b.savedAt);
+      return bTime.getTime() - aTime.getTime();
+    });
 
     return NextResponse.json({ 
       savedRecipes,
