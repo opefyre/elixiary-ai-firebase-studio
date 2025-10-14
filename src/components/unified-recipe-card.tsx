@@ -35,6 +35,7 @@ import ReactMarkdown from 'react-markdown';
 import { useToast } from '@/hooks/use-toast';
 import { exportRecipeToPDF } from '@/lib/pdf-exporter';
 import { generateCocktailGradient } from '@/lib/generate-cocktail-gradient';
+import Image from 'next/image';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 import Link from 'next/link';
 
@@ -86,6 +87,19 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   const recipeName = isAIRecipe ? recipe.recipeName : recipe.name;
   const recipeImage = recipe.imageUrl;
   const recipeGlassware = recipe.glassware;
+
+  // Helper function to get Google Drive thumbnail
+  const getGoogleDriveThumbnail = (url: string) => {
+    if (!url) return null;
+    
+    // Convert Google Drive file URL to optimized image URL
+    const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+    if (fileId) {
+      // Use optimized size for faster loading - w400 for card thumbnails
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}=w400-h600-p`;
+    }
+    return url;
+  };
 
   const handleDelete = async () => {
     if (!confirm(`Delete "${recipeName}"?`)) return;
@@ -279,135 +293,148 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
 
   return (
     <>
-      <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold line-clamp-2 leading-tight">
-                {recipeName}
-              </CardTitle>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-                {recipe.prepTime && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{recipe.prepTime}</span>
-                  </div>
-                )}
-                {recipeGlassware && (
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-4 w-4" />
-                    <span>{recipeGlassware}</span>
-                  </div>
-                )}
+      <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm cursor-pointer h-full">
+        <CardContent className="p-0 h-full flex flex-col">
+          {/* Recipe Image */}
+          <div className="relative h-80 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
+            {recipeImage ? (
+              <Image
+                src={getGoogleDriveThumbnail(recipeImage) || recipeImage}
+                alt={recipeName || 'Recipe'}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                <div className="text-6xl">🍸</div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 ml-4">
-              <Badge variant="outline" className="text-xs">
+            )}
+            
+            {/* Source Badge */}
+            <div className="absolute top-3 left-3">
+              <Badge variant="outline" className="text-xs bg-background/80">
                 {isAIRecipe ? 'AI Generated' : 'Curated'}
               </Badge>
-              {isSaved && (
-                <Star className="h-4 w-4 text-yellow-500 fill-current" />
-              )}
             </div>
+            
+            {/* Favorite Star */}
+            {isSaved && (
+              <div className="absolute top-3 right-3">
+                <Star className="h-5 w-5 text-yellow-500 fill-current" />
+              </div>
+            )}
           </div>
-        </CardHeader>
 
-        <CardContent className="pt-0">
-          {/* Recipe Image */}
-          {recipeImage && (
-            <div className="relative h-48 rounded-lg overflow-hidden mb-4 border border-primary/20">
-              <img 
-                src={recipeImage} 
-                alt={recipeName} 
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          {/* Tags */}
-          {recipe.tags && recipe.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-4">
-              {recipe.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-              {recipe.tags.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{recipe.tags.length - 3}
-                </Badge>
+          {/* Recipe Info */}
+          <div className="p-5 flex flex-col flex-grow">
+            <h3 className="font-semibold text-lg mb-3 line-clamp-2 leading-tight">
+              {recipeName}
+            </h3>
+            
+            <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+              {recipe.prepTime && (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="text-xs">{recipe.prepTime}</span>
+                </div>
+              )}
+              {recipeGlassware && (
+                <div className="flex items-center gap-1">
+                  <Zap className="h-3.5 w-3.5" />
+                  <span className="text-xs">{recipeGlassware}</span>
+                </div>
               )}
             </div>
-          )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsOpen(true)}
-                className="gap-2"
-              >
-                <Eye className="h-4 w-4" />
-                View
-              </Button>
-              
-              {isCuratedRecipe ? (
+            {/* Tags */}
+            {recipe.tags && recipe.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-3 mt-auto">
+                {recipe.tags.slice(0, 2).map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
+                    {tag.replace(/_/g, ' ')}
+                  </Badge>
+                ))}
+                {recipe.tags.length > 2 && (
+                  <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
+                    +{recipe.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center justify-between mt-auto">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  asChild
+                  onClick={() => setIsOpen(true)}
                   className="gap-2"
                 >
-                  <Link href={`/cocktails/recipe/${recipe.id}`}>
-                    <Eye className="h-4 w-4" />
-                    Full Recipe
-                  </Link>
+                  <Eye className="h-4 w-4" />
+                  View
                 </Button>
-              ) : null}
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggleFavorite}
-                className="gap-1"
-              >
-                {isSaved ? (
-                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                ) : (
-                  <Heart className="h-4 w-4" />
+                
+                {isCuratedRecipe && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    className="gap-2"
+                  >
+                    <Link href={`/cocktails/recipe/${recipe.id}`}>
+                      <Eye className="h-4 w-4" />
+                      Full Recipe
+                    </Link>
+                  </Button>
                 )}
-              </Button>
-              
-              {(isAIRecipe && onDelete) && (
+              </div>
+
+              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="text-red-500 hover:text-red-700"
+                  onClick={handleToggleFavorite}
+                  className="gap-1"
                 >
-                  {isDeleting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  {isSaved ? (
+                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
                   ) : (
-                    <Trash2 className="h-4 w-4" />
+                    <Heart className="h-4 w-4" />
                   )}
                 </Button>
-              )}
-              
-              {isCuratedRecipe && onUnsave && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleUnsave}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <HeartOff className="h-4 w-4" />
-                </Button>
-              )}
+                
+                {(isAIRecipe && onDelete) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    {isDeleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+                
+                {isCuratedRecipe && onUnsave && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleUnsave}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <HeartOff className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -430,11 +457,15 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
 
           {/* Recipe Image */}
           {recipeImage && (
-            <div className="relative w-full h-48 rounded-lg overflow-hidden border border-primary/20">
-              <img 
-                src={recipeImage} 
-                alt={recipeName} 
-                className="w-full h-full object-cover"
+            <div className="relative w-full h-64 rounded-lg overflow-hidden border border-primary/20">
+              <Image
+                src={getGoogleDriveThumbnail(recipeImage) || recipeImage}
+                alt={recipeName || 'Recipe'}
+                fill
+                className="object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </div>
           )}
