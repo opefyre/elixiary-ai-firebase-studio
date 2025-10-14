@@ -68,6 +68,8 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<{name: string; description: string; icon: React.ReactNode} | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showUnsaveDialog, setShowUnsaveDialog] = useState(false);
   
   const { toast } = useToast();
   const { updateRecipeTags, updateRecipeImage } = useRecipes();
@@ -75,7 +77,7 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
 
   const isAIRecipe = recipe.source === 'ai';
   const isCuratedRecipe = recipe.source === 'curated';
-  const isSaved = isCuratedRecipe || (isAIRecipe && recipe.isFavorite);
+  const isSaved = isCuratedRecipe;
 
   const recipeName = isAIRecipe ? recipe.recipeName : recipe.name;
   const recipeImage = recipe.imageUrl;
@@ -95,8 +97,7 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Delete "${recipeName}"?`)) return;
-    
+    setShowDeleteDialog(false);
     setIsDeleting(true);
     setIsOpen(false);
     try {
@@ -118,24 +119,24 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   };
 
   const handleUnsave = async () => {
-    if (!confirm(`Remove "${recipeName}" from favorites?`)) return;
-    
+    setShowUnsaveDialog(false);
+    setIsDeleting(true);
+    setIsOpen(false);
     try {
-      if (isCuratedRecipe && onUnsave) {
+      if (onUnsave) {
         await onUnsave(recipe.id);
-      } else if (isAIRecipe) {
-        await toggleFavorite(recipe.id, false);
       }
       toast({
-        title: "Removed from Favorites",
-        description: "Recipe has been removed from your favorites.",
+        title: "Recipe Unsaved",
+        description: "Recipe has been removed from your saved collection.",
       });
     } catch (err) {
       toast({
-        title: "Remove Failed",
-        description: "Could not remove recipe. Please try again.",
+        title: "Unsave Failed",
+        description: "Could not unsave recipe. Please try again.",
         variant: "destructive",
       });
+      setIsDeleting(false);
     }
   };
 
@@ -374,7 +375,7 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete();
+                      setShowDeleteDialog(true);
                     }}
                     disabled={isDeleting}
                     className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -393,7 +394,7 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleUnsave();
+                      setShowUnsaveDialog(true);
                     }}
                     className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   >
@@ -551,6 +552,74 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
         featureDescription={upgradeFeature?.description || ''}
         featureIcon={upgradeFeature?.icon}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Recipe</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{recipeName}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unsave Confirmation Dialog */}
+      <Dialog open={showUnsaveDialog} onOpenChange={setShowUnsaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove from Favorites</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove "{recipeName}" from your saved recipes?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowUnsaveDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleUnsave}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Removing...
+                </>
+              ) : (
+                'Remove'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

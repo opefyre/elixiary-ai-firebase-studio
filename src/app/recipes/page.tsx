@@ -22,11 +22,10 @@ export default function RecipesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterGlassware, setFilterGlassware] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string>('all');
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [selectedRecipeIds, setSelectedRecipeIds] = useState<Set<string>>(new Set());
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'favorites' | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'ai' | 'favorites'>('all');
 
   // Combine AI recipes and saved curated recipes
   const allRecipes = useMemo(() => {
@@ -48,10 +47,7 @@ export default function RecipesPage() {
     if (activeTab === 'ai') {
       recipesToFilter = allRecipes.filter(recipe => recipe.source === 'ai');
     } else if (activeTab === 'favorites') {
-      recipesToFilter = allRecipes.filter(recipe => 
-        (recipe.source === 'ai' && recipe.isFavorite) || 
-        (recipe.source === 'curated')
-      );
+      recipesToFilter = allRecipes.filter(recipe => recipe.source === 'curated');
     }
 
     return recipesToFilter.filter((recipe) => {
@@ -70,14 +66,9 @@ export default function RecipesPage() {
       const matchesTag = filterTag === 'all' || 
         (recipe.tags && recipe.tags.includes(filterTag));
 
-      // Favorites filter - show AI favorites OR saved curated recipes
-      const matchesFavorite = !showFavoritesOnly || 
-        (recipe.source === 'ai' && recipe.isFavorite) || 
-        (recipe.source === 'curated');
-
-      return matchesSearch && matchesGlassware && matchesTag && matchesFavorite;
+      return matchesSearch && matchesGlassware && matchesTag;
     });
-  }, [allRecipes, searchQuery, filterGlassware, filterTag, showFavoritesOnly, activeTab]);
+  }, [allRecipes, searchQuery, filterGlassware, filterTag, activeTab]);
 
   // Get unique glassware types
   const glasswareTypes = useMemo(() => {
@@ -331,7 +322,7 @@ export default function RecipesPage() {
             className="gap-2"
           >
             <Heart className="h-4 w-4" />
-            Favorites ({recipes.filter(r => r.isFavorite).length + savedRecipes.length})
+            Favorites ({savedRecipes.length})
           </Button>
         </div>
       </section>
