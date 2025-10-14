@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { 
   Trash2, 
-  Eye, 
   Clock, 
   Share2, 
   Copy, 
@@ -36,7 +35,6 @@ import { exportRecipeToPDF } from '@/lib/pdf-exporter';
 import { generateCocktailGradient } from '@/lib/generate-cocktail-gradient';
 import Image from 'next/image';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
-import Link from 'next/link';
 
 interface UnifiedRecipeCardProps {
   recipe: {
@@ -277,9 +275,20 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
     }
   };
 
+  const handleCardClick = () => {
+    if (isCuratedRecipe) {
+      window.location.href = `/cocktails/recipe/${recipe.id}`;
+    } else if (isAIRecipe) {
+      setIsOpen(true);
+    }
+  };
+
   return (
     <>
-      <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm cursor-pointer h-full">
+      <Card 
+        className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm cursor-pointer h-full"
+        onClick={handleCardClick}
+      >
         <CardContent className="p-0 h-full flex flex-col">
           {/* Recipe Image */}
           <div className="relative h-80 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
@@ -352,32 +361,12 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
               </div>
             )}
 
-            {/* Actions */}
+            {/* Actions - positioned to not interfere with card click */}
             <div className="flex items-center justify-between mt-auto">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsOpen(true)}
-                  className="gap-2"
-                >
-                  <Eye className="h-4 w-4" />
-                  View
-                </Button>
-                
-                {isCuratedRecipe && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="gap-2"
-                  >
-                    <Link href={`/cocktails/recipe/${recipe.id}`}>
-                      <Eye className="h-4 w-4" />
-                      Full Recipe
-                    </Link>
-                  </Button>
-                )}
+              <div className="flex items-center justify-center text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <span>
+                  {isCuratedRecipe ? 'Click to view full recipe' : 'Click to view details'}
+                </span>
               </div>
 
               <div className="flex items-center gap-1">
@@ -385,9 +374,12 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleDelete}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete();
+                    }}
                     disabled={isDeleting}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   >
                     {isDeleting ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -401,8 +393,11 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleUnsave}
-                    className="text-red-500 hover:text-red-700"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUnsave();
+                    }}
+                    className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   >
                     <HeartOff className="h-4 w-4" />
                   </Button>
