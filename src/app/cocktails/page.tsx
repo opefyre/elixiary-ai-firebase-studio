@@ -334,7 +334,7 @@ export default function CuratedPage() {
               )}
             </>
           ) : (
-            `Discover our collection of ${recipes.length > 0 ? '495+' : ''} professionally curated cocktail recipes from around the world.`
+                    'Discover our collection of professionally curated cocktail recipes from around the world.'
           )}
         </p>
       </div>
