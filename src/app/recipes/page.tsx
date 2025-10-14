@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useUser, useRecipes, useSubscription } from '@/firebase';
-import { Loader2, BookOpen, Search, Filter, X, ShoppingCart, Star, Tag, Crown } from 'lucide-react';
+import { useSavedRecipes } from '@/hooks/use-saved-recipes';
+import { Loader2, BookOpen, Search, Filter, X, ShoppingCart, Star, Tag, Crown, Heart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 export default function RecipesPage() {
   const { user, isUserLoading } = useUser();
   const { recipes, isLoading, deleteRecipe } = useRecipes();
+  const { savedRecipes, unsaveRecipe } = useSavedRecipes();
   const { isPro } = useSubscription();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterGlassware, setFilterGlassware] = useState<string>('all');
@@ -23,13 +25,36 @@ export default function RecipesPage() {
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [selectedRecipeIds, setSelectedRecipeIds] = useState<Set<string>>(new Set());
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState<'ai' | 'saved' | 'all'>('all');
+
+  // Combine AI recipes and saved curated recipes
+  const allRecipes = useMemo(() => {
+    const aiRecipes = recipes.map(recipe => ({ ...recipe, source: 'ai' }));
+    const curatedRecipes = savedRecipes.map(saved => ({ 
+      ...saved.recipeData, 
+      source: 'curated',
+      id: saved.recipeId,
+      savedAt: saved.savedAt
+    }));
+    return [...aiRecipes, ...curatedRecipes];
+  }, [recipes, savedRecipes]);
 
   // Filter and search recipes
   const filteredRecipes = useMemo(() => {
-    return recipes.filter((recipe) => {
+    let recipesToFilter = allRecipes;
+
+    // Tab filter
+    if (activeTab === 'ai') {
+      recipesToFilter = allRecipes.filter(recipe => recipe.source === 'ai');
+    } else if (activeTab === 'saved') {
+      recipesToFilter = allRecipes.filter(recipe => recipe.source === 'curated');
+    }
+
+    return recipesToFilter.filter((recipe) => {
       // Search filter
       const matchesSearch = searchQuery.trim() === '' || 
-        recipe.recipeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipe.recipeName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipe.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (recipe.description && recipe.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (recipe.ingredients && recipe.ingredients.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -41,12 +66,12 @@ export default function RecipesPage() {
       const matchesTag = filterTag === 'all' || 
         (recipe.tags && recipe.tags.includes(filterTag));
 
-      // Favorites filter
-      const matchesFavorite = !showFavoritesOnly || recipe.isFavorite;
+      // Favorites filter (only for AI recipes)
+      const matchesFavorite = !showFavoritesOnly || recipe.isFavorite || recipe.source === 'curated';
 
       return matchesSearch && matchesGlassware && matchesTag && matchesFavorite;
     });
-  }, [recipes, searchQuery, filterGlassware, filterTag, showFavoritesOnly]);
+  }, [allRecipes, searchQuery, filterGlassware, filterTag, showFavoritesOnly, activeTab]);
 
   // Get unique glassware types
   const glasswareTypes = useMemo(() => {
@@ -144,7 +169,7 @@ export default function RecipesPage() {
               </h1>
               <p className="mt-2 text-muted-foreground">
                 {filteredRecipes.length} {filteredRecipes.length === 1 ? 'recipe' : 'recipes'} 
-                {recipes.length !== filteredRecipes.length && ` (filtered from ${recipes.length})`}
+                {allRecipes.length !== filteredRecipes.length && ` (filtered from ${allRecipes.length})`}
               </p>
             </div>
             <div className="flex gap-2">
@@ -281,9 +306,40 @@ export default function RecipesPage() {
             </div>
           )}
         </div>
+
+        {/* Tab Navigation */}
+        <div className="flex gap-2 mt-6">
+          <Button
+            variant={activeTab === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab('all')}
+            className="gap-2"
+          >
+            <BookOpen className="h-4 w-4" />
+            All Recipes ({allRecipes.length})
+          </Button>
+          <Button
+            variant={activeTab === 'ai' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab('ai')}
+            className="gap-2"
+          >
+            <Crown className="h-4 w-4" />
+            AI Generated ({recipes.length})
+          </Button>
+          <Button
+            variant={activeTab === 'saved' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab('saved')}
+            className="gap-2"
+          >
+            <Heart className="h-4 w-4" />
+            Saved Cocktails ({savedRecipes.length})
+          </Button>
+        </div>
       </section>
 
-      {recipes.length === 0 ? (
+      {allRecipes.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
             <div className="flex flex-col items-center gap-4">
@@ -331,11 +387,66 @@ export default function RecipesPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredRecipes.map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              onDelete={deleteRecipe}
-            />
+            recipe.source === 'ai' ? (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                onDelete={deleteRecipe}
+              />
+            ) : (
+              <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                        {recipe.name}
+                      </h3>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{recipe.prepTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Zap className="h-4 w-4" />
+                          <span>{recipe.glassware}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {recipe.tags?.slice(0, 3).map((tag: string) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag.replace(/_/g, ' ')}
+                          </Badge>
+                        ))}
+                        {recipe.tags?.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{recipe.tags.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      Curated
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/cocktails/recipe/${recipe.id}`}>
+                        View Recipe
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => unsaveRecipe(recipe.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Heart className="h-4 w-4 fill-current" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )
           ))}
         </div>
       )}

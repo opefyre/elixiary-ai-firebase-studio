@@ -17,6 +17,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import { SaveRecipeButton } from '@/components/save-recipe-button';
 
 interface CuratedRecipe {
   id: string;
@@ -196,13 +197,20 @@ Source: ${recipe.source}
   return (
     <div className="container mx-auto px-4 py-8 pt-24">
       {/* Back Button */}
-      <div className="mb-6">
+      <div className="mb-6 flex items-center gap-4">
         <Button variant="ghost" asChild>
           <Link href="/cocktails">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Cocktails
           </Link>
         </Button>
+        <SaveRecipeButton 
+          recipeId={recipe.id} 
+          recipeData={recipe}
+          variant="default"
+          size="sm"
+          showText={true}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

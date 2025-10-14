@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { SaveRecipeButton } from '@/components/save-recipe-button';
 
 interface CuratedRecipe {
   id: string;
@@ -269,6 +270,18 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                         +{recipe.tags.length - 2}
                       </Badge>
                     )}
+                  </div>
+
+                  {/* Save Recipe Button */}
+                  <div className="flex justify-center">
+                    <SaveRecipeButton 
+                      recipeId={recipe.id} 
+                      recipeData={recipe}
+                      variant="ghost"
+                      size="sm"
+                      showText={false}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    />
                   </div>
 
                 </div>
