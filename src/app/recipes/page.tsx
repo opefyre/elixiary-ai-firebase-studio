@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { RecipeCard } from '@/components/recipe-card';
+import { UnifiedRecipeCard } from '@/components/unified-recipe-card';
 import { ShoppingListDialog } from '@/components/shopping-list-dialog';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 
@@ -25,7 +26,7 @@ export default function RecipesPage() {
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [selectedRecipeIds, setSelectedRecipeIds] = useState<Set<string>>(new Set());
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ai' | 'saved' | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<'ai' | 'favorites' | 'all'>('all');
 
   // Combine AI recipes and saved curated recipes
   const allRecipes = useMemo(() => {
@@ -46,8 +47,11 @@ export default function RecipesPage() {
     // Tab filter
     if (activeTab === 'ai') {
       recipesToFilter = allRecipes.filter(recipe => recipe.source === 'ai');
-    } else if (activeTab === 'saved') {
-      recipesToFilter = allRecipes.filter(recipe => recipe.source === 'curated');
+    } else if (activeTab === 'favorites') {
+      recipesToFilter = allRecipes.filter(recipe => 
+        (recipe.source === 'ai' && recipe.isFavorite) || 
+        (recipe.source === 'curated')
+      );
     }
 
     return recipesToFilter.filter((recipe) => {
@@ -66,8 +70,10 @@ export default function RecipesPage() {
       const matchesTag = filterTag === 'all' || 
         (recipe.tags && recipe.tags.includes(filterTag));
 
-      // Favorites filter (only for AI recipes)
-      const matchesFavorite = !showFavoritesOnly || recipe.isFavorite || recipe.source === 'curated';
+      // Favorites filter - show AI favorites OR saved curated recipes
+      const matchesFavorite = !showFavoritesOnly || 
+        (recipe.source === 'ai' && recipe.isFavorite) || 
+        (recipe.source === 'curated');
 
       return matchesSearch && matchesGlassware && matchesTag && matchesFavorite;
     });
@@ -328,13 +334,13 @@ export default function RecipesPage() {
             AI Generated ({recipes.length})
           </Button>
           <Button
-            variant={activeTab === 'saved' ? 'default' : 'outline'}
+            variant={activeTab === 'favorites' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setActiveTab('saved')}
+            onClick={() => setActiveTab('favorites')}
             className="gap-2"
           >
             <Heart className="h-4 w-4" />
-            Saved Cocktails ({savedRecipes.length})
+            Favorites ({recipes.filter(r => r.isFavorite).length + savedRecipes.length})
           </Button>
         </div>
       </section>
@@ -387,66 +393,12 @@ export default function RecipesPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredRecipes.map((recipe) => (
-            recipe.source === 'ai' ? (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onDelete={deleteRecipe}
-              />
-            ) : (
-              <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                        {recipe.name}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          <span>{recipe.prepTime}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Zap className="h-4 w-4" />
-                          <span>{recipe.glassware}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {recipe.tags?.slice(0, 3).map((tag: string) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag.replace(/_/g, ' ')}
-                          </Badge>
-                        ))}
-                        {recipe.tags?.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{recipe.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      Curated
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/cocktails/recipe/${recipe.id}`}>
-                        View Recipe
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => unsaveRecipe(recipe.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Heart className="h-4 w-4 fill-current" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )
+            <UnifiedRecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              onDelete={recipe.source === 'ai' ? deleteRecipe : undefined}
+              onUnsave={recipe.source === 'curated' ? unsaveRecipe : undefined}
+            />
           ))}
         </div>
       )}
