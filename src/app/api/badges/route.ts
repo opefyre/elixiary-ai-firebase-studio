@@ -43,7 +43,18 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const userBadges = userBadgesDoc.data() as UserBadges;
+    const rawData = userBadgesDoc.data();
+    
+    // Convert Firestore timestamps to Date objects
+    const userBadges: UserBadges = {
+      ...rawData,
+      achievements: {
+        ...rawData.achievements,
+        lastActivityDate: rawData.achievements?.lastActivityDate?.toDate?.() || null,
+      },
+      lastUpdated: rawData.lastUpdated?.toDate?.() || new Date(),
+    } as UserBadges;
+    
     const stats = getBadgeStats(userBadges);
     const progress = calculateBadgeProgress(userBadges.badges, userBadges.achievements);
 
@@ -92,7 +103,17 @@ export async function POST(request: NextRequest) {
         lastUpdated: new Date(),
       };
     } else {
-      userBadges = userBadgesDoc.data() as UserBadges;
+      const rawData = userBadgesDoc.data();
+      
+      // Convert Firestore timestamps to Date objects
+      userBadges = {
+        ...rawData,
+        achievements: {
+          ...rawData.achievements,
+          lastActivityDate: rawData.achievements?.lastActivityDate?.toDate?.() || null,
+        },
+        lastUpdated: rawData.lastUpdated?.toDate?.() || new Date(),
+      } as UserBadges;
     }
 
     // Update achievements based on action

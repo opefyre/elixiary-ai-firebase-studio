@@ -127,7 +127,13 @@ export function updateAchievements(
   const now = new Date();
   const today = now.toDateString();
   const lastActivityDate = currentAchievements.lastActivityDate;
-  const lastActivityDay = lastActivityDate ? lastActivityDate.toDateString() : null;
+  
+  // Handle both Date objects and Firestore timestamps
+  const lastActivityDay = lastActivityDate 
+    ? (lastActivityDate instanceof Date 
+        ? lastActivityDate.toDateString() 
+        : new Date(lastActivityDate).toDateString())
+    : null;
 
   let newAchievements = { ...currentAchievements };
 
