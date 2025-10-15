@@ -112,6 +112,9 @@ export default function AccountPage() {
   
   // Generate last 7 days with realistic distribution
   const generateChartData = (total: number, type: 'generated' | 'saved') => {
+    console.log(`=== GENERATING CHART DATA for ${type} ===`);
+    console.log('Input total:', total);
+    
     const data = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -133,11 +136,19 @@ export default function AccountPage() {
         else count = Math.floor(total * 0.1); // Days 6-7: 10% each
       }
       
+      const finalCount = Math.min(count, total);
+      console.log(`Day ${i} (${dateStr}): calculated=${count}, final=${finalCount}`);
+      
       data.push({ 
         date: dateStr, 
-        count: Math.min(count, total) 
+        count: finalCount 
       });
     }
+    
+    const totalDistributed = data.reduce((sum, day) => sum + day.count, 0);
+    console.log(`Total distributed: ${totalDistributed} (input was ${total})`);
+    console.log('=== END CHART GENERATION ===');
+    
     return data;
   };
 
@@ -146,6 +157,8 @@ export default function AccountPage() {
   
   console.log('generationChartData:', generationChartData);
   console.log('savedChartData:', savedChartData);
+  console.log('generationChartData total:', generationChartData.reduce((sum, day) => sum + day.count, 0));
+  console.log('savedChartData total:', savedChartData.reduce((sum, day) => sum + day.count, 0));
   console.log('=== END DEBUG ===');
 
   return (
