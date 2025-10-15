@@ -4,7 +4,6 @@ import { Badge, BadgeProgress } from '@/types/badges';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge as UIBadge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Crown, Star, Zap, Trophy, Award } from 'lucide-react';
 
 interface BadgeCardProps {
@@ -37,62 +36,48 @@ export function BadgeCard({ badge, isUnlocked, progress = 0, current = 0, requir
   };
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Card className={`transition-all duration-200 hover:shadow-md ${
-            isUnlocked 
-              ? 'ring-2 ring-primary/20 bg-gradient-to-br from-background to-primary/5' 
-              : 'opacity-60'
-          }`}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`text-2xl ${isUnlocked ? '' : 'grayscale'}`}>
-                  {badge.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className={`font-semibold text-sm ${isUnlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {badge.name}
-                    </h4>
-                    <UIBadge 
-                      variant="outline" 
-                      className={`text-xs ${getTierColor(badge.tier)}`}
-                    >
-                      {getTierIcon(badge.tier)}
-                      <span className="ml-1 capitalize">{badge.tier}</span>
-                    </UIBadge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    {badge.description}
-                  </p>
-                  {!isUnlocked && (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{current} / {required}</span>
-                        <span>{Math.round(progress)}%</span>
-                      </div>
-                      <Progress value={progress} className="h-1" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TooltipTrigger>
-        <TooltipContent>
-          <div className="text-center">
-            <p className="font-semibold">{badge.name}</p>
-            <p className="text-sm text-muted-foreground">{badge.description}</p>
+    <Card 
+      className={`transition-all duration-200 hover:shadow-md cursor-pointer ${
+        isUnlocked 
+          ? 'ring-2 ring-primary/20 bg-gradient-to-br from-background to-primary/5' 
+          : 'opacity-60'
+      }`}
+      title={`${badge.name}: ${badge.description}${!isUnlocked ? ` (${current}/${required})` : ''}`}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3">
+          <div className={`text-2xl ${isUnlocked ? '' : 'grayscale'}`}>
+            {badge.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className={`font-semibold text-sm ${isUnlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
+                {badge.name}
+              </h4>
+              <UIBadge 
+                variant="outline" 
+                className={`text-xs ${getTierColor(badge.tier)}`}
+              >
+                {getTierIcon(badge.tier)}
+                <span className="ml-1 capitalize">{badge.tier}</span>
+              </UIBadge>
+            </div>
+            <p className="text-xs text-muted-foreground mb-2">
+              {badge.description}
+            </p>
             {!isUnlocked && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Progress: {current} / {required} ({Math.round(progress)}%)
-              </p>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>{current} / {required}</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="h-1" />
+              </div>
             )}
           </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
