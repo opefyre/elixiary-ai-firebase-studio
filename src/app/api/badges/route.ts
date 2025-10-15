@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { UserBadges } from '@/types/badges';
-import { getBadgeStats, calculateBadgeProgress } from '@/lib/badges';
+import { getBadgeStats, calculateBadgeProgress, updateAchievements } from '@/lib/badges';
+import { trackRecipeGeneration, trackRecipeSave } from '@/lib/daily-usage-admin';
 
 export async function GET(request: NextRequest) {
   try {
@@ -95,9 +96,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Update achievements based on action
-    const { updateAchievements } = await import('@/lib/badges');
     userBadges.achievements = updateAchievements(userBadges.achievements, action, data);
     userBadges.lastUpdated = new Date();
+
+    // Track daily usage based on action
+    try {
+      if (action === 'recipe_generated') {
+        await trackRecipeGeneration(userId);
+      } else if (action === 'recipe_saved') {
+        await trackRecipeSave(userId);
+      }
+    } catch (error) {
+      console.error('Error tracking daily usage:', error);
+    }
 
     // Check for new badges
     const { checkForNewBadges } = await import('@/lib/badges');
