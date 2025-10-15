@@ -1,6 +1,7 @@
 'use client';
 
 import { useUser, useSubscription } from '@/firebase';
+import { useRecipes } from '@/firebase/firestore/use-recipes';
 import { Loader2, Crown, Sparkles, TrendingUp, Calendar, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ export default function AccountPage() {
     remainingGenerations,
     nextResetDate,
   } = useSubscription();
+  const { recipes: aiRecipes } = useRecipes();
   const { toast } = useToast();
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
 
@@ -94,14 +96,16 @@ export default function AccountPage() {
       ? Math.min(100, (subscription.recipeCount / limits.maxSavedRecipes) * 100)
       : 0;
 
-  // Create proper chart data using actual totals
-  const totalGenerated = subscription?.totalRecipesGenerated || 0;
-  const totalSaved = subscription?.recipeCount || 0;
+  // Use actual recipe counts instead of potentially outdated subscription data
+  const totalGenerated = aiRecipes.length; // Actual count from recipes collection
+  const totalSaved = subscription?.recipeCount || 0; // This should be correct for saved recipes
   
   // Debug logging
   console.log('=== ACCOUNT PAGE DEBUG ===');
-  console.log('subscription:', subscription);
-  console.log('totalGenerated:', totalGenerated);
+  console.log('aiRecipes.length (actual):', aiRecipes.length);
+  console.log('subscription totalRecipesGenerated:', subscription?.totalRecipesGenerated);
+  console.log('subscription recipeCount:', subscription?.recipeCount);
+  console.log('totalGenerated (using actual):', totalGenerated);
   console.log('totalSaved:', totalSaved);
   console.log('recipesGeneratedThisMonth:', subscription?.recipesGeneratedThisMonth);
   console.log('lastGenerationResetDate:', subscription?.lastGenerationResetDate);
@@ -199,7 +203,7 @@ export default function AccountPage() {
 
               {isPro && (
                 <div className="text-sm text-muted-foreground">
-                  {subscription?.totalRecipesGenerated || 0} total generated
+                  {totalGenerated} total generated
                 </div>
               )}
             </div>
