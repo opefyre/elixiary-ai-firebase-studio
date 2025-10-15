@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useRecipes, useSubscription, useUser, useFirebase } from "@/firebase";
 import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
+import { trackRecipeGeneration } from "@/lib/daily-usage";
 import { UpgradeModal } from "@/components/upgrade-modal";
 import { CustomizationDialog, type CustomizationOptions } from "@/components/customization-dialog";
 
@@ -253,6 +254,7 @@ ${window.location.origin}`.trim();
     if (result.recipe && !result.error && user && firestore) {
       try {
         await incrementGenerationCount(user.uid, firestore);
+        await trackRecipeGeneration(user.uid, firestore);
       } catch (err) {
         console.error('Failed to track generation:', err);
       }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { trackRecipeSave } from '@/lib/daily-usage';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,6 +34,9 @@ export async function POST(request: NextRequest) {
     };
 
     await adminDb.collection('user-saved-recipes').add(savedRecipe);
+
+    // Track daily usage
+    await trackRecipeSave(userId, adminDb);
 
     return NextResponse.json({ 
       success: true, 

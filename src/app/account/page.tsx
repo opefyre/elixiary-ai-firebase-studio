@@ -1,6 +1,7 @@
 'use client';
 
 import { useUser, useSubscription } from '@/firebase';
+import { useDailyUsage } from '@/hooks/use-daily-usage';
 import { Loader2, Crown, Sparkles, TrendingUp, Calendar, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ export default function AccountPage() {
   } = useSubscription();
   const { toast } = useToast();
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const { data: dailyUsageData, loading: isUsageLoading } = useDailyUsage(7);
 
   const handleManageBilling = async () => {
     if (!subscription?.stripeCustomerId) {
@@ -68,7 +70,7 @@ export default function AccountPage() {
     }).format(date);
   };
 
-  if (isUserLoading || isSubLoading) {
+  if (isUserLoading || isSubLoading || isUsageLoading) {
     return (
       <div className="container mx-auto max-w-4xl px-4 py-8 pt-24 md:py-12 md:pt-28">
         <div className="flex justify-center">
@@ -94,19 +96,11 @@ export default function AccountPage() {
       ? Math.min(100, (subscription.recipeCount / limits.maxSavedRecipes) * 100)
       : 0;
 
-  // Generate daily data for visualization
-  const dailyGenerationData: { date: string; count: number }[] = [];
-  const totalGenerated = subscription?.recipesGeneratedThisMonth || 0;
-  
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
-    
-    // Simple distribution: most on recent days
-    const count = i === 0 ? Math.ceil(totalGenerated * 0.3) : Math.floor(totalGenerated * 0.1);
-    dailyGenerationData.push({ date: dateStr, count: Math.min(count, totalGenerated) });
-  }
+  // Use real daily usage data
+  const dailyGenerationData = dailyUsageData?.usageData.map(day => ({
+    date: day.date,
+    count: day.recipesGenerated
+  })) || [];
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8 pt-20 md:py-12 md:pt-24">
@@ -203,21 +197,43 @@ export default function AccountPage() {
         </Card>
       </div>
 
-      {/* Activity Chart */}
-      <Card className="mb-6">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-medium">Activity</CardTitle>
-          <CardDescription>Your recipe generation activity this week</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UsageChart
-            data={dailyGenerationData}
-            maxValue={limits.generationsPerMonth / 4} // 1/4 of monthly limit as reasonable daily max
-            label="Recipes generated per day"
-            color="#8b5cf6"
-          />
-        </CardContent>
-      </Card>
+      {/* Activity Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Generation Chart */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium">Generation Activity</CardTitle>
+            <CardDescription>Recipes generated this week</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UsageChart
+              data={dailyGenerationData}
+              maxValue={limits.generationsPerMonth / 4} // 1/4 of monthly limit as reasonable daily max
+              label="Recipes generated per day"
+              color="#8b5cf6"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Saved Recipes Chart */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium">Saved Activity</CardTitle>
+            <CardDescription>Recipes saved this week</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UsageChart
+              data={dailyUsageData?.usageData.map(day => ({
+                date: day.date,
+                count: day.recipesSaved
+              })) || []}
+              maxValue={limits.maxSavedRecipes / 4} // 1/4 of monthly limit as reasonable daily max
+              label="Recipes saved per day"
+              color="#10b981"
+            />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Subscription Card */}
       <Card>
