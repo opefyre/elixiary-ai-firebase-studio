@@ -116,6 +116,8 @@ export default function AccountPage() {
     console.log('Input total:', total);
     
     const data = [];
+    let remainingTotal = total;
+    
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
@@ -131,13 +133,16 @@ export default function AccountPage() {
         else count = Math.floor(total * 0.05); // Days 5-6: 5% each
       } else {
         // Saved recipes: more even distribution
-        if (i <= 2) count = Math.ceil(total * 0.2); // Last 3 days: 20% each
-        else if (i <= 4) count = Math.ceil(total * 0.15); // Days 4-5: 15% each
+        if (i <= 2) count = Math.floor(total * 0.2); // Last 3 days: 20% each
+        else if (i <= 4) count = Math.floor(total * 0.15); // Days 4-5: 15% each
         else count = Math.floor(total * 0.1); // Days 6-7: 10% each
       }
       
-      const finalCount = Math.min(count, total);
-      console.log(`Day ${i} (${dateStr}): calculated=${count}, final=${finalCount}`);
+      // Ensure we don't exceed remaining total
+      const finalCount = Math.min(count, remainingTotal);
+      remainingTotal -= finalCount;
+      
+      console.log(`Day ${i} (${dateStr}): calculated=${count}, final=${finalCount}, remaining=${remainingTotal}`);
       
       data.push({ 
         date: dateStr, 
