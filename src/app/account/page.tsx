@@ -23,7 +23,6 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -189,9 +188,8 @@ export default function AccountPage() {
             </div>
           </div>
           
-          <Separator />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="border-t pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-muted-foreground">Member since:</span>
               <p className="font-medium">{formatDate(subscription?.createdAt)}</p>
@@ -202,6 +200,7 @@ export default function AccountPage() {
                 {subscription?.subscriptionStatus || 'Active'}
               </p>
             </div>
+          </div>
           </div>
         </CardContent>
       </Card>
