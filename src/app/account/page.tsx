@@ -98,6 +98,14 @@ export default function AccountPage() {
   const totalGenerated = subscription?.totalRecipesGenerated || 0;
   const totalSaved = subscription?.recipeCount || 0;
   
+  // Debug logging
+  console.log('=== ACCOUNT PAGE DEBUG ===');
+  console.log('subscription:', subscription);
+  console.log('totalGenerated:', totalGenerated);
+  console.log('totalSaved:', totalSaved);
+  console.log('recipesGeneratedThisMonth:', subscription?.recipesGeneratedThisMonth);
+  console.log('lastGenerationResetDate:', subscription?.lastGenerationResetDate);
+  
   // Generate last 7 days with realistic distribution
   const generateChartData = (total: number, type: 'generated' | 'saved') => {
     const data = [];
@@ -131,6 +139,10 @@ export default function AccountPage() {
 
   const generationChartData = generateChartData(totalGenerated, 'generated');
   const savedChartData = generateChartData(totalSaved, 'saved');
+  
+  console.log('generationChartData:', generationChartData);
+  console.log('savedChartData:', savedChartData);
+  console.log('=== END DEBUG ===');
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8 pt-20 md:py-12 md:pt-24">
