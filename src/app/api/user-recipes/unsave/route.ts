@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
-import { trackRecipeUnsave } from '@/lib/daily-usage';
+import { trackRecipeUnsave } from '@/lib/daily-usage-admin';
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -28,7 +28,7 @@ export async function DELETE(request: NextRequest) {
     await adminDb.collection('user-saved-recipes').doc(doc.id).delete();
 
     // Track daily usage
-    await trackRecipeUnsave(userId, adminDb);
+    await trackRecipeUnsave(userId);
 
     return NextResponse.json({ 
       success: true, 

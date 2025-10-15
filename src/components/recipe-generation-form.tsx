@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRecipes, useSubscription, useUser, useFirebase } from "@/firebase";
 import { useBadges } from "@/hooks/use-badges";
 import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
-import { trackRecipeGeneration } from "@/lib/daily-usage";
+import { trackRecipeGeneration } from "@/lib/daily-usage-admin";
 import { UpgradeModal } from "@/components/upgrade-modal";
 import { CustomizationDialog, type CustomizationOptions } from "@/components/customization-dialog";
 
@@ -266,7 +266,7 @@ ${window.location.origin}`.trim();
     if (result.recipe && !result.error && user && firestore) {
       try {
         await incrementGenerationCount(user.uid, firestore);
-        await trackRecipeGeneration(user.uid, firestore);
+        await trackRecipeGeneration(user.uid);
         
         // Update badges for recipe generation
         if (isPro) {
