@@ -25,6 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useRecipes, useSubscription, useUser, useFirebase } from "@/firebase";
+import { useBadges } from "@/hooks/use-badges";
 import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
 import { trackRecipeGeneration } from "@/lib/daily-usage";
 import { UpgradeModal } from "@/components/upgrade-modal";
@@ -86,6 +87,7 @@ export function RecipeGenerationForm({
   const { user } = useUser();
   const { firestore } = useFirebase();
   const { canGenerateRecipe, canSaveRecipe, remainingGenerations, remainingSaves, isPro } = useSubscription();
+  const { updateBadges } = useBadges();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -195,6 +197,16 @@ ${window.location.origin}`.trim();
     try {
       await saveRecipe(recipe, currentPrompt);
       setIsSaved(true);
+      
+      // Update badges for recipe saving
+      if (isPro) {
+        try {
+          await updateBadges('recipe_saved');
+        } catch (error) {
+          console.error('Error updating badges:', error);
+        }
+      }
+      
       toast({
         title: "Recipe Saved! 💾",
         description: "Recipe has been saved to your collection.",
@@ -255,6 +267,15 @@ ${window.location.origin}`.trim();
       try {
         await incrementGenerationCount(user.uid, firestore);
         await trackRecipeGeneration(user.uid, firestore);
+        
+        // Update badges for recipe generation
+        if (isPro) {
+          try {
+            await updateBadges('recipe_generated');
+          } catch (error) {
+            console.error('Error updating badges:', error);
+          }
+        }
       } catch (err) {
         console.error('Failed to track generation:', err);
       }
@@ -266,6 +287,16 @@ ${window.location.origin}`.trim();
         try {
           await saveRecipe(result.recipe, data.prompt);
           setIsSaved(true);
+          
+          // Update badges for recipe saving
+          if (isPro) {
+            try {
+              await updateBadges('recipe_saved');
+            } catch (error) {
+              console.error('Error updating badges:', error);
+            }
+          }
+          
           toast({
             title: "Recipe Generated & Saved! ✨",
             description: "Your cocktail recipe has been saved to your collection.",

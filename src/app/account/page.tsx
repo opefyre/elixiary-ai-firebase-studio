@@ -3,6 +3,7 @@
 import { useUser, useSubscription } from '@/firebase';
 import { useRecipes } from '@/firebase/firestore/use-recipes';
 import { useSavedRecipes } from '@/hooks/use-saved-recipes';
+import { useBadges } from '@/hooks/use-badges';
 import { 
   Loader2, 
   User, 
@@ -24,6 +25,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { BadgeStats, BadgeGrid } from '@/components/badge-display';
+import { BadgeCelebration } from '@/components/badge-celebration';
 import Link from 'next/link';
 import { useState } from 'react';
 import { signOut } from 'firebase/auth';
@@ -42,8 +45,11 @@ export default function AccountPage() {
   } = useSubscription();
   const { recipes: aiRecipes } = useRecipes();
   const { savedRecipes } = useSavedRecipes();
+  const { userBadges, stats, progress, loading: badgesLoading, updateBadges } = useBadges();
   const { toast } = useToast();
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const [newBadgeIds, setNewBadgeIds] = useState<string[]>([]);
+  const [showBadgeCelebration, setShowBadgeCelebration] = useState(false);
 
   const handleManageBilling = async () => {
     if (!subscription?.stripeCustomerId) {
@@ -387,6 +393,49 @@ export default function AccountPage() {
         </CardContent>
       </Card>
 
+      {/* Achievements Section - Only for Pro users */}
+      {isPro && stats && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5" />
+              Achievements
+            </CardTitle>
+            <CardDescription>
+              Unlock badges by generating recipes, saving favorites, and exploring new flavors!
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Badge Stats */}
+            <BadgeStats stats={stats} />
+            
+            {/* Badge Categories */}
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  🍸 Recipe Generation
+                </h4>
+                <BadgeGrid badges={progress} category="generation" />
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  ⭐ Recipe Collection
+                </h4>
+                <BadgeGrid badges={progress} category="collection" />
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  🏆 Special Achievements
+                </h4>
+                <BadgeGrid badges={progress} category="achievement" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Account Actions */}
       <Card>
         <CardHeader>
@@ -429,6 +478,17 @@ export default function AccountPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Badge Celebration Modal */}
+      {showBadgeCelebration && newBadgeIds.length > 0 && (
+        <BadgeCelebration
+          newBadgeIds={newBadgeIds}
+          onClose={() => {
+            setShowBadgeCelebration(false);
+            setNewBadgeIds([]);
+          }}
+        />
+      )}
     </div>
   );
 }

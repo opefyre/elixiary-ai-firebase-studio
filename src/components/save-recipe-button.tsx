@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, Loader2, Star } from 'lucide-react';
 import { useSavedRecipes } from '@/hooks/use-saved-recipes';
 import { useSubscription } from '@/firebase';
+import { useBadges } from '@/hooks/use-badges';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 
 interface SaveRecipeButtonProps {
@@ -27,6 +28,7 @@ export function SaveRecipeButton({
 }: SaveRecipeButtonProps) {
   const { isRecipeSaved, saveRecipe, unsaveRecipe } = useSavedRecipes();
   const { isPro } = useSubscription();
+  const { updateBadges } = useBadges();
   const [isLoading, setIsLoading] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
@@ -46,6 +48,13 @@ export function SaveRecipeButton({
         await unsaveRecipe(recipeId);
       } else {
         await saveRecipe(recipeId, recipeData);
+        
+        // Update badges for recipe saving
+        try {
+          await updateBadges('recipe_saved');
+        } catch (error) {
+          console.error('Error updating badges:', error);
+        }
       }
     } finally {
       setIsLoading(false);
