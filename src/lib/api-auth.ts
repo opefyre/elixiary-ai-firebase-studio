@@ -65,7 +65,11 @@ export class APIAuthenticator {
       const { initializeFirebaseServer } = await import('@/firebase/server');
       const { adminDb } = initializeFirebaseServer();
       const userDoc = await adminDb.collection('users').doc(keyData.userId).get();
-      const user = userDoc.data();
+      const user = {
+        id: userDoc.id,
+        uid: keyData.userId, // Firebase Auth UID
+        ...userDoc.data()
+      };
 
       return {
         user,
