@@ -541,7 +541,7 @@ const USER_EMAIL = '${userEmail || 'your-email@example.com'}';
 
 async function getRecipes(filters = {}) {
   const params = new URLSearchParams(filters);
-  const response = await fetch(\`\${API_BASE}/recipes?\${params}\`, {
+  const response = await fetch(`\${API_BASE}/recipes?\${params}`, {
     headers: {
       'x-api-key': API_KEY,
       'x-user-email': USER_EMAIL,
@@ -550,7 +550,7 @@ async function getRecipes(filters = {}) {
   });
   
   if (!response.ok) {
-    throw new Error(\`HTTP error! status: \${response.status}\`);
+    throw new Error(`HTTP error! status: \${response.status}`);
   }
   
   return await response.json();
