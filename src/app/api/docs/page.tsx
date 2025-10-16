@@ -50,7 +50,7 @@ export default function APIDocsPage() {
 
   const generateCurlExample = (endpoint: string, method: string = 'GET', body?: any) => {
     const headers = [
-      `"x-api-key: ${apiKey || 'your_api_key_here'}"`,
+      `"x-api-key: ${apiKey || 'elx_live_your_api_key_here'}"`,
       `"x-user-email: ${userEmail || 'your-email@example.com'}"`,
       '"Content-Type: application/json"'
     ];
@@ -73,7 +73,7 @@ export default function APIDocsPage() {
     const js = `const response = await fetch('https://ai.elixiary.com/api/v1${endpoint}', {
   method: '${method}',
   headers: {
-    'x-api-key': '${apiKey || 'your_api_key_here'}',
+    'x-api-key': '${apiKey || 'elx_live_your_api_key_here'}',
     'x-user-email': '${userEmail || 'your-email@example.com'}',
     'Content-Type': 'application/json'
   }${body ? `,\n  body: JSON.stringify(${JSON.stringify(body)})` : ''}
@@ -87,7 +87,7 @@ console.log(data);`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-24 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
@@ -537,7 +537,7 @@ console.log(data);`;
                       <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
                         <pre className="text-sm font-mono overflow-x-auto">
 {`const API_BASE = 'https://ai.elixiary.com/api/v1';
-const API_KEY = '${apiKey || 'your_api_key_here'}';
+const API_KEY = '${apiKey || 'elx_live_your_api_key_here'}';
 const USER_EMAIL = '${userEmail || 'your-email@example.com'}';
 
 async function getRecipes(filters = {}) {
@@ -574,7 +574,7 @@ getRecipes({ category: 'Beer Cocktails', limit: 5 })
 {`import requests
 
 API_BASE = 'https://ai.elixiary.com/api/v1'
-API_KEY = '${apiKey || 'your_api_key_here'}'
+API_KEY = '${apiKey || 'elx_live_your_api_key_here'}'
 USER_EMAIL = '${userEmail || 'your-email@example.com'}'
 
 headers = {
@@ -609,7 +609,7 @@ except requests.exceptions.RequestException as e:
                         <pre className="text-sm font-mono overflow-x-auto">
 {`<?php
 $apiBase = 'https://ai.elixiary.com/api/v1';
-$apiKey = '${apiKey || 'your_api_key_here'}';
+$apiKey = '${apiKey || 'elx_live_your_api_key_here'}';
 $userEmail = '${userEmail || 'your-email@example.com'}';
 
 $headers = [

@@ -35,6 +35,8 @@ export function APIKeyManager() {
   const [creating, setCreating] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [showKey, setShowKey] = useState(false);
+  const [deleteKeyId, setDeleteKeyId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -150,24 +152,20 @@ export function APIKeyManager() {
     }
   };
 
-  const revokeAPIKey = async (keyId: string) => {
-    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
-      return;
-    }
+  const handleDeleteClick = (keyId: string) => {
+    setDeleteKeyId(keyId);
+    setShowDeleteDialog(true);
+  };
 
-    if (!user || !auth) {
-      toast({
-        title: 'Error',
-        description: 'Please sign in to manage API keys',
-        variant: 'destructive'
-      });
+  const revokeAPIKey = async () => {
+    if (!deleteKeyId || !user || !auth) {
       return;
     }
 
     try {
       const token = await user.getIdToken();
       
-      const response = await fetch(`/api/account/api-keys/${keyId}`, {
+      const response = await fetch(`/api/account/api-keys/${deleteKeyId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -180,22 +178,25 @@ export function APIKeyManager() {
         fetchAPIKeys();
         toast({
           title: 'Success',
-          description: 'API key revoked successfully'
+          description: 'API key deleted successfully'
         });
       } else {
         toast({
           title: 'Error',
-          description: data.error || 'Failed to revoke API key',
+          description: data.error || 'Failed to delete API key',
           variant: 'destructive'
         });
       }
     } catch (error) {
-      console.error('Error revoking API key:', error);
+      console.error('Error deleting API key:', error);
       toast({
         title: 'Error',
-        description: 'Failed to revoke API key',
+        description: 'Failed to delete API key',
         variant: 'destructive'
       });
+    } finally {
+      setShowDeleteDialog(false);
+      setDeleteKeyId(null);
     }
   };
 
@@ -383,7 +384,7 @@ export function APIKeyManager() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => revokeAPIKey(key.id)}
+                          onClick={() => handleDeleteClick(key.id)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Revoke
@@ -457,6 +458,43 @@ export function APIKeyManager() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete API Key
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this API key? This action cannot be undone and any applications using this key will stop working immediately.
+            </p>
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-sm text-destructive font-medium">
+                ⚠️ This action is permanent and cannot be reversed.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={revokeAPIKey}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete API Key
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

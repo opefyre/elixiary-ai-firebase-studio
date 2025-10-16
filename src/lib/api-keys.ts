@@ -147,7 +147,7 @@ export class APIKeyManager {
   }
 
   /**
-   * Revoke an API key
+   * Revoke an API key (actually delete it)
    */
   async revokeAPIKey(apiKey: string, userId: string): Promise<void> {
     const keyDoc = await this.adminDb.collection('api_keys').doc(apiKey).get();
@@ -161,10 +161,8 @@ export class APIKeyManager {
       throw new Error('Unauthorized');
     }
 
-    await this.adminDb.collection('api_keys').doc(apiKey).update({
-      status: 'revoked',
-      updatedAt: new Date()
-    });
+    // Actually delete the API key document
+    await this.adminDb.collection('api_keys').doc(apiKey).delete();
   }
 
   /**
