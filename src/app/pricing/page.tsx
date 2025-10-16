@@ -22,8 +22,6 @@ function PricingContent() {
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
-  const [earlyBirdSpotsLeft, setEarlyBirdSpotsLeft] = useState<number>(50);
-  const [isEarlyBirdActive, setIsEarlyBirdActive] = useState(true);
 
   // Check for success/cancel params
   useEffect(() => {
@@ -43,28 +41,6 @@ function PricingContent() {
     }
   }, [searchParams, router, toast]);
 
-  // Fetch early bird status
-  useEffect(() => {
-    async function fetchEarlyBirdStatus() {
-      if (!firestore) return;
-      
-      const configRef = doc(firestore, 'config', 'earlyBird');
-      const configSnap = await getDoc(configRef);
-      
-      if (configSnap.exists()) {
-        const data = configSnap.data();
-        const count = data.count || 0;
-        setEarlyBirdSpotsLeft(Math.max(0, 50 - count));
-        setIsEarlyBirdActive(data.isActive && count < 50);
-      }
-    }
-    
-    fetchEarlyBirdStatus();
-    
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchEarlyBirdStatus, 30000);
-    return () => clearInterval(interval);
-  }, [firestore]);
 
   const handleCheckout = async () => {
     if (!user) {
@@ -93,7 +69,6 @@ function PricingContent() {
           planType: selectedPlan,
           userId: user.uid,
           userEmail: user.email,
-          isEarlyBird: isEarlyBirdActive,
         }),
       });
 
@@ -182,7 +157,6 @@ function PricingContent() {
           planType: newPlanType,
           userId: user.uid,
           userEmail: user.email,
-          isEarlyBird: isEarlyBirdActive,
           isPlanChange: true, // Flag to indicate this is a plan change
         }),
       });
@@ -234,15 +208,9 @@ function PricingContent() {
 
   // Calculate pricing
   const getPricing = () => {
-    if (isEarlyBirdActive) {
-      return {
-        monthly: { price: 1.49, original: 4.99, period: 'month' },
-        annual: { price: 14.99, original: 49.99, period: 'year' }
-      };
-    }
     return {
-      monthly: { price: 4.99, original: null, period: 'month' },
-      annual: { price: 49, original: null, period: 'year' }
+      monthly: { price: 2.49, original: null, period: 'month' },
+      annual: { price: 23.88, original: null, period: 'year' }
     };
   };
 
@@ -260,18 +228,6 @@ function PricingContent() {
         </p>
       </div>
 
-      {/* Early Bird Banner */}
-      {isEarlyBirdActive && (
-        <div className="mb-8 rounded-lg border border-primary/20 bg-primary/5 p-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Zap className="h-4 w-4 text-primary" />
-            <span className="font-semibold">Early Bird Special</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            70% OFF for the first 50 members • Only <strong>{earlyBirdSpotsLeft} spots</strong> left
-          </p>
-        </div>
-      )}
 
       {/* Pricing Cards */}
       <div className={`grid gap-6 max-w-3xl mx-auto ${isPro ? 'md:grid-cols-1' : 'md:grid-cols-2'}`}>
@@ -377,9 +333,9 @@ function PricingContent() {
                   <p className="text-sm text-muted-foreground">
                     per {pricing[selectedPlan].period}
                   </p>
-                  {isEarlyBirdActive && (
+                  {selectedPlan === 'annual' && (
                     <p className="text-xs text-primary mt-1">
-                      {selectedPlan === 'monthly' ? 'First 3 months, then $4.99/mo' : 'First year, then $49/year'}
+                      Save 20% vs monthly • Billed once per year
                     </p>
                   )}
                 </div>
@@ -395,6 +351,9 @@ function PricingContent() {
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Next billing: {subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'N/A'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {currentPlanType === 'monthly' ? 'Billed monthly' : 'Billed annually'}
                   </p>
                 </div>
                 
