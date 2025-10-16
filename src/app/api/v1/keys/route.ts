@@ -9,20 +9,15 @@ const createKeySchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Creating API key...');
     const authenticator = new APIAuthenticator();
     const { user, apiKey } = await authenticator.authenticateRequest(request);
-    console.log('User:', user);
-    console.log('API Key:', apiKey);
     
     const body = await request.json();
     const { name } = createKeySchema.parse(body);
-    console.log('Creating key with name:', name);
     
     const apiKeyManager = new APIKeyManager();
     const userId = user.uid || user.id;
     const userEmail = user.email || apiKey.email; // Use email from API key if not in user object
-    console.log('Using userId:', userId, 'email:', userEmail);
     const newKey = await apiKeyManager.createAPIKey(userId, userEmail, name);
     
     // Don't return the full key data for security

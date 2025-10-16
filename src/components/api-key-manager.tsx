@@ -47,30 +47,25 @@ export function APIKeyManager() {
 
   const fetchAPIKeys = async () => {
     try {
-      if (!user || !auth) {
-        console.log('No user or auth available');
-        toast({
-          title: 'Error',
-          description: 'Please sign in to manage API keys',
-          variant: 'destructive'
-        });
-        setLoading(false);
-        return;
-      }
-
-      console.log('Getting token for user:', user.uid);
-      const token = await user.getIdToken();
-      console.log('Token obtained, length:', token.length);
-      
-      const response = await fetch('/api/account/api-keys', {
-        headers: {
-          'Authorization': `Bearer ${token}`
+        if (!user || !auth) {
+          toast({
+            title: 'Error',
+            description: 'Please sign in to manage API keys',
+            variant: 'destructive'
+          });
+          setLoading(false);
+          return;
         }
-      });
-      
-      console.log('API response status:', response.status);
-      const data = await response.json();
-      console.log('API response data:', data);
+
+        const token = await user.getIdToken();
+        
+        const response = await fetch('/api/account/api-keys', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
       
       if (data.success) {
         setApiKeys(data.data);

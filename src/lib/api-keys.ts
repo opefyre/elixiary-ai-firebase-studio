@@ -26,7 +26,6 @@ export class APIKeyManager {
     email: string,
     name: string
   ): Promise<APIKey> {
-    console.log('Creating API key for userId:', userId, 'email:', email);
     // Check if user is Pro
     const userDoc = await this.adminDb.collection('users').doc(userId).get();
     if (!userDoc.exists) {
@@ -89,40 +88,29 @@ export class APIKeyManager {
    * Validate an API key
    */
   async validateAPIKey(apiKey: string, email: string): Promise<APIKey> {
-    console.log('Validating API key:', apiKey, 'for email:', email);
     const keyDoc = await this.adminDb.collection('api_keys').doc(apiKey).get();
     
     if (!keyDoc.exists) {
-      console.log('API key not found in database');
       throw new Error('Invalid API key');
     }
-
-    console.log('API key found, checking status and expiration...');
 
     const keyData = keyDoc.data() as APIKey;
 
     // Check if key is active
     if (keyData.status !== 'active') {
-      console.log('API key is not active, status:', keyData.status);
       throw new Error('API key is not active');
     }
-    console.log('API key is active');
 
     // Check if key is expired
     const expiresAt = keyData.expiresAt instanceof Date ? keyData.expiresAt : keyData.expiresAt.toDate();
-    console.log('Checking expiration - now:', new Date(), 'expiresAt:', expiresAt);
     if (new Date() > expiresAt) {
-      console.log('API key has expired');
       throw new Error('API key has expired');
     }
-    console.log('API key is not expired');
 
     // Verify email matches
     if (keyData.email !== email) {
-      console.log('Email mismatch - key email:', keyData.email, 'provided email:', email);
       throw new Error('Email does not match API key');
     }
-    console.log('Email matches');
 
     // Check if user is still Pro
     const userDoc = await this.adminDb.collection('users').doc(keyData.userId).get();
