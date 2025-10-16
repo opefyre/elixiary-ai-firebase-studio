@@ -26,6 +26,7 @@ export class APIKeyManager {
     email: string,
     name: string
   ): Promise<APIKey> {
+    console.log('Creating API key for userId:', userId, 'email:', email);
     // Check if user is Pro
     const userDoc = await this.adminDb.collection('users').doc(userId).get();
     if (!userDoc.exists) {
@@ -88,9 +89,11 @@ export class APIKeyManager {
    * Validate an API key
    */
   async validateAPIKey(apiKey: string, email: string): Promise<APIKey> {
+    console.log('Validating API key:', apiKey, 'for email:', email);
     const keyDoc = await this.adminDb.collection('api_keys').doc(apiKey).get();
     
     if (!keyDoc.exists) {
+      console.log('API key not found in database');
       throw new Error('Invalid API key');
     }
 
