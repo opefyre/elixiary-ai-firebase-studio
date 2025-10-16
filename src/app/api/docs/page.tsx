@@ -1,116 +1,352 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFirebase } from '@/firebase';
-import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Key, Globe, Shield, Clock, Code, BookOpen, User, Trash2, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Globe, Shield, Clock, Key, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+
+// Import Swagger UI components
+import SwaggerUI from 'swagger-ui-react';
+import 'swagger-ui-react/swagger-ui.css';
 
 export default function APIDocsPage() {
   const { user, isUserLoading } = useFirebase();
   const [apiKey, setApiKey] = useState('');
   const [userEmail, setUserEmail] = useState('');
-  const [userApiKeys, setUserApiKeys] = useState<any[]>([]);
-  const [loadingKeys, setLoadingKeys] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-      fetchUserAPIKeys();
-    } else if (!isUserLoading && !user) {
-      setApiKey('');
-      setUserEmail('');
-      setLoadingKeys(false);
+    if (user) {
+      setUserEmail(user.email || '');
     }
-  }, [user, isUserLoading]);
+  }, [user]);
 
-  const fetchUserAPIKeys = async () => {
-    setLoadingKeys(true);
-    try {
-      const token = await user?.getIdToken();
-      if (!token) throw new Error('No auth token');
-
-      const response = await fetch('/api/account/api-keys', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setUserApiKeys(data.data);
-        if (data.data.length > 0) {
-          const activeKey = data.data.find((key: any) => key.status === 'active');
-          if (activeKey) {
-            setApiKey(activeKey.id);
-            setUserEmail(activeKey.email);
+  const openApiSpec = {
+    openapi: '3.0.0',
+    info: {
+      title: 'Elixiary AI API',
+      description: 'Professional cocktail recipe API for Pro users',
+      version: '1.0.0',
+      contact: {
+        name: 'Elixiary AI Support',
+        email: 'hello@elixiary.com'
+      }
+    },
+    servers: [
+      {
+        url: 'https://ai.elixiary.com/api/v1',
+        description: 'Production server'
+      }
+    ],
+    security: [
+      {
+        ApiKeyAuth: []
+      }
+    ],
+    components: {
+      securitySchemes: {
+        ApiKeyAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'x-api-key',
+          description: 'API key for authentication'
+        }
+      },
+      schemas: {
+        Recipe: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' },
+            category: { type: 'string' },
+            difficulty: { type: 'string' },
+            glassware: { type: 'string' },
+            ingredients: { type: 'array', items: { type: 'string' } },
+            instructions: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            imageUrl: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        Error: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: false },
+            error: { type: 'string' },
+            statusCode: { type: 'integer' },
+            timestamp: { type: 'string', format: 'date-time' }
           }
         }
-      } else {
-        toast({ title: 'Error', description: data.error, variant: 'destructive' });
       }
-    } catch (error: any) {
-      toast({ title: 'Error', description: `Failed to fetch API keys: ${error.message}`, variant: 'destructive' });
-    } finally {
-      setLoadingKeys(false);
+    },
+    paths: {
+      '/recipes': {
+        get: {
+          summary: 'Get all recipes',
+          description: 'Retrieve all curated cocktail recipes with optional filtering',
+          parameters: [
+            {
+              name: 'category',
+              in: 'query',
+              description: 'Filter by category',
+              schema: { type: 'string' }
+            },
+            {
+              name: 'difficulty',
+              in: 'query',
+              description: 'Filter by difficulty',
+              schema: { type: 'string' }
+            },
+            {
+              name: 'limit',
+              in: 'query',
+              description: 'Number of recipes to return',
+              schema: { type: 'integer', default: 20 }
+            },
+            {
+              name: 'offset',
+              in: 'query',
+              description: 'Number of recipes to skip',
+              schema: { type: 'integer', default: 0 }
+            }
+          ],
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'object',
+                        properties: {
+                          recipes: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/Recipe' }
+                          },
+                          total: { type: 'integer' },
+                          limit: { type: 'integer' },
+                          offset: { type: 'integer' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            '401': {
+              description: 'Unauthorized',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/recipes/{id}': {
+        get: {
+          summary: 'Get recipe by ID',
+          description: 'Retrieve a specific recipe by its ID',
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              description: 'Recipe ID',
+              schema: { type: 'string' }
+            }
+          ],
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: { $ref: '#/components/schemas/Recipe' }
+                    }
+                  }
+                }
+              }
+            },
+            '404': {
+              description: 'Recipe not found',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/categories': {
+        get: {
+          summary: 'Get all categories',
+          description: 'Retrieve all available recipe categories',
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'array',
+                        items: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/tags': {
+        get: {
+          summary: 'Get all tags',
+          description: 'Retrieve all available recipe tags',
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'array',
+                        items: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/user/recipes': {
+        get: {
+          summary: 'Get user saved recipes',
+          description: 'Retrieve recipes saved by the authenticated user',
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Recipe' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/user/badges': {
+        get: {
+          summary: 'Get user badges',
+          description: 'Retrieve achievement badges for the authenticated user',
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'object',
+                        properties: {
+                          badges: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                id: { type: 'string' },
+                                name: { type: 'string' },
+                                description: { type: 'string' },
+                                icon: { type: 'string' },
+                                unlockedAt: { type: 'string', format: 'date-time' }
+                              }
+                            }
+                          },
+                          stats: {
+                            type: 'object',
+                            properties: {
+                              totalBadges: { type: 'integer' },
+                              unlockedBadges: { type: 'integer' }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   };
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: 'Copied!',
-      description: `${label} copied to clipboard`,
-    });
-  };
+  if (isUserLoading) {
+    return (
+      <div className="container mx-auto max-w-6xl px-4 py-8 pt-24">
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
-  const generateCurlExample = (endpoint: string, method: string = 'GET', body?: any) => {
-    const headers = [
-      `"x-api-key: ${apiKey || 'elx_live_your_api_key_here'}"`,
-      `"x-user-email: ${userEmail || 'your-email@example.com'}"`,
-      '"Content-Type: application/json"'
-    ];
-
-    let curl = `curl -X ${method} "https://ai.elixiary.com/api/v1${endpoint}" \\\n`;
-    headers.forEach((header, index) => {
-      curl += `  -H ${header}`;
-      if (index < headers.length - 1) curl += ' \\';
-      curl += '\n';
-    });
-    if (body) {
-      curl += `  -d '${JSON.stringify(body)}'`;
-    }
-    return curl;
-  };
-
-  const generateJSExample = (endpoint: string, method: string = 'GET', body?: any) => {
-    const js = `const response = await fetch('https://ai.elixiary.com/api/v1${endpoint}', {
-  method: '${method}',
-  headers: {
-    'x-api-key': '${apiKey || 'elx_live_your_api_key_here'}',
-    'x-user-email': '${userEmail || 'your-email@example.com'}',
-    'Content-Type': 'application/json'
-  }${body ? ',\n  body: JSON.stringify(' + JSON.stringify(body) + ')' : ''}
-});
-
-const data = await response.json();
-console.log(data);`;
-
-    return js;
-  };
+  if (!user) {
+    return (
+      <div className="container mx-auto max-w-6xl px-4 py-8 pt-24">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Key className="h-12 w-12 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+            <p className="text-muted-foreground text-center mb-6">
+              Please sign in to access the API documentation.
+            </p>
+            <Button asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8 pt-24">
+    <div className="container mx-auto max-w-6xl px-4 py-8 pt-24">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="font-headline text-3xl font-bold md:text-4xl mb-4">
-          🍸 Elixiary AI API
-        </h1>
-        <p className="mx-auto max-w-xl text-lg text-muted-foreground mb-6">
+        <h1 className="text-3xl font-bold mb-4">🍸 Elixiary AI API</h1>
+        <p className="text-lg text-muted-foreground mb-6">
           Professional cocktail recipe API for Pro users
         </p>
         <div className="flex justify-center gap-4 flex-wrap">
@@ -143,44 +379,42 @@ console.log(data);`;
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="api-key">API Key</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="api-key"
+              <label className="text-sm font-medium">API Key</label>
+              <div className="flex gap-2 mt-1">
+                <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="Enter your API key"
-                  className="font-mono text-sm"
+                  className="flex-1 px-3 py-2 border border-input bg-background rounded-md text-sm font-mono"
                 />
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => copyToClipboard(apiKey, 'API Key')}
+                  onClick={() => navigator.clipboard.writeText(apiKey)}
                   disabled={!apiKey}
                 >
-                  <Copy className="w-4 h-4" />
+                  Copy
                 </Button>
               </div>
             </div>
             <div>
-              <Label htmlFor="user-email">User Email</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="user-email"
+              <label className="text-sm font-medium">User Email</label>
+              <div className="flex gap-2 mt-1">
+                <input
                   type="email"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="font-mono text-sm"
+                  className="flex-1 px-3 py-2 border border-input bg-background rounded-md text-sm font-mono"
                 />
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => copyToClipboard(userEmail, 'Email')}
+                  onClick={() => navigator.clipboard.writeText(userEmail)}
                   disabled={!userEmail}
                 >
-                  <Copy className="w-4 h-4" />
+                  Copy
                 </Button>
               </div>
             </div>
@@ -195,208 +429,38 @@ console.log(data);`;
         </CardContent>
       </Card>
 
-      {/* API Documentation */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="recipes">Recipes</TabsTrigger>
-          <TabsTrigger value="user">User Data</TabsTrigger>
-          <TabsTrigger value="keys">API Keys</TabsTrigger>
-          <TabsTrigger value="examples">Examples</TabsTrigger>
-          <TabsTrigger value="errors">Errors</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                API Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                The Elixiary AI API provides access to curated cocktail recipes and user-specific data for Pro subscribers.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Authentication</h4>
-                  <p className="text-sm text-muted-foreground">
-                    All requests require an API key and user email in headers.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Rate Limits</h4>
-                  <p className="text-sm text-muted-foreground">
-                    100 requests/hour, 1,000/day, 10,000/month
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="recipes" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recipes Endpoints</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">GET /recipes</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Get all curated cocktail recipes with optional filtering.
-                </p>
-                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
-                  <pre className="text-sm font-mono overflow-x-auto">
-{generateCurlExample('/recipes')}
-                  </pre>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="examples" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Code Examples</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="javascript" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                  <TabsTrigger value="python">Python</TabsTrigger>
-                  <TabsTrigger value="php">PHP</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="javascript" className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Get All Recipes</h4>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
-                      <pre className="text-sm font-mono overflow-x-auto">
-{generateJSExample('/recipes')}
-                      </pre>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="python" className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Get All Recipes</h4>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
-                      <pre className="text-sm font-mono overflow-x-auto">
-{`import requests
-
-API_BASE = 'https://ai.elixiary.com/api/v1'
-API_KEY = '${apiKey || 'elx_live_your_api_key_here'}'
-USER_EMAIL = '${userEmail || 'your-email@example.com'}'
-
-headers = {
-    'x-api-key': API_KEY,
-    'x-user-email': USER_EMAIL,
-    'Content-Type': 'application/json'
-}
-
-def get_recipes(filters=None):
-    if filters is None:
-        filters = {}
-    
-    response = requests.get(f'{API_BASE}/recipes', headers=headers, params=filters)
-    response.raise_for_status()
-    return response.json()
-
-# Usage
-try:
-    recipes = get_recipes({'category': 'Beer Cocktails', 'limit': 5})
-    print(f"Found {len(recipes['data']['recipes'])} recipes")
-except requests.exceptions.RequestException as e:
-    print(f'Error: {e}')`}
-                      </pre>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="php" className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Get All Recipes</h4>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
-                      <pre className="text-sm font-mono overflow-x-auto">
-{`<?php
-$apiBase = 'https://ai.elixiary.com/api/v1';
-$apiKey = '${apiKey || 'elx_live_your_api_key_here'}';
-$userEmail = '${userEmail || 'your-email@example.com'}';
-
-$headers = [
-    'x-api-key: ' . $apiKey,
-    'x-user-email: ' . $userEmail,
-    'Content-Type: application/json'
-];
-
-function getRecipes($filters = []) {
-    global $apiBase, $headers;
-    
-    $url = $apiBase . '/recipes';
-    if (!empty($filters)) {
-        $url .= '?' . http_build_query($filters);
-    }
-    
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    if ($httpCode !== 200) {
-        throw new Exception("HTTP error: $httpCode");
-    }
-    
-    return json_decode($response, true);
-}
-
-// Usage
-try {
-    $recipes = getRecipes(['category' => 'Beer Cocktails', 'limit' => 5]);
-    echo "Found " . count($recipes['data']['recipes']) . " recipes\\n";
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage() . "\\n";
-}
-?>`}
-                      </pre>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="errors" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Error Responses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <h4 className="font-semibold mb-2">Error Response Format</h4>
-                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
-                  <pre className="text-sm font-mono overflow-x-auto">
-{`{
-  "success": false,
-  "error": "Error message describing what went wrong",
-  "statusCode": 400,
-  "timestamp": "2025-10-16T19:36:54.370Z"
-}`}
-                  </pre>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Swagger UI */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ExternalLink className="w-5 h-5" />
+            Interactive API Documentation
+          </CardTitle>
+          <CardDescription>
+            Test API endpoints directly in your browser with live examples
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="swagger-ui-container">
+            <SwaggerUI 
+              spec={openApiSpec}
+              docExpansion="list"
+              defaultModelsExpandDepth={1}
+              defaultModelExpandDepth={1}
+              tryItOutEnabled={true}
+              requestInterceptor={(request) => {
+                if (apiKey) {
+                  request.headers['x-api-key'] = apiKey;
+                }
+                if (userEmail) {
+                  request.headers['x-user-email'] = userEmail;
+                }
+                return request;
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

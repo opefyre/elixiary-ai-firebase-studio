@@ -312,10 +312,10 @@ export function APIKeyManager() {
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Key className="h-5 w-5" />
                 API Keys
               </CardTitle>
@@ -325,7 +325,7 @@ export function APIKeyManager() {
             </div>
             <Dialog open={showNewKeyDialog} onOpenChange={setShowNewKeyDialog}>
               <DialogTrigger asChild>
-                <Button size="sm">
+                <Button size="sm" variant="outline">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Key
                 </Button>
@@ -364,64 +364,65 @@ export function APIKeyManager() {
             </Dialog>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {apiKeys.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No API keys created yet</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <Key className="h-16 w-16 mx-auto mb-4 opacity-30" />
+              <h3 className="font-medium text-lg mb-2">No API keys created yet</h3>
               <p className="text-sm">Create your first API key to start using the API</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {apiKeys.map((key) => (
-                <Card key={key.id} className="border-l-4 border-l-primary">
-                  <CardContent className="pt-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{key.name}</h3>
-                        <Badge variant={key.status === 'active' ? 'default' : 'secondary'}>
-                          {key.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => rotateAPIKey(key.id)}
-                        >
-                          <RotateCcw className="h-4 w-4 mr-2" />
-                          Rotate
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteClick(key.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Revoke
-                        </Button>
-                      </div>
+                <div key={key.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      <h3 className="font-medium text-base">{key.name}</h3>
+                      <Badge variant={key.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                        {key.status}
+                      </Badge>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-                      <div>
-                        <p className="font-medium">Created</p>
-                        <p>{formatDate(key.createdAt)}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Last Used</p>
-                        <p>{formatDate(key.lastUsed)}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Today's Requests</p>
-                        <p>{key.usage.requestsToday}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Total Requests</p>
-                        <p>{key.usage.totalRequests}</p>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => rotateAPIKey(key.id)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        <RotateCcw className="h-3 w-3 mr-1" />
+                        Rotate
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteClick(key.id)}
+                        className="h-8 px-3 text-xs text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-muted-foreground">
+                    <div>
+                      <p className="font-medium text-foreground">Created</p>
+                      <p>{formatDate(key.createdAt)}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Last Used</p>
+                      <p>{formatDate(key.lastUsed)}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Today's Requests</p>
+                      <p>{key.usage.requestsToday}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Total Requests</p>
+                      <p>{key.usage.totalRequests}</p>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}
