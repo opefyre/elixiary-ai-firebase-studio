@@ -7,36 +7,6 @@
         {
           "fieldPath": "category",
           "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "curated-recipes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "difficulty",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "curated-recipes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "glassware",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "curated-recipes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "category",
-          "order": "ASCENDING"
         },
         {
           "fieldPath": "difficulty",
@@ -115,16 +85,6 @@
         {
           "fieldPath": "createdAt",
           "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "user-saved-recipes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
         }
       ]
     },
@@ -199,26 +159,6 @@
         {
           "fieldPath": "savedAt",
           "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "subscription.status",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "subscription.stripeCustomerId",
-          "order": "ASCENDING"
         }
       ]
     },
@@ -233,16 +173,6 @@
         {
           "fieldPath": "subscription.createdAt",
           "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "user-badges",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
         }
       ]
     },
@@ -270,26 +200,6 @@
         },
         {
           "fieldPath": "badgeType",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "curated-categories",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "name",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "curated-tags",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "name",
           "order": "ASCENDING"
         }
       ]
