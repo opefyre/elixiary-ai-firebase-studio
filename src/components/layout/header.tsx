@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { AuthButton } from "@/components/auth-button";
 import { Button } from "@/components/ui/button";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Wine } from "lucide-react";
 import { useUser } from "@/firebase";
 
 export function Header() {
@@ -37,7 +37,9 @@ export function Header() {
         {/* Mobile Navigation */}
         <div className="flex md:hidden items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/cocktails">Cocktails</Link>
+            <Link href="/cocktails">
+              <Wine className="h-4 w-4" />
+            </Link>
           </Button>
           {user && (
             <Button variant="ghost" size="sm" asChild>
