@@ -113,15 +113,27 @@ export function generateCocktailGradient(cocktail: CocktailVisualData): string {
   drawGlassSilhouette(ctx, cocktail.glassware);
   ctx.globalAlpha = 1;
 
-  // Add recipe name with elegant typography
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+  // Add recipe name with elegant typography and better contrast
+  const nameLines = wrapText(ctx, cocktail.name, 700);
+  
+  // Add subtle background behind text for better contrast
+  if (nameLines.length > 0) {
+    const textHeight = nameLines.length * 60;
+    const padding = 20;
+    const bgY = 280 - 40 - padding;
+    const bgHeight = textHeight + (padding * 2);
+    
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fillRect(50, bgY, 700, bgHeight);
+  }
+  
+  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
   ctx.font = 'bold 48px Georgia, serif';
   ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetY = 2;
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+  ctx.shadowBlur = 15;
+  ctx.shadowOffsetY = 3;
   
-  const nameLines = wrapText(ctx, cocktail.name, 700);
   nameLines.forEach((line, idx) => {
     ctx.fillText(line, 400, 280 + (idx * 60));
   });
