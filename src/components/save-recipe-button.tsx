@@ -53,7 +53,7 @@ export function SaveRecipeButton({
         try {
           await updateBadges('recipe_saved');
         } catch (error) {
-          console.error('Error updating badges:', error);
+          // Silent error handling for badge updates
         }
       }
     } finally {

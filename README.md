@@ -17,24 +17,26 @@ Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist w
 - Share recipes via copy/share API
 - Basic recipe customization
 
-### 👑 **Pro Tier** ($4.99/month)
+### 👑 **Pro Tier** ($2.49/month or $1.99/month billed annually)
 - **Unlimited** recipe generation
 - **Unlimited** recipe saves
 - **PDF Export** - Beautiful recipe downloads
 - **Advanced Customization** - Control complexity, alcohol level, sweetness, dietary preferences
 - **Shopping List Generator** - Smart ingredient lists with quantity summing
 - **Customer Portal** - Self-service billing management
+- **Gamified Badge System** - Earn achievements for your cocktail journey
 
 ---
 
 ## 🚀 Tech Stack
 
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, Firebase Admin SDK
 - **Database**: Firebase Firestore
 - **Authentication**: Firebase Auth (Google OAuth)
 - **Payments**: Stripe (subscriptions)
 - **AI**: Google Gemini 2.5 Flash
+- **Email**: Brevo (Sendinblue)
 - **Deployment**: Vercel
 - **Analytics**: Google Analytics
 
@@ -48,6 +50,7 @@ Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist w
 - Firebase project
 - Stripe account
 - Google AI API key
+- Brevo account (for email services)
 
 ### Installation
 
@@ -63,7 +66,7 @@ Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist w
    ```
 
 3. **Environment Variables**
-   Create `.env.local` with your Firebase, Stripe, and Google AI credentials.
+   Create `.env.local` with your Firebase, Stripe, Google AI, and Brevo credentials.
 
 4. **Run development server**
    ```bash
@@ -77,18 +80,22 @@ Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist w
 ```
 src/
 ├── app/                    # Next.js app router
-│   ├── api/stripe/        # Stripe webhook & checkout
-│   ├── account/          # User account dashboard
-│   ├── pricing/          # Subscription pricing
-│   ├── privacy/          # Privacy policy & terms
-│   └── recipes/          # User's saved recipes
+│   ├── api/               # API routes (Stripe, badges, recipes)
+│   ├── account/           # User account dashboard
+│   ├── cocktails/         # Curated recipes pages
+│   ├── curated/           # Curated recipes (legacy)
+│   ├── pricing/           # Subscription pricing
+│   ├── privacy/           # Privacy policy & terms
+│   └── recipes/           # User's saved recipes
 ├── components/            # React components
-│   ├── layout/           # Header, footer
-│   ├── ui/               # Reusable UI components
-│   └── ...               # Feature components
-├── firebase/             # Firebase configuration
-├── lib/                  # Utilities (PDF export, analytics)
-└── types/                # TypeScript definitions
+│   ├── layout/            # Header, footer
+│   ├── ui/                # Reusable UI components
+│   └── ...                # Feature components
+├── firebase/              # Firebase configuration
+├── hooks/                 # Custom React hooks
+├── lib/                   # Utilities (PDF export, badges, etc.)
+├── types/                 # TypeScript definitions
+└── ai/                    # Google Gemini AI flows
 ```
 
 ---

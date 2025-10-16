@@ -43,13 +43,6 @@ export function useSubscription() {
             return null;
           };
 
-          // Debug logging
-          console.log('=== SUBSCRIPTION DATA DEBUG ===');
-          console.log('Raw Firestore data:', data);
-          console.log('recipesGeneratedThisMonth (raw):', data.recipesGeneratedThisMonth);
-          console.log('totalRecipesGenerated (raw):', data.totalRecipesGenerated);
-          console.log('recipeCount (raw):', data.recipeCount);
-          console.log('lastGenerationResetDate (raw):', data.lastGenerationResetDate);
           
           // Convert Firestore timestamps to Date objects
           const subscriptionData: UserSubscription = {
@@ -72,8 +65,6 @@ export function useSubscription() {
             updatedAt: toDate(data.updatedAt),
           };
           
-          console.log('Processed subscription data:', subscriptionData);
-          console.log('=== END SUBSCRIPTION DEBUG ===');
           
           setSubscription(subscriptionData);
         } else {
@@ -100,7 +91,6 @@ export function useSubscription() {
         setIsLoading(false);
       },
       (error) => {
-        console.error('Error fetching subscription:', error);
         setIsLoading(false);
       }
     );
@@ -115,32 +105,22 @@ export function useSubscription() {
     const now = new Date();
     const lastReset = subscription.lastGenerationResetDate;
     
-    console.log('=== MONTHLY RESET CHECK ===');
-    console.log('Current date:', now);
-    console.log('Last reset date:', lastReset);
-    console.log('Current month:', now.getMonth());
-    console.log('Last reset month:', lastReset.getMonth());
-    console.log('Current year:', now.getFullYear());
-    console.log('Last reset year:', lastReset.getFullYear());
     
     // Check if we're in a new month
     const needsReset = 
       lastReset.getMonth() !== now.getMonth() || 
       lastReset.getFullYear() !== now.getFullYear();
 
-    console.log('Needs reset:', needsReset);
-    console.log('User tier:', subscription.subscriptionTier);
-
     if (needsReset && subscription.subscriptionTier === 'free') {
-      console.log('Resetting monthly counter for free user');
       // Reset counter for free users
       const userDocRef = doc(firestore, 'users', user.uid);
       updateDoc(userDocRef, {
         recipesGeneratedThisMonth: 0,
         lastGenerationResetDate: serverTimestamp(),
-      }).catch(console.error);
+      }).catch(() => {
+        // Silent error handling for reset
+      });
     }
-    console.log('=== END RESET CHECK ===');
   }, [subscription, user, firestore]);
 
   const limits: UsageLimits = subscription 
@@ -201,7 +181,6 @@ export async function incrementGenerationCount(userId: string, firestore: any) {
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error incrementing generation count:', error);
     throw error;
   }
 }
@@ -219,7 +198,6 @@ export async function updateRecipeCount(userId: string, firestore: any, delta: n
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error updating recipe count:', error);
     throw error;
   }
 }

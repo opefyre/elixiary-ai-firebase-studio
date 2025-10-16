@@ -202,7 +202,7 @@ ${window.location.origin}`.trim();
         try {
           await updateBadges('recipe_saved');
         } catch (error) {
-          console.error('Error updating badges:', error);
+          // Silent error handling for badge updates
         }
       }
       
@@ -272,11 +272,11 @@ ${window.location.origin}`.trim();
           try {
             await updateBadges('recipe_generated');
           } catch (error) {
-            console.error('Error updating badges:', error);
+            // Silent error handling for badge updates
           }
         }
       } catch (err) {
-        console.error('Failed to track generation:', err);
+        // Silent error handling for generation tracking
       }
     }
     
@@ -292,7 +292,7 @@ ${window.location.origin}`.trim();
             try {
               await updateBadges('recipe_saved');
             } catch (error) {
-              console.error('Error updating badges:', error);
+              // Silent error handling for badge updates
             }
           }
           
@@ -302,7 +302,6 @@ ${window.location.origin}`.trim();
           });
         } catch (err) {
           // Silently fail auto-save, user can manually save if needed
-          console.error('Auto-save failed:', err);
         }
       } else {
         // Can't save due to limit

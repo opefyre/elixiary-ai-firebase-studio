@@ -31,11 +31,9 @@ export function useSavedRecipes() {
       if (response.ok) {
         setSavedRecipes(data.savedRecipes || []);
         setSavedRecipeIds(new Set(data.savedRecipes?.map((r: SavedRecipe) => r.recipeId) || []));
-      } else {
-        console.error('Error fetching saved recipes:', data.error);
       }
     } catch (error) {
-      console.error('Error fetching saved recipes:', error);
+      // Silent error handling for fetching saved recipes
     } finally {
       setLoading(false);
     }
@@ -80,7 +78,6 @@ export function useSavedRecipes() {
         return false;
       }
     } catch (error) {
-      console.error('Error saving recipe:', error);
       toast({
         title: 'Error',
         description: 'Failed to save recipe',
@@ -128,7 +125,6 @@ export function useSavedRecipes() {
         return false;
       }
     } catch (error) {
-      console.error('Error unsaving recipe:', error);
       toast({
         title: 'Error',
         description: 'Failed to remove recipe',
