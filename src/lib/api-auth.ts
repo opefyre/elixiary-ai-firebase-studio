@@ -75,7 +75,13 @@ export class APIAuthenticator {
       }
       
       console.error('API authentication error:', error);
-      throw new APIError('Authentication failed', 'Invalid credentials or server error', 401);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        apiKey: apiKey?.substring(0, 10) + '...',
+        email: email
+      });
+      throw new APIError('Authentication failed', `Invalid credentials or server error: ${error.message}`, 401);
     }
   }
 

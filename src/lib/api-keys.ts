@@ -97,23 +97,32 @@ export class APIKeyManager {
       throw new Error('Invalid API key');
     }
 
+    console.log('API key found, checking status and expiration...');
+
     const keyData = keyDoc.data() as APIKey;
 
     // Check if key is active
     if (keyData.status !== 'active') {
+      console.log('API key is not active, status:', keyData.status);
       throw new Error('API key is not active');
     }
+    console.log('API key is active');
 
     // Check if key is expired
     const expiresAt = keyData.expiresAt instanceof Date ? keyData.expiresAt : keyData.expiresAt.toDate();
+    console.log('Checking expiration - now:', new Date(), 'expiresAt:', expiresAt);
     if (new Date() > expiresAt) {
+      console.log('API key has expired');
       throw new Error('API key has expired');
     }
+    console.log('API key is not expired');
 
     // Verify email matches
     if (keyData.email !== email) {
+      console.log('Email mismatch - key email:', keyData.email, 'provided email:', email);
       throw new Error('Email does not match API key');
     }
+    console.log('Email matches');
 
     // Check if user is still Pro
     const userDoc = await this.adminDb.collection('users').doc(keyData.userId).get();
