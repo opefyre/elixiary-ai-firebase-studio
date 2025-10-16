@@ -1,0 +1,772 @@
+openapi: 3.0.3
+info:
+  title: Elixiary AI API
+  description: Professional cocktail recipe API for Pro users
+  version: 1.0.0
+  contact:
+    name: Elixiary AI Support
+    email: api@elixiary.com
+  license:
+    name: Proprietary
+servers:
+  - url: https://ai.elixiary.com/api/v1
+    description: Production server
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /recipes:
+    get:
+      summary: Get cocktail recipes
+      description: Browse cocktail recipes with filtering and pagination
+      parameters:
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+            maxLength: 50
+        - name: difficulty
+          in: query
+          description: Filter by difficulty
+          schema:
+            type: string
+            enum: [Easy, Medium, Hard]
+        - name: search
+          in: query
+          description: Search in name, ingredients, tags
+          schema:
+            type: string
+            maxLength: 100
+        - name: tags
+          in: query
+          description: Filter by tags (comma-separated)
+          schema:
+            type: string
+            maxLength: 200
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 1
+        - name: limit
+          in: query
+          description: Results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /recipes/{id}:
+    get:
+      summary: Get specific recipe
+      description: Get a specific cocktail recipe by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /categories:
+    get:
+      summary: Get all categories
+      description: Get all available recipe categories
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tags:
+    get:
+      summary: Get all tags
+      description: Get all available tags
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /user/recipes:
+    get:
+      summary: Get user's saved recipes
+      description: Get user's saved recipes with filtering
+      parameters:
+        - name: source
+          in: query
+          description: Filter by source
+          schema:
+            type: string
+            enum: [curated, ai]
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+            maxLength: 50
+        - name: difficulty
+          in: query
+          description: Filter by difficulty
+          schema:
+            type: string
+            enum: [Easy, Medium, Hard]
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 1
+        - name: limit
+          in: query
+          description: Results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRecipesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      summary: Save recipe to user collection
+      description: Save a recipe to the user's collection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - recipeId
+              properties:
+                recipeId:
+                  type: string
+                  description: Recipe ID to save
+      responses:
+        '200':
+          description: Recipe saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /user/recipes/{id}:
+    delete:
+      summary: Remove saved recipe
+      description: Remove a saved recipe from user collection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Saved recipe ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recipe removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /user/badges:
+    get:
+      summary: Get user's badges
+      description: Get user's earned badges
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadgesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /keys:
+    get:
+      summary: List user's API keys
+      description: Get all API keys for the authenticated user
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeysResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      summary: Create new API key
+      description: Create a new API key for the authenticated user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: API key name
+      responses:
+        '200':
+          description: API key created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /keys/{keyId}:
+    delete:
+      summary: Revoke API key
+      description: Revoke an API key
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          description: API key ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: API key revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /keys/{keyId}/rotate:
+    post:
+      summary: Rotate API key
+      description: Generate a new API key to replace the existing one
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          description: API key ID to rotate
+          schema:
+            type: string
+      responses:
+        '200':
+          description: API key rotated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /docs:
+    get:
+      summary: Get API documentation
+      description: Get comprehensive API documentation
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key in format elx_live_[32_characters]
+
+  schemas:
+    Recipe:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+        instructions:
+          type: array
+          items:
+            type: string
+        glassware:
+          type: string
+        garnish:
+          type: string
+        difficulty:
+          type: string
+          enum: [Easy, Medium, Hard]
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        imageUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Ingredient:
+      type: object
+      properties:
+        name:
+          type: string
+        measure:
+          type: string
+        amount:
+          type: number
+        unit:
+          type: string
+        ingredient:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    RateLimit:
+      type: object
+      properties:
+        requestsPerHour:
+          type: integer
+        requestsPerDay:
+          type: integer
+        requestsPerMonth:
+          type: integer
+        remainingHourly:
+          type: integer
+        remainingDaily:
+          type: integer
+        remainingMonthly:
+          type: integer
+        resetTimeHourly:
+          type: string
+          format: date-time
+        resetTimeDaily:
+          type: string
+          format: date-time
+        resetTimeMonthly:
+          type: string
+          format: date-time
+
+    Meta:
+      type: object
+      properties:
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        rateLimit:
+          $ref: '#/components/schemas/RateLimit'
+
+    RecipesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            recipes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Recipe'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    RecipeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Recipe'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        recipeCount:
+          type: integer
+
+    CategoriesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        recipeCount:
+          type: integer
+
+    TagsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    UserRecipe:
+      type: object
+      properties:
+        id:
+          type: string
+        recipeId:
+          type: string
+        source:
+          type: string
+          enum: [curated, ai]
+        savedAt:
+          type: string
+          format: date-time
+
+    UserRecipesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            recipes:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserRecipe'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    Badge:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        earnedAt:
+          type: string
+          format: date-time
+
+    BadgesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            badges:
+              type: array
+              items:
+                $ref: '#/components/schemas/Badge'
+            totalBadges:
+              type: integer
+            user:
+              type: object
+              properties:
+                uid:
+                  type: string
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    APIKey:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended, revoked]
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        lastUsed:
+          type: string
+          format: date-time
+        usage:
+          type: object
+          properties:
+            requestsToday:
+              type: integer
+            requestsThisMonth:
+              type: integer
+            totalRequests:
+              type: integer
+
+    APIKeysResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKey'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    APIKeyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/APIKey'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    DocsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            title:
+              type: string
+            version:
+              type: string
+            description:
+              type: string
+            baseUrl:
+              type: string
+            authentication:
+              type: object
+            rateLimits:
+              type: object
+            endpoints:
+              type: object
+            responseFormat:
+              type: object
+            examples:
+              type: object
+            errorCodes:
+              type: object
+            support:
+              type: object
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        statusCode:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Bad Request - Invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Invalid API key or email
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Forbidden - Pro subscription required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    RateLimited:
+      description: Too Many Requests - Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorResponse'
+              - type: object
+                properties:
+                  retryAfter:
+                    type: integer
+                    description: Seconds to wait before retrying
