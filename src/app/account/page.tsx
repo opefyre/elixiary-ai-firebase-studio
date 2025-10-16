@@ -438,9 +438,10 @@ export default function AccountPage() {
       )}
 
       {/* API Keys - Pro Users Only */}
-      {isPro && (
+      {/* Temporarily disabled until Firebase Auth is properly implemented */}
+      {/* {isPro && (
         <APIKeyManager />
-      )}
+      )} */}
 
       {/* Account Actions */}
       <Card>
