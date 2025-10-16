@@ -316,10 +316,16 @@ export default function APIDocsPage() {
   return (
     <SwaggerUI 
       spec={openApiSpec}
-      docExpansion="list"
-      defaultModelsExpandDepth={1}
-      defaultModelExpandDepth={1}
+      docExpansion="full"
+      defaultModelsExpandDepth={2}
+      defaultModelExpandDepth={2}
       tryItOutEnabled={true}
+      filter={true}
+      showRequestHeaders={true}
+      showCommonExtensions={true}
+      showExtensions={true}
+      showMutatedRequest={true}
+      supportedSubmitMethods={['get', 'post', 'put', 'delete', 'patch']}
       requestInterceptor={(request) => {
         if (apiKey) {
           request.headers['x-api-key'] = apiKey;
@@ -328,6 +334,75 @@ export default function APIDocsPage() {
           request.headers['x-user-email'] = userEmail;
         }
         return request;
+      }}
+      responseInterceptor={(response) => {
+        return response;
+      }}
+      onComplete={() => {
+        // Add custom styling and features after Swagger UI loads
+        const style = document.createElement('style');
+        style.textContent = `
+          .swagger-ui .topbar { display: none; }
+          .swagger-ui .info { margin: 20px 0; }
+          .swagger-ui .info .title { font-size: 2.5rem; color: #3b82f6; }
+          .swagger-ui .info .description { font-size: 1.1rem; color: #6b7280; }
+          .swagger-ui .opblock { margin: 10px 0; border-radius: 8px; }
+          .swagger-ui .opblock .opblock-summary { border-radius: 8px; }
+          .swagger-ui .opblock.opblock-get { border-color: #10b981; }
+          .swagger-ui .opblock.opblock-get .opblock-summary { border-color: #10b981; background: #f0fdf4; }
+          .swagger-ui .opblock.opblock-post { border-color: #3b82f6; }
+          .swagger-ui .opblock.opblock-post .opblock-summary { border-color: #3b82f6; background: #eff6ff; }
+          .swagger-ui .opblock.opblock-put { border-color: #f59e0b; }
+          .swagger-ui .opblock.opblock-put .opblock-summary { border-color: #f59e0b; background: #fffbeb; }
+          .swagger-ui .opblock.opblock-delete { border-color: #ef4444; }
+          .swagger-ui .opblock.opblock-delete .opblock-summary { border-color: #ef4444; background: #fef2f2; }
+          .swagger-ui .btn { border-radius: 6px; font-weight: 500; }
+          .swagger-ui .btn.execute { background: #3b82f6; border-color: #3b82f6; }
+          .swagger-ui .btn.execute:hover { background: #2563eb; }
+          .swagger-ui .response-col_status { font-weight: 600; }
+          .swagger-ui .response-col_description__inner { font-size: 0.9rem; }
+          .swagger-ui .model { font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; }
+          .swagger-ui .model-title { color: #374151; font-weight: 600; }
+          .swagger-ui .prop-name { color: #059669; font-weight: 500; }
+          .swagger-ui .prop-type { color: #7c3aed; }
+          .swagger-ui .parameter__name { font-weight: 600; color: #374151; }
+          .swagger-ui .parameter__type { color: #7c3aed; font-weight: 500; }
+          .swagger-ui .parameter__deprecated { color: #ef4444; }
+          .swagger-ui .auth-container { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; }
+          .swagger-ui .auth-container h4 { color: #374151; margin: 0 0 8px 0; }
+          .swagger-ui .auth-container p { color: #6b7280; margin: 0; font-size: 0.9rem; }
+          .swagger-ui .scheme-container { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0; }
+          .swagger-ui .scheme-container h4 { color: #374151; margin: 0 0 8px 0; }
+          .swagger-ui .scheme-container p { color: #6b7280; margin: 0; font-size: 0.9rem; }
+          .swagger-ui .opblock-description-wrapper p { color: #4b5563; line-height: 1.6; }
+          .swagger-ui .opblock-external-docs-wrapper p { color: #6b7280; }
+          .swagger-ui .opblock-external-docs-wrapper a { color: #3b82f6; text-decoration: none; }
+          .swagger-ui .opblock-external-docs-wrapper a:hover { text-decoration: underline; }
+          .swagger-ui .response-col_links { display: none; }
+          .swagger-ui .opblock-section-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+          .swagger-ui .opblock-section-header h4 { color: #374151; font-weight: 600; }
+          .swagger-ui .opblock-section-header .btn { background: #3b82f6; border-color: #3b82f6; color: white; }
+          .swagger-ui .opblock-section-header .btn:hover { background: #2563eb; }
+          .swagger-ui .opblock-section-header .btn.cancel { background: #6b7280; border-color: #6b7280; }
+          .swagger-ui .opblock-section-header .btn.cancel:hover { background: #4b5563; }
+          .swagger-ui .opblock-section-header .btn-group { margin: 0; }
+          .swagger-ui .opblock-section-header .btn-group .btn { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:first-child { margin-left: 0; }
+          .swagger-ui .opblock-section-header .btn-group .btn:last-child { margin-right: 0; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child) { margin-right: 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:first-child) { margin-left: 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)):not(:nth-child(8)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)):not(:nth-child(8)):not(:nth-child(9)) { margin: 0 4px; }
+          .swagger-ui .opblock-section-header .btn-group .btn:not(:last-child):not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)):not(:nth-child(8)):not(:nth-child(9)):not(:nth-child(10)) { margin: 0 4px; }
+        `;
+        document.head.appendChild(style);
       }}
     />
   );
