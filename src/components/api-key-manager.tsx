@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Copy, Key, Plus, Trash2, RotateCcw, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useFirebase } from '@/firebase';
 
 interface APIKey {
   id: string;
@@ -26,6 +27,7 @@ interface APIKey {
 }
 
 export function APIKeyManager() {
+  const { auth, user, isUserLoading } = useFirebase();
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewKeyDialog, setShowNewKeyDialog] = useState(false);
@@ -36,16 +38,16 @@ export function APIKeyManager() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchAPIKeys();
-  }, []);
+    if (!isUserLoading && user) {
+      fetchAPIKeys();
+    } else if (!isUserLoading && !user) {
+      setLoading(false);
+    }
+  }, [user, isUserLoading]);
 
   const fetchAPIKeys = async () => {
     try {
-      // Get Firebase Auth token
-      const { auth } = await import('@/firebase');
-      const user = auth.currentUser;
-      
-      if (!user) {
+      if (!user || !auth) {
         toast({
           title: 'Error',
           description: 'Please sign in to manage API keys',
@@ -74,6 +76,7 @@ export function APIKeyManager() {
         });
       }
     } catch (error) {
+      console.error('Error fetching API keys:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch API keys',
@@ -94,22 +97,17 @@ export function APIKeyManager() {
       return;
     }
 
+    if (!user || !auth) {
+      toast({
+        title: 'Error',
+        description: 'Please sign in to create API keys',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setCreating(true);
     try {
-      // Get Firebase Auth token
-      const { auth } = await import('@/firebase');
-      const user = auth.currentUser;
-      
-      if (!user) {
-        toast({
-          title: 'Error',
-          description: 'Please sign in to create API keys',
-          variant: 'destructive'
-        });
-        setCreating(false);
-        return;
-      }
-
       const token = await user.getIdToken();
       
       const response = await fetch('/api/account/api-keys', {
@@ -140,6 +138,7 @@ export function APIKeyManager() {
         });
       }
     } catch (error) {
+      console.error('Error creating API key:', error);
       toast({
         title: 'Error',
         description: 'Failed to create API key',
@@ -155,20 +154,16 @@ export function APIKeyManager() {
       return;
     }
 
-    try {
-      // Get Firebase Auth token
-      const { auth } = await import('@/firebase');
-      const user = auth.currentUser;
-      
-      if (!user) {
-        toast({
-          title: 'Error',
-          description: 'Please sign in to manage API keys',
-          variant: 'destructive'
-        });
-        return;
-      }
+    if (!user || !auth) {
+      toast({
+        title: 'Error',
+        description: 'Please sign in to manage API keys',
+        variant: 'destructive'
+      });
+      return;
+    }
 
+    try {
       const token = await user.getIdToken();
       
       const response = await fetch(`/api/account/api-keys/${keyId}`, {
@@ -194,6 +189,7 @@ export function APIKeyManager() {
         });
       }
     } catch (error) {
+      console.error('Error revoking API key:', error);
       toast({
         title: 'Error',
         description: 'Failed to revoke API key',
@@ -207,20 +203,16 @@ export function APIKeyManager() {
       return;
     }
 
-    try {
-      // Get Firebase Auth token
-      const { auth } = await import('@/firebase');
-      const user = auth.currentUser;
-      
-      if (!user) {
-        toast({
-          title: 'Error',
-          description: 'Please sign in to manage API keys',
-          variant: 'destructive'
-        });
-        return;
-      }
+    if (!user || !auth) {
+      toast({
+        title: 'Error',
+        description: 'Please sign in to manage API keys',
+        variant: 'destructive'
+      });
+      return;
+    }
 
+    try {
       const token = await user.getIdToken();
       
       const response = await fetch(`/api/account/api-keys/${keyId}/rotate`, {
@@ -247,6 +239,7 @@ export function APIKeyManager() {
         });
       }
     } catch (error) {
+      console.error('Error rotating API key:', error);
       toast({
         title: 'Error',
         description: 'Failed to rotate API key',
@@ -273,7 +266,7 @@ export function APIKeyManager() {
     });
   };
 
-  if (loading) {
+  if (isUserLoading || loading) {
     return (
       <Card>
         <CardHeader>
@@ -284,6 +277,25 @@ export function APIKeyManager() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">Loading...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" />
+            API Keys
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>Please sign in to manage API keys</p>
+          </div>
         </CardContent>
       </Card>
     );
