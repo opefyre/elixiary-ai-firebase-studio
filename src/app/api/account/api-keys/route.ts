@@ -10,11 +10,14 @@ const createKeySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
+    console.log('API route - authHeader:', authHeader ? 'Present' : 'Missing');
+    
     const { user, error } = await verifyFirebaseToken(authHeader);
+    console.log('API route - verification result:', { user: user ? 'Present' : 'Missing', error });
     
     if (!user || error) {
       return NextResponse.json(
-        { success: false, error: 'Authentication required' },
+        { success: false, error: `Authentication required: ${error || 'No user'}` },
         { status: 401 }
       );
     }
