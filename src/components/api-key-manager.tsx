@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Key, Plus, Trash2, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { Copy, Key, Plus, Trash2, RotateCcw, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
 
