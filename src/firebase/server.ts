@@ -1,5 +1,6 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 // Server-side Firebase initialization for webhooks and API routes
 export function initializeFirebaseServer() {
@@ -7,6 +8,7 @@ export function initializeFirebaseServer() {
   if (getApps().length > 0) {
     return {
       adminDb: getFirestore(),
+      adminAuth: getAuth(),
     };
   }
 
@@ -52,5 +54,6 @@ export function initializeFirebaseServer() {
 
   return {
     adminDb: getFirestore(app),
+    adminAuth: getAuth(app),
   };
 }
