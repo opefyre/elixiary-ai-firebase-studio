@@ -36,6 +36,9 @@ export function Header() {
 
         {/* Mobile Navigation */}
         <div className="flex md:hidden items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/cocktails">Cocktails</Link>
+          </Button>
           {user && (
             <Button variant="ghost" size="sm" asChild>
               <Link href="/recipes">
