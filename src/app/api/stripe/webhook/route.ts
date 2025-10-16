@@ -114,6 +114,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
     session.subscription as string
   );
 
+  // Get product information for enhanced tracking
+  const price = subscription.items.data[0].price;
+  const product = await stripe.products.retrieve(price.product as string);
+  
+  // Determine product type based on price interval
+  const productType = price.recurring?.interval === 'year' ? 'annual' : 'monthly';
+  const productName = `${product.name} (${productType})`;
+
   const userRef = firestore.collection('users').doc(userId);
   
   // Get current early bird count if this is an early bird
@@ -142,18 +150,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
 
   // Check if user document exists
   const userDoc = await userRef.get();
+  const currentData = userDoc.exists ? userDoc.data() : {};
   
-  // Build user data
+  // Build user data with enhanced tracking
   const userData: any = {
     subscriptionTier: 'pro',
     subscriptionStatus: subscription.status,
     stripeCustomerId: session.customer as string,
     stripeSubscriptionId: subscription.id,
-    stripePriceId: subscription.items.data[0].price.id,
+    stripePriceId: price.id,
+    stripeProductId: product.id, // NEW: Track product ID
+    productName: productName, // NEW: Human-readable product name
+    productType: productType, // NEW: Billing frequency
     isEarlyBird: isEarlyBird,
     ...(earlyBirdNumber && { earlyBirdNumber }),
     subscriptionStartDate: new Date().toISOString(),
     cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+    lastWebhookEvent: 'checkout.session.completed', // NEW: Track webhook event
+    webhookSignature: session.id, // NEW: Track webhook source
     updatedAt: new Date().toISOString(),
   };
 
@@ -165,6 +179,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   if (subscription.current_period_end) {
     userData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
   }
+
+  // Create audit trail entry
+  const auditEntry = {
+    timestamp: new Date(),
+    event: 'checkout.session.completed',
+    from: currentData,
+    to: userData,
+    source: 'webhook' as const,
+    webhookId: session.id,
+  };
+
+  // Add to subscription history
+  const existingHistory = currentData.subscriptionHistory || [];
+  userData.subscriptionHistory = [...existingHistory, auditEntry].slice(-50); // Keep last 50 changes
 
   if (!userDoc.exists) {
     userData.createdAt = new Date().toISOString();

@@ -21,8 +21,13 @@ export interface UserSubscription {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   stripePriceId?: string;
+  stripeProductId?: string; // NEW: Track which product user subscribed to
   
-  // Early Bird Tracking
+  // Product Information
+  productName?: string; // NEW: Human-readable product name
+  productType?: 'monthly' | 'annual'; // NEW: Billing frequency
+  
+  // Early Bird Tracking (DEPRECATED - remove in future)
   isEarlyBird: boolean;
   earlyBirdNumber?: number; // 1-50
   
@@ -38,9 +43,23 @@ export interface UserSubscription {
   totalRecipesGenerated: number;
   recipeCount: number; // Number of saved recipes
   
+  // Security & Audit
+  lastWebhookEvent?: string; // NEW: Last webhook event processed
+  webhookSignature?: string; // NEW: Last webhook signature
+  subscriptionHistory?: SubscriptionChange[]; // NEW: Audit trail
+  
   // Metadata
   createdAt: Date;
   updatedAt?: Date;
+}
+
+export interface SubscriptionChange {
+  timestamp: Date;
+  event: string;
+  from: Partial<UserSubscription>;
+  to: Partial<UserSubscription>;
+  source: 'webhook' | 'manual' | 'system';
+  webhookId?: string;
 }
 
 export interface UsageLimits {
