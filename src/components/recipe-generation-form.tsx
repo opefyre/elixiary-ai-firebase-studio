@@ -29,6 +29,7 @@ import { useBadges } from "@/hooks/use-badges";
 import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
 import { UpgradeModal } from "@/components/upgrade-modal";
 import { CustomizationDialog, type CustomizationOptions } from "@/components/customization-dialog";
+import { generateCocktailGradient } from "@/lib/generate-cocktail-gradient";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please describe what kind of cocktail you'd like").min(10, "Please provide more details about your desired cocktail (at least 10 characters)"),
@@ -214,7 +215,24 @@ ${window.location.origin}`.trim();
     if (!recipe || !currentPrompt) return;
     
     try {
-      await saveRecipe(recipe, currentPrompt);
+      // Generate gradient image for manually saved recipe
+      let recipeWithImage = recipe;
+      if (!recipe.imageUrl) {
+        try {
+          const gradientImage = generateCocktailGradient({
+            name: recipe.recipeName,
+            ingredients: recipe.ingredients,
+            glassware: recipe.glassware || 'Cocktail Glass',
+            difficultyLevel: recipe.difficultyLevel || 'Medium'
+          });
+          recipeWithImage = { ...recipe, imageUrl: gradientImage };
+        } catch (error) {
+          // Continue without image if generation fails
+          console.error('Error generating gradient image for manual save:', error);
+        }
+      }
+
+      await saveRecipe(recipeWithImage, currentPrompt);
       setIsSaved(true);
       
       // Update badges for recipe saving
@@ -287,24 +305,57 @@ ${window.location.origin}`.trim();
         await incrementGenerationCount(user.uid, firestore);
         
         
-        // Update badges for recipe generation
-        if (isPro) {
-          try {
-            await updateBadges('recipe_generated');
-          } catch (error) {
-            // Silent error handling for badge updates
-          }
+      // Update badges for recipe generation
+      if (isPro) {
+        try {
+          await updateBadges('recipe_generated');
+        } catch (error) {
+          // Silent error handling for badge updates
         }
-      } catch (err) {
-        // Silent error handling for generation tracking
       }
+
+      // Automatically generate gradient image for the recipe
+      if (result.recipe) {
+        try {
+          const gradientImage = generateCocktailGradient({
+            name: result.recipe.recipeName,
+            ingredients: result.recipe.ingredients,
+            glassware: result.recipe.glassware || 'Cocktail Glass',
+            difficultyLevel: result.recipe.difficultyLevel || 'Medium'
+          });
+          
+          // Update the recipe with the generated image
+          setRecipe(prev => prev ? { ...prev, imageUrl: gradientImage } : null);
+        } catch (error) {
+          // Silent error handling for image generation
+          console.error('Error generating gradient image:', error);
+        }
+      }
+    } catch (err) {
+      // Silent error handling for generation tracking
+    }
     }
     
     // Auto-save recipe if generation was successful and user can save
     if (result.recipe && !result.error) {
       if (canSaveRecipe) {
         try {
-          await saveRecipe(result.recipe, data.prompt);
+          // Generate gradient image for auto-saved recipe
+          let recipeWithImage = result.recipe;
+          try {
+            const gradientImage = generateCocktailGradient({
+              name: result.recipe.recipeName,
+              ingredients: result.recipe.ingredients,
+              glassware: result.recipe.glassware || 'Cocktail Glass',
+              difficultyLevel: result.recipe.difficultyLevel || 'Medium'
+            });
+            recipeWithImage = { ...result.recipe, imageUrl: gradientImage };
+          } catch (error) {
+            // Continue without image if generation fails
+            console.error('Error generating gradient image for auto-save:', error);
+          }
+
+          await saveRecipe(recipeWithImage, data.prompt);
           setIsSaved(true);
           
           // Update badges for recipe saving
