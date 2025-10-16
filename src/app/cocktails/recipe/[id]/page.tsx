@@ -12,11 +12,17 @@ import {
   ArrowLeft,
   Share2,
   Copy,
-  Crown
+  Crown,
+  Star,
+  Loader2,
+  ChefHat,
+  Wine,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import { SaveRecipeButton } from '@/components/save-recipe-button';
 
 interface CuratedRecipe {
   id: string;
@@ -52,6 +58,7 @@ export default function RecipeDetailPage({ params }: RecipeDetailPageProps) {
   const [recipe, setRecipe] = useState<CuratedRecipe | null>(null);
   const [relatedRecipes, setRelatedRecipes] = useState<CuratedRecipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -60,6 +67,9 @@ export default function RecipeDetailPage({ params }: RecipeDetailPageProps) {
 
   const fetchRecipe = async () => {
     try {
+      setLoading(true);
+      setPageLoading(true);
+      
       const response = await fetch(`/api/curated-recipes/${params.id}`);
       const data = await response.json();
       
@@ -73,6 +83,8 @@ export default function RecipeDetailPage({ params }: RecipeDetailPageProps) {
       console.error('Error fetching recipe:', error);
     } finally {
       setLoading(false);
+      // Add a small delay for smoother transition
+      setTimeout(() => setPageLoading(false), 300);
     }
   };
 
@@ -161,9 +173,9 @@ Source: ${recipe.source}
     );
   };
 
-  if (loading) {
+  if (loading || pageLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-24">
         <div className="space-y-6">
           <Skeleton className="h-8 w-64" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -194,7 +206,7 @@ Source: ${recipe.source}
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-24">
+    <div className={`container mx-auto px-4 py-8 pt-24 transition-opacity duration-300 ${pageLoading ? 'opacity-0' : 'opacity-100'}`}>
       {/* Back Button */}
       <div className="mb-6 flex items-center gap-4">
         <Button variant="ghost" asChild>
@@ -232,6 +244,12 @@ Source: ${recipe.source}
 
           {/* Action Buttons */}
           <div className="flex gap-2">
+            <SaveRecipeButton
+              recipeId={recipe.id}
+              recipeData={recipe}
+              variant="outline"
+              className="flex-1"
+            />
             <Button onClick={copyRecipe} variant="outline" className="flex-1">
               <Copy className="h-4 w-4 mr-2" />
               Copy Recipe
@@ -247,36 +265,44 @@ Source: ${recipe.source}
         <div className="space-y-6">
           {/* Recipe Header */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">{recipe.name}</h1>
+            <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+              <span className="text-4xl">🍸</span>
+              {recipe.name}
+            </h1>
             <div className="flex items-center gap-4 mb-4">
-              <Badge className={getDifficultyColor(recipe.difficulty)}>
+              <Badge className={`${getDifficultyColor(recipe.difficulty)} gap-1`}>
+                <ChefHat className="h-3 w-3" />
                 {recipe.difficulty}
               </Badge>
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                {recipe.prepTime}
+                <span className="text-sm">{recipe.prepTime}</span>
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
-                <Zap className="h-4 w-4" />
-                {recipe.glassware}
+                <Wine className="h-4 w-4" />
+                <span className="text-sm">{recipe.glassware}</span>
               </div>
             </div>
-            <p className="text-muted-foreground">
-              {recipe.category} • {recipe.source}
+            <p className="text-muted-foreground flex items-center gap-2">
+              <span className="text-sm">📂</span>
+              <span className="text-sm">{recipe.category} • {recipe.source}</span>
             </p>
           </div>
 
           {/* Ingredients */}
-          <Card>
+          <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle>Ingredients</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-lg">🥃</span>
+                Ingredients
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {recipe.ingredients.map((ingredient, index) => (
-                  <li key={index} className="flex justify-between items-center">
-                    <span className="font-medium">{ingredient.name}</span>
-                    <span className="text-muted-foreground">{ingredient.measure}</span>
+                  <li key={index} className="flex justify-between items-center py-2 px-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <span className="font-medium text-sm">{ingredient.name}</span>
+                    <span className="text-muted-foreground text-sm font-mono">{ingredient.measure}</span>
                   </li>
                 ))}
               </ul>
@@ -284,38 +310,62 @@ Source: ${recipe.source}
           </Card>
 
           {/* Instructions */}
-          <Card>
+          <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle>Instructions</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-lg">👨‍🍳</span>
+                Instructions
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {Array.isArray(recipe.instructions) ? recipe.instructions.join('\n\n') : recipe.instructions}
+              <div className="text-muted-foreground leading-relaxed whitespace-pre-line space-y-3">
+                {Array.isArray(recipe.instructions) ? 
+                  recipe.instructions.map((instruction, index) => (
+                    <div key={index} className="flex gap-3 p-3 rounded-lg bg-muted/20">
+                      <span className="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm">{instruction}</span>
+                    </div>
+                  )) : 
+                  <div className="p-3 rounded-lg bg-muted/20 text-sm">
+                    {recipe.instructions}
+                  </div>
+                }
               </div>
             </CardContent>
           </Card>
 
           {/* Garnish */}
           {recipe.garnish && (
-            <Card>
+            <Card className="border-primary/20">
               <CardHeader>
-                <CardTitle>Garnish</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-lg">🌿</span>
+                  Garnish
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>{recipe.garnish}</p>
+                <div className="p-3 rounded-lg bg-muted/20">
+                  <p className="text-sm">{recipe.garnish}</p>
+                </div>
               </CardContent>
             </Card>
           )}
 
           {/* Tags */}
-          <Card>
+          <Card className="border-primary/20">
             <CardHeader>
-              <CardTitle>Tags</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-lg">🏷️</span>
+                Tags
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {recipe.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">
+                  <Badge key={tag} variant="secondary" className="gap-1">
+                    <Sparkles className="h-3 w-3" />
                     {formatTagText(tag)}
                   </Badge>
                 ))}
@@ -328,7 +378,10 @@ Source: ${recipe.source}
       {/* Related Recipes */}
       {relatedRecipes.length > 0 && (
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">More {recipe.category}</h2>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <span className="text-2xl">🍹</span>
+            More {recipe.category}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {relatedRecipes.map((relatedRecipe) => (
               <Link key={relatedRecipe.id} href={`/cocktails/recipe/${relatedRecipe.id}`} className="block">
