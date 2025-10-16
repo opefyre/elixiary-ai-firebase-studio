@@ -151,6 +151,61 @@ function PricingContent() {
     }
   };
 
+  const handleSwitchPlan = async (newPlanType: 'monthly' | 'annual') => {
+    if (!user || !subscription?.stripeCustomerId) {
+      toast({
+        title: 'Error',
+        description: 'Unable to switch plan. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (currentPlanType === newPlanType) {
+      toast({
+        title: 'Same Plan',
+        description: `You're already on the ${newPlanType} plan.`,
+        variant: 'default',
+      });
+      return;
+    }
+
+    setIsLoadingCheckout(true);
+    try {
+      // Create a checkout session for plan change
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planType: newPlanType,
+          userId: user.uid,
+          userEmail: user.email,
+          isEarlyBird: isEarlyBirdActive,
+          isPlanChange: true, // Flag to indicate this is a plan change
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error || !response.ok) {
+        throw new Error(data.message || data.error || 'Plan switch failed');
+      }
+
+      // Redirect to Stripe Checkout for plan change
+      window.location.href = data.url;
+    } catch (error: any) {
+      console.error('Plan switch error:', error);
+      toast({
+        title: "Plan Switch Failed",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoadingCheckout(false);
+    }
+  };
+
   // Determine current plan type
   const getCurrentPlanType = () => {
     if (!subscription?.stripePriceId) return null;
@@ -219,49 +274,50 @@ function PricingContent() {
       )}
 
       {/* Pricing Cards */}
-      <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-        {/* Free Plan */}
-        <Card className="relative">
-          <CardHeader className="text-center pb-4">
-            <div className="flex justify-center mb-2">
-              <div className="p-2 bg-muted rounded-lg">
-                <Sparkles className="h-5 w-5 text-muted-foreground" />
+      <div className={`grid gap-6 max-w-3xl mx-auto ${isPro ? 'md:grid-cols-1' : 'md:grid-cols-2'}`}>
+        {/* Free Plan - Only show for non-Pro users */}
+        {!isPro && (
+          <Card className="relative">
+            <CardHeader className="text-center pb-4">
+              <div className="flex justify-center mb-2">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Sparkles className="h-5 w-5 text-muted-foreground" />
+                </div>
               </div>
-            </div>
-            <CardTitle className="text-xl">Free</CardTitle>
-            <CardDescription>Perfect for trying out</CardDescription>
-            <div className="mt-4">
-              <div className="text-3xl font-bold">$0</div>
-              <p className="text-sm text-muted-foreground">forever</p>
-            </div>
-          </CardHeader>
-          
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-              <span>10 AI recipes per month</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-              <span>Save up to 20 recipes</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-              <span>Browse curated recipes</span>
-            </div>
-          </CardContent>
-          
-          <CardFooter>
-            <Button
-              className="w-full"
-              variant="outline"
-              disabled={isPro}
-              onClick={() => !user && router.push('/login')}
-            >
-              {user ? (isPro ? 'Upgrade to Pro' : 'Current Plan') : 'Get Started Free'}
-            </Button>
-          </CardFooter>
-        </Card>
+              <CardTitle className="text-xl">Free</CardTitle>
+              <CardDescription>Perfect for trying out</CardDescription>
+              <div className="mt-4">
+                <div className="text-3xl font-bold">$0</div>
+                <p className="text-sm text-muted-foreground">forever</p>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <span>10 AI recipes per month</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <span>Save up to 20 recipes</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <span>Browse curated recipes</span>
+              </div>
+            </CardContent>
+            
+            <CardFooter>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => !user && router.push('/login')}
+              >
+                {user ? 'Current Plan' : 'Get Started Free'}
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
 
         {/* Pro Plan */}
         <Card className="relative border-primary shadow-lg">
@@ -332,13 +388,47 @@ function PricingContent() {
 
             {/* Current Plan Display for Pro Users */}
             {isPro && currentPlanType && (
-              <div className="mt-4 text-center">
-                <div className="bg-primary/10 rounded-lg p-3 mb-4">
+              <div className="mt-4">
+                <div className="bg-primary/10 rounded-lg p-3 mb-4 text-center">
                   <p className="text-sm font-medium text-primary">
                     Current Plan: {currentPlanType === 'monthly' ? 'Monthly' : 'Annual'} Pro
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Next billing: {subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'N/A'}
+                  </p>
+                </div>
+                
+                {/* Plan Switching Options */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-center mb-3">Switch Plan:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={currentPlanType === 'monthly' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleSwitchPlan('monthly')}
+                      disabled={isLoadingCheckout || currentPlanType === 'monthly'}
+                    >
+                      {isLoadingCheckout && currentPlanType !== 'monthly' ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      ) : null}
+                      Monthly
+                      {currentPlanType === 'monthly' && ' ✓'}
+                    </Button>
+                    <Button
+                      variant={currentPlanType === 'annual' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleSwitchPlan('annual')}
+                      disabled={isLoadingCheckout || currentPlanType === 'annual'}
+                    >
+                      {isLoadingCheckout && currentPlanType !== 'annual' ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      ) : null}
+                      Annual
+                      {currentPlanType === 'annual' && ' ✓'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    Changes take effect on next billing cycle
                   </p>
                 </div>
               </div>
@@ -370,21 +460,32 @@ function PricingContent() {
           
           <CardFooter>
             {isPro ? (
-              <div className="w-full space-y-2">
-                <Button
-                  className="w-full"
-                  onClick={handleManageBilling}
-                  disabled={isLoadingPortal}
-                >
-                  {isLoadingPortal ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Crown className="h-4 w-4 mr-2" />
-                  )}
-                  Manage Billing
-                </Button>
+              <div className="w-full space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleManageBilling}
+                    disabled={isLoadingPortal}
+                    className="text-xs"
+                  >
+                    {isLoadingPortal ? (
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                    ) : (
+                      <Crown className="h-3 w-3 mr-1" />
+                    )}
+                    Billing
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/account')}
+                    className="text-xs"
+                  >
+                    <Star className="h-3 w-3 mr-1" />
+                    Account
+                  </Button>
+                </div>
                 <p className="text-xs text-center text-muted-foreground">
-                  Change plan, update payment, or cancel
+                  Use buttons above to switch plans or manage billing
                 </p>
               </div>
             ) : (
