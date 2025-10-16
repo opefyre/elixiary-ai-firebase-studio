@@ -23,6 +23,12 @@ export async function GET(request: NextRequest) {
     }
 
     const userData = await getUserByUid(user.uid);
+    console.log('User data retrieved:', { 
+      uid: userData?.id, 
+      email: userData?.email,
+      subscription: userData?.subscription 
+    });
+    
     if (!userData) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
@@ -31,9 +37,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is Pro
+    console.log('Checking subscription tier:', userData.subscription?.tier);
     if (userData.subscription?.tier !== 'pro') {
       return NextResponse.json(
-        { success: false, error: 'Pro subscription required' },
+        { success: false, error: `Pro subscription required. Current tier: ${userData.subscription?.tier || 'none'}` },
         { status: 403 }
       );
     }
@@ -83,6 +90,12 @@ export async function POST(request: NextRequest) {
     const { name } = createKeySchema.parse(body);
     
     const userData = await getUserByUid(user.uid);
+    console.log('POST - User data retrieved:', { 
+      uid: userData?.id, 
+      email: userData?.email,
+      subscription: userData?.subscription 
+    });
+    
     if (!userData) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
@@ -91,9 +104,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is Pro
+    console.log('POST - Checking subscription tier:', userData.subscription?.tier);
     if (userData.subscription?.tier !== 'pro') {
       return NextResponse.json(
-        { success: false, error: 'Pro subscription required' },
+        { success: false, error: `Pro subscription required. Current tier: ${userData.subscription?.tier || 'none'}` },
         { status: 403 }
       );
     }
