@@ -31,8 +31,8 @@ export class APIAuthenticator {
       }
 
       // Validate API key format
-      if (!apiKey.startsWith('elx_live_') || apiKey.length !== 48) {
-        throw new APIError('Invalid API key format', 'API key must start with elx_live_ and be 48 characters long', 401);
+      if (!apiKey.startsWith('elx_live_') || apiKey.length < 40) {
+        throw new APIError('Invalid API key format', 'API key must start with elx_live_ and be at least 40 characters long', 401);
       }
 
       // Validate email format
