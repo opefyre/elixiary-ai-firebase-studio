@@ -4,10 +4,10 @@ import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
 
 const recipeQuerySchema = z.object({
-  category: z.string().optional().max(50),
+  category: z.string().max(50).optional(),
   difficulty: z.enum(['Easy', 'Medium', 'Hard']).optional(),
-  search: z.string().optional().max(100),
-  tags: z.string().optional().max(200),
+  search: z.string().max(100).optional(),
+  tags: z.string().max(200).optional(),
   page: z.number().int().min(1).max(100).default(1),
   limit: z.number().int().min(1).max(20).default(10)
 });

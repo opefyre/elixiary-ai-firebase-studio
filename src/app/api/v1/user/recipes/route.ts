@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const userRecipeQuerySchema = z.object({
   source: z.enum(['curated', 'ai']).optional(),
-  category: z.string().optional().max(50),
+  category: z.string().max(50).optional(),
   difficulty: z.enum(['Easy', 'Medium', 'Hard']).optional(),
   page: z.number().int().min(1).max(100).default(1),
   limit: z.number().int().min(1).max(20).default(10)

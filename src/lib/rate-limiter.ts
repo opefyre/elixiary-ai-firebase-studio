@@ -105,21 +105,31 @@ export class RateLimiter {
     try {
       const resetTime = Date.now() + (ttlSeconds * 1000);
       
-      await this.adminDb.collection('rate_limits').doc(key).set({
-        count: 1,
-        resetTime,
-        lastUpdated: new Date()
-      }, { merge: true });
+      // Use a transaction to safely increment
+      await this.adminDb.runTransaction(async (transaction: any) => {
+        const docRef = this.adminDb.collection('rate_limits').doc(key);
+        const doc = await transaction.get(docRef);
+        
+        if (doc.exists) {
+          const currentCount = doc.data().count || 0;
+          transaction.update(docRef, {
+            count: currentCount + 1,
+            lastUpdated: new Date()
+          });
+        } else {
+          transaction.set(docRef, {
+            count: 1,
+            resetTime,
+            lastUpdated: new Date()
+          });
+        }
+      });
 
       // Update cache
       this.rateLimitCache.set(key, { count: 1, resetTime });
-
-      // Increment existing count
-      await this.adminDb.collection('rate_limits').doc(key).update({
-        count: this.adminDb.FieldValue.increment(1)
-      });
     } catch (error) {
       console.error('Error incrementing rate limit:', error);
+      // Don't throw error to avoid breaking the API
     }
   }
 
