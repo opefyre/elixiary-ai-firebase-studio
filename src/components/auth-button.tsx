@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { LogIn, LogOut, Crown, Settings, CreditCard, BookOpen, Loader2 } from 'lucide-react';
+import { LogIn, LogOut, Crown, Settings, CreditCard, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
@@ -153,20 +153,6 @@ export function AuthButton() {
           <Link href="/account" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>My Account</span>
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link href="/recipes" className="cursor-pointer">
-            <BookOpen className="mr-2 h-4 w-4" />
-            <span>My Recipes</span>
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link href="/pricing" className="cursor-pointer">
-            <Crown className="mr-2 h-4 w-4" />
-            <span>Pricing</span>
           </Link>
         </DropdownMenuItem>
 
