@@ -28,7 +28,7 @@ export async function DELETE(
     }
 
     // Check if user is Pro
-    if (userData.subscription?.tier !== 'pro') {
+    if (userData.subscriptionTier !== 'pro') {
       return NextResponse.json(
         { success: false, error: 'Pro subscription required' },
         { status: 403 }
@@ -78,7 +78,7 @@ export async function POST(
     }
 
     // Check if user is Pro
-    if (userData.subscription?.tier !== 'pro') {
+    if (userData.subscriptionTier !== 'pro') {
       return NextResponse.json(
         { success: false, error: 'Pro subscription required' },
         { status: 403 }

@@ -37,10 +37,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is Pro
-    console.log('Checking subscription tier:', userData.subscription?.tier);
-    if (userData.subscription?.tier !== 'pro') {
+    console.log('Checking subscription tier:', userData.subscriptionTier);
+    if (userData.subscriptionTier !== 'pro') {
       return NextResponse.json(
-        { success: false, error: `Pro subscription required. Current tier: ${userData.subscription?.tier || 'none'}` },
+        { success: false, error: `Pro subscription required. Current tier: ${userData.subscriptionTier || 'none'}` },
         { status: 403 }
       );
     }
@@ -104,10 +104,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is Pro
-    console.log('POST - Checking subscription tier:', userData.subscription?.tier);
-    if (userData.subscription?.tier !== 'pro') {
+    console.log('POST - Checking subscription tier:', userData.subscriptionTier);
+    if (userData.subscriptionTier !== 'pro') {
       return NextResponse.json(
-        { success: false, error: `Pro subscription required. Current tier: ${userData.subscription?.tier || 'none'}` },
+        { success: false, error: `Pro subscription required. Current tier: ${userData.subscriptionTier || 'none'}` },
         { status: 403 }
       );
     }
