@@ -33,7 +33,7 @@ export class APIKeyManager {
     }
 
     const userData = userDoc.data();
-    if (userData.subscription?.tier !== 'pro') {
+    if (userData.subscriptionTier !== 'pro') {
       throw new Error('API access requires Pro subscription');
     }
 
@@ -118,7 +118,7 @@ export class APIKeyManager {
     }
 
     const userData = userDoc.data();
-    if (userData.subscription?.tier !== 'pro') {
+    if (userData.subscriptionTier !== 'pro') {
       throw new Error('Pro subscription required');
     }
 

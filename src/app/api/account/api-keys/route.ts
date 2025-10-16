@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Error fetching API keys:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch API keys' },
+      { success: false, error: `Failed to fetch API keys: ${error.message}` },
       { status: 500 }
     );
   }
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json(
-      { success: false, error: 'Failed to create API key' },
+      { success: false, error: `Failed to create API key: ${error.message}` },
       { status: 500 }
     );
   }
