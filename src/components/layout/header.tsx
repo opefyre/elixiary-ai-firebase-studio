@@ -21,7 +21,10 @@ export function Header() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/cocktails">Cocktails</Link>
+            <Link href="/cocktails">
+              <Wine className="mr-2 h-4 w-4" />
+              Cocktails
+            </Link>
           </Button>
           {user && (
             <Button variant="ghost" size="sm" asChild>
