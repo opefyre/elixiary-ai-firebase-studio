@@ -13,8 +13,10 @@ const userRecipeQuerySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('User recipes endpoint called');
     const authenticator = new APIAuthenticator();
     const { user, rateLimit } = await authenticator.authenticateRequest(request);
+    console.log('User authenticated:', user?.id);
     
     // Validate request size
     authenticator.validateRequestSize(request);
@@ -37,9 +39,16 @@ export async function GET(request: NextRequest) {
     const { adminDb } = initializeFirebaseServer();
     
     // Build optimized query using indexes
+    console.log('User object:', user);
+    console.log('User ID to use:', user?.id || user?.uid);
+    const userId = user?.id || user?.uid;
+    if (!userId) {
+      throw new APIError('User not found', 'Unable to identify user', 404);
+    }
+    
     let query = adminDb
       .collection('user-saved-recipes')
-      .where('userId', '==', user.uid);
+      .where('userId', '==', userId);
     
     // Apply source filter if provided
     if (sanitizedParams.source) {
