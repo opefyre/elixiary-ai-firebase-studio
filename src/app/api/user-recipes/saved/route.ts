@@ -6,28 +6,34 @@ export async function GET(request: NextRequest) {
     const { adminDb } = initializeFirebaseServer();
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100); // Cap at 100 for performance
+    const source = searchParams.get('source'); // 'curated' or 'ai'
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
     }
 
-    // Get user's saved recipes (without orderBy to avoid index requirement)
-    const query = await adminDb
+    // Build optimized query using indexes
+    let query = adminDb
       .collection('user-saved-recipes')
-      .where('userId', '==', userId)
-      .get();
+      .where('userId', '==', userId);
 
-    const savedRecipes = query.docs.map(doc => ({
+    // Apply source filter if provided
+    if (source) {
+      query = query.where('source', '==', source);
+    }
+
+    // Order by savedAt using the composite index
+    query = query.orderBy('savedAt', 'desc');
+
+    // Apply limit for performance
+    query = query.limit(limit);
+
+    const snapshot = await query.get();
+    const savedRecipes = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-
-    // Sort by savedAt in descending order (newest first)
-    savedRecipes.sort((a, b) => {
-      const aTime = a.savedAt?.toDate?.() || new Date(a.savedAt);
-      const bTime = b.savedAt?.toDate?.() || new Date(b.savedAt);
-      return bTime.getTime() - aTime.getTime();
-    });
 
     return NextResponse.json({ 
       savedRecipes,

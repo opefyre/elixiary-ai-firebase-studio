@@ -8,34 +8,43 @@ export async function GET(request: NextRequest) {
     
     // Parse query parameters
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100); // Cap at 100 for performance
     const category = searchParams.get('category');
     const difficulty = searchParams.get('difficulty');
     const search = searchParams.get('search');
     const tags = searchParams.get('tags')?.split(',').filter(Boolean);
 
-    // Get all recipes and filter client-side to avoid complex Firestore indexes
-    const allRecipesSnapshot = await adminDb.collection('curated-recipes')
-      .orderBy('name', 'asc')
-      .get();
+    // Build optimized query using indexes
+    let query = adminDb.collection('curated-recipes');
 
-    let recipes = allRecipesSnapshot.docs.map(doc => ({
+    // Apply indexed filters first (most selective)
+    if (category) {
+      query = query.where('category', '==', category);
+    }
+    
+    if (difficulty) {
+      query = query.where('difficulty', '==', difficulty);
+    }
+
+    // Order by indexed field for consistent pagination
+    query = query.orderBy('name', 'asc');
+
+    // Apply limit for performance
+    query = query.limit(limit * 3); // Get more than needed for client-side filtering
+
+    const snapshot = await query.get();
+    let recipes = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
 
-    // Apply filters
-    if (category) {
-      recipes = recipes.filter(recipe => recipe.categoryId === category);
-    }
-    if (difficulty) {
-      recipes = recipes.filter(recipe => recipe.difficulty === difficulty);
-    }
+    // Apply client-side filters for complex queries (tags, search)
     if (tags && tags.length > 0) {
       recipes = recipes.filter(recipe => 
         tags.some(tag => recipe.tags && recipe.tags.includes(tag))
       );
     }
+    
     if (search) {
       const searchLower = search.toLowerCase();
       recipes = recipes.filter(recipe => {
