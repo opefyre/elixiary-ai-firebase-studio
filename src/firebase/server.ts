@@ -4,8 +4,17 @@ import { getAuth } from 'firebase-admin/auth';
 
 // Server-side Firebase initialization for webhooks and API routes
 export function initializeFirebaseServer() {
+  console.log('Initializing Firebase Admin SDK...');
+  console.log('Environment variables check:', {
+    hasCredentialsJson: !!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON,
+    hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+    hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+    hasProjectId: !!process.env.FIREBASE_PROJECT_ID
+  });
+  
   // Check if already initialized
   if (getApps().length > 0) {
+    console.log('Firebase already initialized, returning existing instances');
     return {
       adminDb: getFirestore(),
       adminAuth: getAuth(),
@@ -52,8 +61,15 @@ export function initializeFirebaseServer() {
     projectId: projectId,
   });
 
+  const adminDb = getFirestore(app);
+  const adminAuth = getAuth(app);
+  
+  console.log('Firebase Admin SDK initialized successfully');
+  console.log('adminDb type:', typeof adminDb);
+  console.log('adminAuth type:', typeof adminAuth);
+  
   return {
-    adminDb: getFirestore(app),
-    adminAuth: getAuth(app),
+    adminDb,
+    adminAuth,
   };
 }
