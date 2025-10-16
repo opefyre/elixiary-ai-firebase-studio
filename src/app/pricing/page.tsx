@@ -338,6 +338,11 @@ function PricingContent() {
                       Save 20% vs monthly • Billed once per year
                     </p>
                   )}
+                  {selectedPlan === 'annual' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Equals $1.99 per month
+                    </p>
+                  )}
                 </div>
               </div>
             )}
