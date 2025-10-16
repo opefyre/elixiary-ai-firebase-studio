@@ -20,10 +20,13 @@ export class APIAuthenticator {
     apiKey: any;
     rateLimit: any;
   }> {
+    let apiKey: string | null = null;
+    let email: string | null = null;
+    
     try {
       // Extract credentials
-      const apiKey = request.headers.get('x-api-key');
-      const email = request.headers.get('x-user-email');
+      apiKey = request.headers.get('x-api-key');
+      email = request.headers.get('x-user-email');
 
       // Validate required headers
       if (!apiKey || !email) {
