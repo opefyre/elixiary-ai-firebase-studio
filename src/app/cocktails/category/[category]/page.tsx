@@ -150,9 +150,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Category not found</h1>
         <Button asChild>
-          <Link href="/curated">
+          <Link href="/cocktails">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Curated Recipes
+            Back to Cocktails
           </Link>
         </Button>
       </div>
@@ -310,7 +310,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             This category doesn't have any recipes yet.
           </p>
           <Button asChild>
-            <Link href="/curated">
+            <Link href="/cocktails">
               Browse All Recipes
             </Link>
           </Button>
