@@ -6,7 +6,7 @@ import { AuthButton } from "@/components/auth-button";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Wine, Code } from "lucide-react";
 import { useUser } from "@/firebase";
-import { useSubscription } from "@/hooks/use-subscription";
+import { useSubscription } from "@/firebase/firestore/use-subscription";
 
 export function Header() {
   const { user } = useUser();
