@@ -223,7 +223,7 @@ export class APIKeyManager {
     if (!keyDoc.exists) return;
 
     const keyData = keyDoc.data() as APIKey;
-    const lastUsed = new Date(keyData.usage.lastUsed);
+    const lastUsed = keyData.usage.lastUsed instanceof Date ? keyData.usage.lastUsed : keyData.usage.lastUsed.toDate();
     const lastUsedToday = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), lastUsed.getDate());
     const lastUsedMonth = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), 1);
 
