@@ -13,9 +13,14 @@ export default function APIDocsLayout({
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #fafafa;
           }
           .swagger-ui {
-            padding-top: 20px;
+            padding-top: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 20px;
+            padding-right: 20px;
           }
         `}</style>
       </head>
