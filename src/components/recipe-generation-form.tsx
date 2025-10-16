@@ -81,8 +81,6 @@ export function RecipeGenerationForm({
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [customization, setCustomization] = useState<CustomizationOptions | null>(null);
-  const [isDiceRolling, setIsDiceRolling] = useState(false);
-  const [diceAnimation, setDiceAnimation] = useState<'roll-1' | 'roll-2' | 'roll-3'>('roll-1');
   const { toast } = useToast();
   const { saveRecipe } = useRecipes();
   const { user } = useUser();
@@ -98,19 +96,8 @@ export function RecipeGenerationForm({
   });
 
   const handleRandomPrompt = () => {
-    setIsDiceRolling(true);
-    
-    // Randomly select one of three dice animations
-    const animations = ['roll-1', 'roll-2', 'roll-3'] as const;
-    const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
-    setDiceAnimation(randomAnimation);
-    
-    // Add a delay to show the sophisticated animation
-    setTimeout(() => {
-      const randomPrompt = luckyPrompts[Math.floor(Math.random() * luckyPrompts.length)];
-      form.setValue("prompt", randomPrompt);
-      setIsDiceRolling(false);
-    }, 1200); // 1.2s animation duration
+    const randomPrompt = luckyPrompts[Math.floor(Math.random() * luckyPrompts.length)];
+    form.setValue("prompt", randomPrompt);
   };
 
   const handleCopyRecipe = async () => {
@@ -379,26 +366,8 @@ ${window.location.origin}`.trim();
                   </>
                 )}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="lg" 
-                onClick={handleRandomPrompt} 
-                aria-label="I'm feeling lucky"
-                disabled={isDiceRolling}
-                className={`relative overflow-hidden ${isDiceRolling ? 'animate-pulse dice-rolling' : ''}`}
-              >
-                <div className={`dice-container flex items-center gap-1 ${isDiceRolling ? 'justify-center' : ''}`}>
-                  {isDiceRolling ? (
-                    <>
-                      <Dices className={`h-3 w-3 animate-dice-roll`} />
-                      <Dices className={`h-3 w-3 animate-dice-roll-2`} />
-                      <Dices className={`h-3 w-3 animate-dice-roll-3`} />
-                    </>
-                  ) : (
-                    <Dices className="h-4 w-4" />
-                  )}
-                </div>
+              <Button type="button" variant="outline" size="lg" onClick={handleRandomPrompt} aria-label="I'm feeling lucky">
+                  <Dices className="h-4 w-4 animate-dice" />
               </Button>
             </div>
             <CustomizationDialog 
