@@ -105,7 +105,8 @@ export class APIKeyManager {
     }
 
     // Check if key is expired
-    if (new Date() > keyData.expiresAt) {
+    const expiresAt = keyData.expiresAt instanceof Date ? keyData.expiresAt : keyData.expiresAt.toDate();
+    if (new Date() > expiresAt) {
       throw new Error('API key has expired');
     }
 
