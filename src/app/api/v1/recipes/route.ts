@@ -119,6 +119,11 @@ export async function GET(request: NextRequest) {
     
   } catch (error: any) {
     console.error('Error fetching recipes:', error);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
     
     if (error instanceof APIError) {
       return NextResponse.json(
@@ -135,7 +140,7 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch recipes' },
+      { success: false, error: `Failed to fetch recipes: ${error.message}` },
       { status: 500 }
     );
   }
