@@ -318,20 +318,10 @@ Source: ${recipe.source}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-muted-foreground leading-relaxed whitespace-pre-line space-y-3">
-                {Array.isArray(recipe.instructions) ? 
-                  recipe.instructions.map((instruction, index) => (
-                    <div key={index} className="flex gap-3 p-3 rounded-lg bg-muted/20">
-                      <span className="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary rounded-full flex items-center justify-center text-sm font-semibold">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm">{instruction}</span>
-                    </div>
-                  )) : 
-                  <div className="p-3 rounded-lg bg-muted/20 text-sm">
-                    {recipe.instructions}
-                  </div>
-                }
+              <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                <div className="p-3 rounded-lg bg-muted/20 text-sm">
+                  {recipe.instructions}
+                </div>
               </div>
             </CardContent>
           </Card>

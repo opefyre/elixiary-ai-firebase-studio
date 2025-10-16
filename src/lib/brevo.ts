@@ -40,11 +40,15 @@ export async function sendWelcomeEmail(email: string, displayName?: string) {
           </li>
           <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
             <span style="position: absolute; left: 0; top: 0;">🔍</span>
-            Search recipes by ingredients
+            Search and filter recipes
           </li>
           <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
             <span style="position: absolute; left: 0; top: 0;">📱</span>
             Share recipes with friends
+          </li>
+          <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+            <span style="position: absolute; left: 0; top: 0;">🎲</span>
+            Random cocktail inspiration
           </li>
         </ul>
       </div>
@@ -59,7 +63,7 @@ export async function sendWelcomeEmail(email: string, displayName?: string) {
       <div style="background: #e8f4fd; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
         <h3 style="color: #1e40af; margin: 0 0 10px 0; font-size: 16px;">💡 Want More?</h3>
         <p style="margin: 0; font-size: 14px; color: #1e40af;">
-          Upgrade to Pro for unlimited recipe generation, PDF exports, advanced customization, and more for just $4.99/month!
+          Upgrade to Pro for unlimited recipe generation, PDF exports, advanced customization, shopping lists, and gamified badges for just $2.49/month or $1.99/month billed annually!
         </p>
       </div>
       
