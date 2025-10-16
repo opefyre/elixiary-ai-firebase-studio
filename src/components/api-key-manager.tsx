@@ -41,7 +41,27 @@ export function APIKeyManager() {
 
   const fetchAPIKeys = async () => {
     try {
-      const response = await fetch('/api/account/api-keys');
+      // Get Firebase Auth token
+      const { auth } = await import('@/firebase');
+      const user = auth.currentUser;
+      
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'Please sign in to manage API keys',
+          variant: 'destructive'
+        });
+        setLoading(false);
+        return;
+      }
+
+      const token = await user.getIdToken();
+      
+      const response = await fetch('/api/account/api-keys', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -76,10 +96,27 @@ export function APIKeyManager() {
 
     setCreating(true);
     try {
+      // Get Firebase Auth token
+      const { auth } = await import('@/firebase');
+      const user = auth.currentUser;
+      
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'Please sign in to create API keys',
+          variant: 'destructive'
+        });
+        setCreating(false);
+        return;
+      }
+
+      const token = await user.getIdToken();
+      
       const response = await fetch('/api/account/api-keys', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ name: newKeyName.trim() })
       });
@@ -119,8 +156,26 @@ export function APIKeyManager() {
     }
 
     try {
+      // Get Firebase Auth token
+      const { auth } = await import('@/firebase');
+      const user = auth.currentUser;
+      
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'Please sign in to manage API keys',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const token = await user.getIdToken();
+      
       const response = await fetch(`/api/account/api-keys/${keyId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       const data = await response.json();
@@ -153,8 +208,26 @@ export function APIKeyManager() {
     }
 
     try {
+      // Get Firebase Auth token
+      const { auth } = await import('@/firebase');
+      const user = auth.currentUser;
+      
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'Please sign in to manage API keys',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const token = await user.getIdToken();
+      
       const response = await fetch(`/api/account/api-keys/${keyId}/rotate`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       const data = await response.json();

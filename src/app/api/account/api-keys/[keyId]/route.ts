@@ -1,18 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { initializeFirebaseServer } from '@/firebase/server';
 import { APIKeyManager } from '@/lib/api-keys';
+import { verifyFirebaseToken, getUserByUid } from '@/lib/firebase-auth-verify';
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { keyId: string } }
 ) {
   try {
-    // For now, return error to avoid build issues
-    // TODO: Implement proper Firebase Auth verification
-    return NextResponse.json(
-      { success: false, error: 'API key management will be available after authentication is implemented' },
-      { status: 501 }
-    );
+    const authHeader = request.headers.get('authorization');
+    const { user, error } = await verifyFirebaseToken(authHeader);
+    
+    if (!user || error) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { keyId } = params;
+    
+    const userData = await getUserByUid(user.uid);
+    if (!userData) {
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if user is Pro
+    if (userData.subscription?.tier !== 'pro') {
+      return NextResponse.json(
+        { success: false, error: 'Pro subscription required' },
+        { status: 403 }
+      );
+    }
+
+    const apiKeyManager = new APIKeyManager();
+    await apiKeyManager.revokeAPIKey(keyId, user.uid);
+    
+    return NextResponse.json({ 
+      success: true, 
+      data: { message: 'API key revoked successfully' }
+    });
     
   } catch (error: any) {
     console.error('Error revoking API key:', error);
@@ -28,12 +57,44 @@ export async function POST(
   { params }: { params: { keyId: string } }
 ) {
   try {
-    // For now, return error to avoid build issues
-    // TODO: Implement proper Firebase Auth verification
-    return NextResponse.json(
-      { success: false, error: 'API key management will be available after authentication is implemented' },
-      { status: 501 }
-    );
+    const authHeader = request.headers.get('authorization');
+    const { user, error } = await verifyFirebaseToken(authHeader);
+    
+    if (!user || error) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { keyId } = params;
+    
+    const userData = await getUserByUid(user.uid);
+    if (!userData) {
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if user is Pro
+    if (userData.subscription?.tier !== 'pro') {
+      return NextResponse.json(
+        { success: false, error: 'Pro subscription required' },
+        { status: 403 }
+      );
+    }
+
+    const apiKeyManager = new APIKeyManager();
+    const newKey = await apiKeyManager.rotateAPIKey(keyId, user.uid);
+    
+    return NextResponse.json({
+      success: true,
+      data: {
+        newApiKey: newKey,
+        message: 'API key rotated successfully'
+      }
+    });
     
   } catch (error: any) {
     console.error('Error rotating API key:', error);
