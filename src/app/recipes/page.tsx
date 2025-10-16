@@ -24,7 +24,7 @@ export default function RecipesPage() {
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [selectedRecipeIds, setSelectedRecipeIds] = useState<Set<string>>(new Set());
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState<'all' | 'ai' | 'favorites'>('all');
+  const [activeTab, setActiveTab] = useState<'ai' | 'favorites'>('ai');
 
   // Combine AI recipes and saved curated recipes
   const allRecipes = useMemo(() => {
@@ -50,12 +50,12 @@ export default function RecipesPage() {
     }
 
     return recipesToFilter.filter((recipe) => {
-      // Search filter
+      // Search filter - safely handle ingredients field
       const matchesSearch = searchQuery.trim() === '' || 
         recipe.recipeName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         recipe.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (recipe.description && recipe.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (recipe.ingredients && recipe.ingredients.toLowerCase().includes(searchQuery.toLowerCase()));
+        (recipe.ingredients && typeof recipe.ingredients === 'string' && recipe.ingredients.toLowerCase().includes(searchQuery.toLowerCase()));
 
       // Glassware filter
       const matchesGlassware = filterGlassware === 'all' || 
@@ -297,15 +297,6 @@ export default function RecipesPage() {
         {/* Tab Navigation */}
         <div className="flex gap-2 mt-6">
           <Button
-            variant={activeTab === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setActiveTab('all')}
-            className="gap-2"
-          >
-            <BookOpen className="h-4 w-4" />
-            All Recipes ({allRecipes.length})
-          </Button>
-          <Button
             variant={activeTab === 'ai' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActiveTab('ai')}
@@ -361,8 +352,8 @@ export default function RecipesPage() {
                   variant="outline"
                   onClick={() => {
                     setSearchQuery('');
-                    setFilterDifficulty('all');
                     setFilterGlassware('all');
+                    setFilterTag('all');
                   }}
                 >
                   Clear All Filters
