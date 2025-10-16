@@ -41,7 +41,7 @@ export function APIKeyManager() {
 
   const fetchAPIKeys = async () => {
     try {
-      const response = await fetch('/api/v1/keys');
+      const response = await fetch('/api/account/api-keys');
       const data = await response.json();
       
       if (data.success) {
@@ -76,7 +76,7 @@ export function APIKeyManager() {
 
     setCreating(true);
     try {
-      const response = await fetch('/api/v1/keys', {
+      const response = await fetch('/api/account/api-keys', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -119,7 +119,7 @@ export function APIKeyManager() {
     }
 
     try {
-      const response = await fetch(`/api/v1/keys/${keyId}`, {
+      const response = await fetch(`/api/account/api-keys/${keyId}`, {
         method: 'DELETE'
       });
       
@@ -153,7 +153,7 @@ export function APIKeyManager() {
     }
 
     try {
-      const response = await fetch(`/api/v1/keys/${keyId}/rotate`, {
+      const response = await fetch(`/api/account/api-keys/${keyId}/rotate`, {
         method: 'POST'
       });
       
