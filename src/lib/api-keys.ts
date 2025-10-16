@@ -129,13 +129,20 @@ export class APIKeyManager {
    * Get user's API keys
    */
   async getUserAPIKeys(userId: string): Promise<APIKey[]> {
+    // For now, get all keys and filter client-side to avoid index requirement
     const keysSnapshot = await this.adminDb
       .collection('api_keys')
       .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
       .get();
 
-    return keysSnapshot.docs.map(doc => doc.data() as APIKey);
+    const keys = keysSnapshot.docs.map(doc => doc.data() as APIKey);
+    
+    // Sort by createdAt on the client side
+    return keys.sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 
   /**
