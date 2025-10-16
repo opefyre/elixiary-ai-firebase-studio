@@ -19,7 +19,6 @@ export default function RecipesPage() {
   const { savedRecipes, unsaveRecipe } = useSavedRecipes();
   const { isPro } = useSubscription();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterGlassware, setFilterGlassware] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string>('all');
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [selectedRecipeIds, setSelectedRecipeIds] = useState<Set<string>>(new Set());
@@ -57,23 +56,14 @@ export default function RecipesPage() {
         (recipe.description && recipe.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (recipe.ingredients && typeof recipe.ingredients === 'string' && recipe.ingredients.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Glassware filter
-      const matchesGlassware = filterGlassware === 'all' || 
-        ('glassware' in recipe && recipe.glassware?.toLowerCase().includes(filterGlassware.toLowerCase()));
-
       // Tag filter
       const matchesTag = filterTag === 'all' || 
         (recipe.tags && recipe.tags.includes(filterTag));
 
-      return matchesSearch && matchesGlassware && matchesTag;
+      return matchesSearch && matchesTag;
     });
-  }, [allRecipes, searchQuery, filterGlassware, filterTag, activeTab]);
+  }, [allRecipes, searchQuery, filterTag, activeTab]);
 
-  // Get unique glassware types
-  const glasswareTypes = useMemo(() => {
-    const unique = new Set(recipes.map(r => 'glassware' in r ? r.glassware : '').filter(Boolean));
-    return Array.from(unique);
-  }, [recipes]);
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
@@ -229,30 +219,14 @@ export default function RecipesPage() {
                 )}
               </div>
 
-              {/* Glassware Filter */}
-              {glasswareTypes.length > 0 && (
-                <select
-                  value={filterGlassware}
-                  onChange={(e) => setFilterGlassware(e.target.value)}
-                  className="px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="all">All Glassware</option>
-                  {glasswareTypes.map((glass) => (
-                    <option key={glass} value={glass}>
-                      {glass}
-                    </option>
-                  ))}
-                </select>
-              )}
-
               {/* Clear Filters */}
-              {(searchQuery || filterGlassware !== 'all') && (
+              {(searchQuery || filterTag !== 'all') && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     setSearchQuery('');
-                    setFilterGlassware('all');
+                    setFilterTag('all');
                   }}
                   className="gap-2"
                 >
@@ -352,7 +326,6 @@ export default function RecipesPage() {
                   variant="outline"
                   onClick={() => {
                     setSearchQuery('');
-                    setFilterGlassware('all');
                     setFilterTag('all');
                   }}
                 >
