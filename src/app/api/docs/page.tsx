@@ -86,17 +86,16 @@ console.log(data);`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 pt-24 pb-8">
+    <div className="container mx-auto max-w-4xl px-4 py-8 pt-24">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          <h1 className="font-headline text-3xl font-bold md:text-4xl mb-4">
             🍸 Elixiary AI API
           </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-300 mb-6">
+          <p className="mx-auto max-w-xl text-lg text-muted-foreground mb-6">
             Professional cocktail recipe API for Pro users
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 flex-wrap">
             <Badge variant="secondary" className="text-sm">
               <Globe className="w-4 h-4 mr-1" />
               Base URL: https://ai.elixiary.com/api/v1
@@ -133,7 +132,7 @@ console.log(data);`;
                     type="password"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="elx_live_your_api_key_here"
+                    placeholder="Enter your API key"
                     className="font-mono text-sm"
                   />
                   <Button
@@ -154,7 +153,7 @@ console.log(data);`;
                     type="email"
                     value={userEmail}
                     onChange={(e) => setUserEmail(e.target.value)}
-                    placeholder="your-email@example.com"
+                    placeholder="Enter your email"
                     className="font-mono text-sm"
                   />
                   <Button

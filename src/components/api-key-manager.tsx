@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -276,6 +276,9 @@ export function APIKeyManager() {
             <Key className="h-5 w-5" />
             API Keys
           </CardTitle>
+          <CardDescription>
+            Manage your API keys for programmatic access to the Elixiary AI API
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">Loading...</div>
@@ -292,6 +295,9 @@ export function APIKeyManager() {
             <Key className="h-5 w-5" />
             API Keys
           </CardTitle>
+          <CardDescription>
+            Manage your API keys for programmatic access to the Elixiary AI API
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
@@ -308,10 +314,15 @@ export function APIKeyManager() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5" />
-              API Keys
-            </CardTitle>
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                API Keys
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Manage your API keys for programmatic access to the Elixiary AI API
+              </CardDescription>
+            </div>
             <Dialog open={showNewKeyDialog} onOpenChange={setShowNewKeyDialog}>
               <DialogTrigger asChild>
                 <Button size="sm">
