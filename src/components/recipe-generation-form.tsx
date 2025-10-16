@@ -81,6 +81,7 @@ export function RecipeGenerationForm({
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [customization, setCustomization] = useState<CustomizationOptions | null>(null);
+  const [isDiceRolling, setIsDiceRolling] = useState(false);
   const { toast } = useToast();
   const { saveRecipe } = useRecipes();
   const { user } = useUser();
@@ -96,8 +97,14 @@ export function RecipeGenerationForm({
   });
 
   const handleRandomPrompt = () => {
-    const randomPrompt = luckyPrompts[Math.floor(Math.random() * luckyPrompts.length)];
-    form.setValue("prompt", randomPrompt);
+    setIsDiceRolling(true);
+    
+    // Add a small delay to show the animation
+    setTimeout(() => {
+      const randomPrompt = luckyPrompts[Math.floor(Math.random() * luckyPrompts.length)];
+      form.setValue("prompt", randomPrompt);
+      setIsDiceRolling(false);
+    }, 800); // 800ms animation duration
   };
 
   const handleCopyRecipe = async () => {
@@ -366,8 +373,16 @@ ${window.location.origin}`.trim();
                   </>
                 )}
               </Button>
-              <Button type="button" variant="outline" size="lg" onClick={handleRandomPrompt} aria-label="I'm feeling lucky">
-                  <Dices className="h-4 w-4" />
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="lg" 
+                onClick={handleRandomPrompt} 
+                aria-label="I'm feeling lucky"
+                disabled={isDiceRolling}
+                className={isDiceRolling ? 'animate-pulse' : ''}
+              >
+                  <Dices className={`h-4 w-4 ${isDiceRolling ? 'animate-dice-roll' : ''}`} />
               </Button>
             </div>
             <CustomizationDialog 
