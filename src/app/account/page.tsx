@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { BadgeStats, BadgeGrid } from '@/components/badge-display';
 import { BadgeCelebration } from '@/components/badge-celebration';
+import { APIKeyManager } from '@/components/api-key-manager';
 import Link from 'next/link';
 import { useState } from 'react';
 import { signOut } from 'firebase/auth';
@@ -434,6 +435,11 @@ export default function AccountPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* API Keys - Pro Users Only */}
+      {isPro && (
+        <APIKeyManager />
       )}
 
       {/* Account Actions */}

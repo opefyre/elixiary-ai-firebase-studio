@@ -1,0 +1,376 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Copy, Key, Plus, Trash2, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface APIKey {
+  id: string;
+  name: string;
+  status: 'active' | 'suspended' | 'revoked';
+  createdAt: string;
+  expiresAt: string;
+  lastUsed: string;
+  usage: {
+    requestsToday: number;
+    requestsThisMonth: number;
+    totalRequests: number;
+  };
+}
+
+export function APIKeyManager() {
+  const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showNewKeyDialog, setShowNewKeyDialog] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [newKey, setNewKey] = useState<string | null>(null);
+  const [showKey, setShowKey] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchAPIKeys();
+  }, []);
+
+  const fetchAPIKeys = async () => {
+    try {
+      const response = await fetch('/api/v1/keys');
+      const data = await response.json();
+      
+      if (data.success) {
+        setApiKeys(data.data);
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to fetch API keys',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch API keys',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createAPIKey = async () => {
+    if (!newKeyName.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a name for the API key',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const response = await fetch('/api/v1/keys', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newKeyName.trim() })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setNewKey(data.data.id);
+        setNewKeyName('');
+        setShowNewKeyDialog(false);
+        fetchAPIKeys();
+        toast({
+          title: 'Success',
+          description: 'API key created successfully'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to create API key',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create API key',
+        variant: 'destructive'
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const revokeAPIKey = async (keyId: string) => {
+    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/keys/${keyId}`, {
+        method: 'DELETE'
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchAPIKeys();
+        toast({
+          title: 'Success',
+          description: 'API key revoked successfully'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to revoke API key',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to revoke API key',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const rotateAPIKey = async (keyId: string) => {
+    if (!confirm('Are you sure you want to rotate this API key? The old key will be revoked and a new one will be generated.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/keys/${keyId}/rotate`, {
+        method: 'POST'
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setNewKey(data.data.newApiKey);
+        fetchAPIKeys();
+        toast({
+          title: 'Success',
+          description: 'API key rotated successfully'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to rotate API key',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to rotate API key',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: 'Copied',
+      description: 'API key copied to clipboard'
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" />
+            API Keys
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">Loading...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              API Keys
+            </CardTitle>
+            <Dialog open={showNewKeyDialog} onOpenChange={setShowNewKeyDialog}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Key
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New API Key</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="keyName">Key Name</Label>
+                    <Input
+                      id="keyName"
+                      value={newKeyName}
+                      onChange={(e) => setNewKeyName(e.target.value)}
+                      placeholder="e.g., My App Integration"
+                      maxLength={50}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowNewKeyDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={createAPIKey}
+                      disabled={creating || !newKeyName.trim()}
+                    >
+                      {creating ? 'Creating...' : 'Create Key'}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {apiKeys.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No API keys created yet</p>
+              <p className="text-sm">Create your first API key to start using the API</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {apiKeys.map((key) => (
+                <Card key={key.id} className="border-l-4 border-l-primary">
+                  <CardContent className="pt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium">{key.name}</h3>
+                        <Badge variant={key.status === 'active' ? 'default' : 'secondary'}>
+                          {key.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => rotateAPIKey(key.id)}
+                        >
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          Rotate
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => revokeAPIKey(key.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Revoke
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                      <div>
+                        <p className="font-medium">Created</p>
+                        <p>{formatDate(key.createdAt)}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Last Used</p>
+                        <p>{formatDate(key.lastUsed)}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Today's Requests</p>
+                        <p>{key.usage.requestsToday}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Total Requests</p>
+                        <p>{key.usage.totalRequests}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* New Key Dialog */}
+      {newKey && (
+        <Dialog open={!!newKey} onOpenChange={() => setNewKey(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>New API Key Created</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Your new API key has been created. Copy it now as it won't be shown again.
+              </p>
+              <div className="space-y-2">
+                <Label>API Key</Label>
+                <div className="flex items-center gap-2">
+                  <Textarea
+                    value={newKey}
+                    readOnly
+                    className="font-mono text-sm"
+                    rows={2}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copyToClipboard(newKey)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Important:</strong> Store this API key securely. It won't be shown again.
+                </p>
+              </div>
+              <Button onClick={() => setNewKey(null)} className="w-full">
+                I've Saved My API Key
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+}
