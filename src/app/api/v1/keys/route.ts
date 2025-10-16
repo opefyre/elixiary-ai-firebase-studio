@@ -16,7 +16,9 @@ export async function POST(request: NextRequest) {
     const { name } = createKeySchema.parse(body);
     
     const apiKeyManager = new APIKeyManager();
-    const newKey = await apiKeyManager.createAPIKey(user.uid, user.email, name);
+    const userId = user.uid || user.id;
+    const userEmail = user.email || apiKey.email; // Use email from API key if not in user object
+    const newKey = await apiKeyManager.createAPIKey(userId, userEmail, name);
     
     // Don't return the full key data for security
     const response = {
@@ -52,7 +54,8 @@ export async function GET(request: NextRequest) {
     const { user } = await authenticator.authenticateRequest(request);
     
     const apiKeyManager = new APIKeyManager();
-    const keys = await apiKeyManager.getUserAPIKeys(user.uid);
+    const userId = user.uid || user.id;
+    const keys = await apiKeyManager.getUserAPIKeys(userId);
     
     // Don't return sensitive data
     const response = keys.map(key => ({
