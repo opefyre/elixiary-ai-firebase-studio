@@ -4,11 +4,13 @@ import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { AuthButton } from "@/components/auth-button";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Wine } from "lucide-react";
+import { BookOpen, Wine, Code } from "lucide-react";
 import { useUser } from "@/firebase";
+import { useSubscription } from "@/hooks/use-subscription";
 
 export function Header() {
   const { user } = useUser();
+  const { subscription } = useSubscription();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
@@ -34,6 +36,14 @@ export function Header() {
               </Link>
             </Button>
           )}
+          {user && subscription?.tier === 'pro' && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/api/docs">
+                <Code className="mr-2 h-4 w-4" />
+                API Docs
+              </Link>
+            </Button>
+          )}
           <AuthButton />
         </div>
 
@@ -48,6 +58,13 @@ export function Header() {
             <Button variant="ghost" size="sm" asChild>
               <Link href="/recipes">
                 <BookOpen className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
+          {user && subscription?.tier === 'pro' && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/api/docs">
+                <Code className="h-4 w-4" />
               </Link>
             </Button>
           )}

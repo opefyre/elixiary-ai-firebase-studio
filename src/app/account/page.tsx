@@ -442,6 +442,35 @@ export default function AccountPage() {
         <APIKeyManager />
       )}
 
+      {/* API Documentation - Pro Users Only */}
+      {isPro && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ExternalLink className="h-5 w-5" />
+              API Documentation
+            </CardTitle>
+            <CardDescription>
+              Interactive API documentation with live examples and code snippets
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Access our comprehensive API documentation with interactive examples, 
+                code snippets in multiple languages, and live testing capabilities.
+              </p>
+              <Button asChild className="w-full">
+                <Link href="/api/docs">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open API Documentation
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Account Actions */}
       <Card>
         <CardHeader>
