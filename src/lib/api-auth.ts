@@ -62,7 +62,8 @@ export class APIAuthenticator {
       const keyData = await this.apiKeyManager.validateAPIKey(apiKey, email);
 
       // Get user data
-      const { adminDb } = await import('@/firebase/server');
+      const { initializeFirebaseServer } = await import('@/firebase/server');
+      const { adminDb } = initializeFirebaseServer();
       const userDoc = await adminDb.collection('users').doc(keyData.userId).get();
       const user = userDoc.data();
 
