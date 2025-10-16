@@ -13,13 +13,14 @@ import { useFirebase } from '@/firebase';
 
 function PricingContent() {
   const { user, isUserLoading } = useUser();
-  const { isPro } = useSubscription();
+  const { isPro, subscription } = useSubscription();
   const { firestore } = useFirebase();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [earlyBirdSpotsLeft, setEarlyBirdSpotsLeft] = useState<number>(50);
   const [isEarlyBirdActive, setIsEarlyBirdActive] = useState(true);
@@ -115,6 +116,57 @@ function PricingContent() {
     }
   };
 
+  const handleManageBilling = async () => {
+    if (!subscription?.stripeCustomerId) {
+      toast({
+        title: 'No Subscription Found',
+        description: 'Please upgrade to Pro first to manage billing.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoadingPortal(true);
+    try {
+      const response = await fetch('/api/stripe/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to open billing portal');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to open billing portal',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingPortal(false);
+    }
+  };
+
+  // Determine current plan type
+  const getCurrentPlanType = () => {
+    if (!subscription?.stripePriceId) return null;
+    
+    // Check if it's monthly or annual based on price ID
+    if (subscription.stripePriceId.includes('monthly') || subscription.stripePriceId.includes('month')) {
+      return 'monthly';
+    }
+    if (subscription.stripePriceId.includes('annual') || subscription.stripePriceId.includes('year')) {
+      return 'annual';
+    }
+    return null;
+  };
+
+  const currentPlanType = getCurrentPlanType();
+
   if (isUserLoading) {
     return (
       <div className="container mx-auto max-w-6xl px-4 py-8 pt-24 md:py-12 md:pt-28">
@@ -206,7 +258,7 @@ function PricingContent() {
               disabled={isPro}
               onClick={() => !user && router.push('/login')}
             >
-              {user ? (isPro ? 'Current Plan' : 'Current Plan') : 'Get Started Free'}
+              {user ? (isPro ? 'Upgrade to Pro' : 'Current Plan') : 'Get Started Free'}
             </Button>
           </CardFooter>
         </Card>
@@ -229,52 +281,68 @@ function PricingContent() {
             <CardTitle className="text-xl">Pro</CardTitle>
             <CardDescription>For cocktail enthusiasts</CardDescription>
 
-            {/* Plan Toggle */}
-            <div className="mt-4">
-              <div className="flex bg-muted rounded-lg p-1 mb-4">
-                <button
-                  onClick={() => setSelectedPlan('monthly')}
-                  className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-                    selectedPlan === 'monthly'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setSelectedPlan('annual')}
-                  className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-                    selectedPlan === 'annual'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  Annual
-                </button>
-              </div>
+            {/* Plan Toggle - Only show if not Pro or if Pro user wants to change plan */}
+            {!isPro && (
+              <div className="mt-4">
+                <div className="flex bg-muted rounded-lg p-1 mb-4">
+                  <button
+                    onClick={() => setSelectedPlan('monthly')}
+                    className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                      selectedPlan === 'monthly'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setSelectedPlan('annual')}
+                    className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                      selectedPlan === 'annual'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Annual
+                  </button>
+                </div>
 
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <span className="text-3xl font-bold">
-                    ${pricing[selectedPlan].price}
-                  </span>
-                  {pricing[selectedPlan].original && (
-                    <span className="text-sm line-through text-muted-foreground">
-                      ${pricing[selectedPlan].original}
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <span className="text-3xl font-bold">
+                      ${pricing[selectedPlan].price}
                     </span>
+                    {pricing[selectedPlan].original && (
+                      <span className="text-sm line-through text-muted-foreground">
+                        ${pricing[selectedPlan].original}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    per {pricing[selectedPlan].period}
+                  </p>
+                  {isEarlyBirdActive && (
+                    <p className="text-xs text-primary mt-1">
+                      {selectedPlan === 'monthly' ? 'First 3 months, then $4.99/mo' : 'First year, then $49/year'}
+                    </p>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  per {pricing[selectedPlan].period}
-                </p>
-                {isEarlyBirdActive && (
-                  <p className="text-xs text-primary mt-1">
-                    {selectedPlan === 'monthly' ? 'First 3 months, then $4.99/mo' : 'First year, then $49/year'}
-                  </p>
-                )}
               </div>
-            </div>
+            )}
+
+            {/* Current Plan Display for Pro Users */}
+            {isPro && currentPlanType && (
+              <div className="mt-4 text-center">
+                <div className="bg-primary/10 rounded-lg p-3 mb-4">
+                  <p className="text-sm font-medium text-primary">
+                    Current Plan: {currentPlanType === 'monthly' ? 'Monthly' : 'Annual'} Pro
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Next billing: {subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'N/A'}
+                  </p>
+                </div>
+              </div>
+            )}
           </CardHeader>
           
           <CardContent className="space-y-3">
@@ -301,16 +369,38 @@ function PricingContent() {
           </CardContent>
           
           <CardFooter>
-            <Button
-              className="w-full"
-              onClick={handleCheckout}
-              disabled={isLoadingCheckout || isPro}
-            >
-              {isLoadingCheckout ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              {isPro ? 'Current Plan' : `Upgrade to Pro`}
-            </Button>
+            {isPro ? (
+              <div className="w-full space-y-2">
+                <Button
+                  className="w-full"
+                  onClick={handleManageBilling}
+                  disabled={isLoadingPortal}
+                >
+                  {isLoadingPortal ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Crown className="h-4 w-4 mr-2" />
+                  )}
+                  Manage Billing
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  Change plan, update payment, or cancel
+                </p>
+              </div>
+            ) : (
+              <Button
+                className="w-full"
+                onClick={handleCheckout}
+                disabled={isLoadingCheckout}
+              >
+                {isLoadingCheckout ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                )}
+                Upgrade to Pro
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>
