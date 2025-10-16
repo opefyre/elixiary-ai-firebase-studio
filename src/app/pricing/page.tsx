@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Check, Loader2, Sparkles, Zap } from 'lucide-react';
+import { Crown, Check, Loader2, Sparkles, Zap, ArrowRight, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { useFirebase } from '@/firebase';
@@ -20,7 +20,7 @@ function PricingContent() {
   const { toast } = useToast();
   
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
-  const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [earlyBirdSpotsLeft, setEarlyBirdSpotsLeft] = useState<number>(50);
   const [isEarlyBirdActive, setIsEarlyBirdActive] = useState(true);
 
@@ -65,7 +65,7 @@ function PricingContent() {
     return () => clearInterval(interval);
   }, [firestore]);
 
-  const handleCheckout = async (priceType: 'monthly' | 'annual') => {
+  const handleCheckout = async () => {
     if (!user) {
       router.push('/login');
       return;
@@ -80,7 +80,6 @@ function PricingContent() {
     }
 
     setIsLoadingCheckout(true);
-    setSelectedPrice(priceType);
 
     try {
       // Call API to create checkout session
@@ -90,7 +89,7 @@ function PricingContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          planType: priceType, // 'monthly' or 'annual'
+          planType: selectedPlan,
           userId: user.uid,
           userEmail: user.email,
           isEarlyBird: isEarlyBirdActive,
@@ -100,7 +99,6 @@ function PricingContent() {
       const data = await response.json();
 
       if (data.error || !response.ok) {
-        // Show the specific error message from the server
         throw new Error(data.message || data.error || 'Checkout failed');
       }
 
@@ -114,7 +112,6 @@ function PricingContent() {
         variant: "destructive",
       });
       setIsLoadingCheckout(false);
-      setSelectedPrice(null);
     }
   };
 
@@ -128,232 +125,247 @@ function PricingContent() {
     );
   }
 
-  return (
-    <div className="container mx-auto max-w-6xl px-4 py-8 pt-24 md:py-12 md:pt-28">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl font-bold md:text-5xl mb-4">
-          Choose Your Plan
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Start free, upgrade when you're ready. No credit card required for free tier.
-        </p>
-      </div>
+  // Calculate pricing
+  const getPricing = () => {
+    if (isEarlyBirdActive) {
+      return {
+        monthly: { price: 1.49, original: 4.99, period: 'month' },
+        annual: { price: 14.99, original: 49.99, period: 'year' }
+      };
+    }
+    return {
+      monthly: { price: 4.99, original: null, period: 'month' },
+      annual: { price: 49, original: null, period: 'year' }
+    };
+  };
 
-      {/* Early Bird Banner */}
-      {isEarlyBirdActive && (
-        <div className="mb-8 rounded-lg border border-primary/50 bg-gradient-to-r from-primary/10 to-yellow-500/10 p-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Zap className="h-5 w-5 text-yellow-500" />
-            <span className="font-semibold text-lg">Limited Time Offer!</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            🔥 70% OFF for the first 50 Pro members • Only <strong>{earlyBirdSpotsLeft} spots</strong> remaining
+  const pricing = getPricing();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="container mx-auto max-w-7xl px-4 py-16 pt-24">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-slate-100 dark:to-slate-400 bg-clip-text text-transparent mb-6">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Start free, upgrade when you're ready. No hidden fees, no surprises.
           </p>
         </div>
-      )}
 
-      {/* Pricing Cards */}
-      <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-        {/* Free Plan */}
-        <Card className="relative">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                  Free
-                </CardTitle>
-                <CardDescription className="mt-2">
-                  Perfect for trying out Elixiary
-                </CardDescription>
+        {/* Early Bird Banner */}
+        {isEarlyBirdActive && (
+          <div className="mb-12 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Zap className="h-6 w-6 text-amber-500" />
+                <span className="text-lg font-semibold text-amber-900 dark:text-amber-100">Early Bird Special</span>
               </div>
+              <p className="text-amber-800 dark:text-amber-200">
+                70% OFF for the first 50 members • Only <strong>{earlyBirdSpotsLeft} spots</strong> left
+              </p>
             </div>
-            <div className="mt-4">
-              <div className="text-4xl font-bold">$0</div>
-              <p className="text-sm text-muted-foreground">forever</p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>10 recipe generations per month</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Save up to 20 recipes</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Search & filter recipes</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Tags & collections</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Share & copy recipes</span>
-              </li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button
-              className="w-full"
-              variant="outline"
-              disabled={isPro}
-              onClick={() => !user && router.push('/login')}
-            >
-              {user ? (isPro ? 'Current: Pro Plan' : 'Current Plan') : 'Get Started Free'}
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Pro Plan */}
-        <Card className="relative border-primary shadow-lg shadow-primary/20">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-            <Badge className="gap-1 px-3 py-1 text-sm">
-              <Crown className="h-3.5 w-3.5 fill-current" />
-              Most Popular
-            </Badge>
           </div>
-          
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Crown className="h-6 w-6 text-yellow-500" />
-                  Pro
-                </CardTitle>
-                <CardDescription className="mt-2">
-                  For serious mixologists
-                </CardDescription>
+        )}
+
+        {/* Pricing Cards */}
+        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16">
+          {/* Free Plan */}
+          <Card className="relative overflow-hidden border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300">
+            <CardHeader className="pb-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                  <Sparkles className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-bold">Free</CardTitle>
+                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                    Perfect for getting started
+                  </CardDescription>
+                </div>
               </div>
+              <div className="mb-6">
+                <div className="text-5xl font-bold text-slate-900 dark:text-slate-100">$0</div>
+                <p className="text-slate-600 dark:text-slate-400">forever</p>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="pb-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">10 AI recipes per month</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">Save up to 20 recipes</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">Browse 500+ curated recipes</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">Search & filter tools</span>
+                </div>
+              </div>
+            </CardContent>
+            
+            <CardFooter>
+              <Button
+                className="w-full h-12 text-base font-medium"
+                variant="outline"
+                disabled={isPro}
+                onClick={() => !user && router.push('/login')}
+              >
+                {user ? (isPro ? 'Current Plan' : 'Current Plan') : 'Get Started Free'}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Pro Plan */}
+          <Card className="relative overflow-hidden border-2 border-primary shadow-2xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+              <Badge className="gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground">
+                <Crown className="h-4 w-4" />
+                Most Popular
+              </Badge>
             </div>
             
-            {/* Pricing Toggle */}
-            <div className="mt-6 space-y-4">
-              {/* Monthly */}
-              <div className="rounded-lg border border-border p-4 hover:border-primary transition-colors cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">Monthly</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {isEarlyBirdActive ? (
-                        <>
-                          <span className="text-3xl font-bold">$1.49</span>
-                          <span className="text-sm line-through text-muted-foreground">$4.99</span>
-                          <Badge variant="secondary" className="text-xs">70% OFF</Badge>
-                        </>
-                      ) : (
-                        <span className="text-3xl font-bold">$4.99</span>
-                      )}
-                      <span className="text-sm text-muted-foreground">/month</span>
-                    </div>
-                    {isEarlyBirdActive && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        First 3 months, then $4.99/mo
-                      </p>
-                    )}
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleCheckout('monthly')}
-                    disabled={isLoadingCheckout || isPro}
-                  >
-                    {isLoadingCheckout && selectedPrice === 'monthly' ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Select'
-                    )}
-                  </Button>
+            <CardHeader className="pb-6 pt-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Crown className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-bold">Pro</CardTitle>
+                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                    For serious cocktail enthusiasts
+                  </CardDescription>
                 </div>
               </div>
 
-              {/* Annual */}
-              <div className="rounded-lg border border-primary p-4 bg-primary/5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold">Annual</p>
-                      <Badge variant="default" className="text-xs">Best Value</Badge>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      {isEarlyBirdActive ? (
-                        <>
-                          <span className="text-3xl font-bold">$14.99</span>
-                          <span className="text-sm line-through text-muted-foreground">$49.99</span>
-                          <Badge variant="secondary" className="text-xs">70% OFF</Badge>
-                        </>
-                      ) : (
-                        <span className="text-3xl font-bold">$49</span>
-                      )}
-                      <span className="text-sm text-muted-foreground">/year</span>
-                    </div>
-                    {isEarlyBirdActive && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        First year, then $49/year
-                      </p>
+              {/* Plan Toggle */}
+              <div className="mb-6">
+                <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 mb-4">
+                  <button
+                    onClick={() => setSelectedPlan('monthly')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                      selectedPlan === 'monthly'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setSelectedPlan('annual')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                      selectedPlan === 'annual'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
+                  >
+                    Annual
+                    <Badge variant="secondary" className="ml-2 text-xs">Save 17%</Badge>
+                  </button>
+                </div>
+
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="text-5xl font-bold text-slate-900 dark:text-slate-100">
+                      ${pricing[selectedPlan].price}
+                    </span>
+                    {pricing[selectedPlan].original && (
+                      <span className="text-xl line-through text-slate-500 dark:text-slate-400">
+                        ${pricing[selectedPlan].original}
+                      </span>
                     )}
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleCheckout('annual')}
-                    disabled={isLoadingCheckout || isPro}
-                  >
-                    {isLoadingCheckout && selectedPrice === 'annual' ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Select'
+                  <p className="text-slate-600 dark:text-slate-400">
+                    per {pricing[selectedPlan].period}
+                    {isEarlyBirdActive && (
+                      <span className="block text-sm text-amber-600 dark:text-amber-400 mt-1">
+                        {selectedPlan === 'monthly' ? 'First 3 months, then $4.99/mo' : 'First year, then $49/year'}
+                      </span>
                     )}
-                  </Button>
+                  </p>
                 </div>
               </div>
+            </CardHeader>
+            
+            <CardContent className="pb-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="font-medium text-slate-900 dark:text-slate-100">Unlimited AI recipes</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="font-medium text-slate-900 dark:text-slate-100">Unlimited saved recipes</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">Smart shopping lists</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">PDF export & sharing</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">Advanced customization</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">Gamified achievements</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300">Priority support</span>
+                </div>
+              </div>
+            </CardContent>
+            
+            <CardFooter>
+              <Button
+                className="w-full h-12 text-base font-medium"
+                onClick={handleCheckout}
+                disabled={isLoadingCheckout || isPro}
+              >
+                {isLoadingCheckout ? (
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                ) : (
+                  <ArrowRight className="h-5 w-5 mr-2" />
+                )}
+                {isPro ? 'Current Plan' : `Upgrade to Pro - $${pricing[selectedPlan].price}/${pricing[selectedPlan].period}`}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        {/* Trust Signals */}
+        <div className="text-center space-y-6">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-slate-600 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Secure payment via Stripe</span>
             </div>
-          </CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Cancel anytime</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>No hidden fees</span>
+            </div>
+          </div>
           
-          <CardContent>
-            <p className="text-sm font-semibold mb-3">Everything in Free, plus:</p>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="font-medium">Unlimited recipe generations</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="font-medium">Unlimited saved recipes</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Smart shopping list generator</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>PDF export with beautiful formatting</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Advanced customization options</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Recipe visuals & theming</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span>Priority support</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Trust Signals */}
-      <div className="mt-16 text-center space-y-4">
-        <p className="text-sm text-muted-foreground">
-          ✅ Secure payment via Stripe • 🔒 Cancel anytime • 💳 No hidden fees
-        </p>
+          <div className="text-sm text-slate-500 dark:text-slate-500">
+            Join thousands of cocktail enthusiasts who trust Elixiary
+          </div>
+        </div>
       </div>
     </div>
   );
