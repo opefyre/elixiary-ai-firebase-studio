@@ -13,7 +13,7 @@ export function Header() {
   const { subscription } = useSubscription();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md mobile-navbar-fix ios-safe-area-top">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <Logo className="h-6 w-6 text-primary" />

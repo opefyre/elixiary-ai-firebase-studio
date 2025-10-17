@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../styles/mobile-pwa.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -56,6 +57,8 @@ export const metadata: Metadata = {
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
   },
   openGraph: {
     type: 'website',
@@ -130,6 +133,14 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         
+        {/* iOS PWA Meta Tags */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Elixiary" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="apple-touch-fullscreen" content="yes" />
+        
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -190,7 +201,7 @@ export default function RootLayout({
             Skip to main content
           </a>
           <Header />
-          <div className="relative min-h-screen flex flex-col">
+          <div className="relative min-h-screen flex flex-col ios-viewport-fix mobile-content-container">
             <div className="absolute top-1/4 left-1/4 h-32 w-32 animate-float text-primary/10 [animation-delay:-2s]">
               <Martini className="h-full w-full" />
             </div>
@@ -203,7 +214,7 @@ export default function RootLayout({
             <div className="absolute top-1/3 right-[20%] h-28 w-28 animate-float text-primary/10">
               <Sprout className="h-full w-full" />
             </div>
-            <main id="main-content" className="relative z-10 flex-1">
+            <main id="main-content" className="relative z-10 flex-1 mobile-body-padding">
               <AuthGuard>{children}</AuthGuard>
             </main>
             <Footer />
@@ -212,6 +223,33 @@ export default function RootLayout({
           <OfflineWarning />
           <PWAInstallPrompt />
         </FirebaseClientProvider>
+        
+        {/* Mobile Viewport Height Fix */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Fix for mobile viewport height issues (especially iOS)
+              function setViewportHeight() {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', vh + 'px');
+              }
+              
+              // Set initial viewport height
+              setViewportHeight();
+              
+              // Update on resize and orientation change
+              window.addEventListener('resize', setViewportHeight);
+              window.addEventListener('orientationchange', function() {
+                setTimeout(setViewportHeight, 100);
+              });
+              
+              // Fix for iOS PWA status bar
+              if (window.navigator.standalone === true) {
+                document.documentElement.classList.add('ios-pwa');
+              }
+            `,
+          }}
+        />
         
         {/* Service Worker Registration */}
         <script
