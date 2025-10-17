@@ -73,7 +73,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: '/',
       },
     ],
-    sitemap: 'https://ai.elixiary.com/sitemap.xml',
+    sitemap: [
+      'https://ai.elixiary.com/sitemap.xml',
+      'https://ai.elixiary.com/sitemap-index.xml',
+    ],
     host: 'https://ai.elixiary.com',
   };
 }
