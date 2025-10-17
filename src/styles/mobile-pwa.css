@@ -23,10 +23,10 @@
 body::before {
   content: "";
   position: fixed;
-  top: calc(-1 * var(--safe-top)); /* Negative offset to extend behind status bar */
+  top: calc(-1 * var(--safe-top) * 1.5); /* 50% more negative offset for safety */
   left: 0; 
   right: 0;
-  height: calc(var(--safe-top) + 4rem); /* Status bar height + navbar height */
+  height: calc(var(--safe-top) * 1.5 + 4rem); /* 50% larger height for full coverage */
   background: hsl(var(--background) / 0.8); /* Same as navbar */
   backdrop-filter: blur(12px); /* Same as navbar */
   border-bottom: 1px solid hsl(var(--border)); /* Same as navbar */
@@ -82,9 +82,9 @@ body::before {
   
   /* iOS PWA specific - Enhanced fake navbar */
   .ios-pwa body::before {
-    /* Force minimum height for iPhone status bar */
-    height: calc(max(var(--safe-top), 44px) + 4rem) !important;
-    top: calc(-1 * max(var(--safe-top), 44px)) !important;
+    /* Force minimum height for iPhone status bar with 50% extra */
+    height: calc(max(var(--safe-top), 44px) * 1.5 + 4rem) !important;
+    top: calc(-1 * max(var(--safe-top), 44px) * 1.5) !important;
     /* Ensure it covers the entire status bar area */
     background: hsl(var(--background) / 0.9) !important;
     backdrop-filter: blur(16px) !important;

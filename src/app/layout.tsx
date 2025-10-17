@@ -272,9 +272,9 @@ export default function RootLayout({
                     document.documentElement.style.setProperty('--safe-top', safeAreaTop);
                     console.log('Updated safe area top to:', safeAreaTop);
                   } else {
-                    // Fallback: Use 44px for iPhone status bar height
-                    document.documentElement.style.setProperty('--safe-top', '44px');
-                    console.log('Using fallback safe area top: 44px');
+                    // Fallback: Use 66px for iPhone status bar height (50% extra for safety)
+                    document.documentElement.style.setProperty('--safe-top', '66px');
+                    console.log('Using fallback safe area top: 66px (50% extra for safety)');
                   }
                 }
               }
