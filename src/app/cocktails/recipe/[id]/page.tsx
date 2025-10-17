@@ -194,7 +194,7 @@ Source: ${recipe.source}
   if (!recipe) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Recipe not found</h1>
+        <h2 className="text-2xl font-bold mb-4">Recipe not found</h2>
         <Button asChild>
           <Link href="/cocktails">
             <ArrowLeft className="h-4 w-4 mr-2" />

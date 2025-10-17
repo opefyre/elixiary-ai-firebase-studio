@@ -95,6 +95,8 @@ export default function robots(): MetadataRoute.Robots {
     ],
     sitemap: 'https://ai.elixiary.com/sitemap.xml',
     host: 'https://ai.elixiary.com',
+    // Add crawl delay for Bing
+    crawlDelay: 1,
   };
 }
 

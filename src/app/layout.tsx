@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
 import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
 import { AuthGuard } from "@/components/auth-guard";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 
@@ -176,8 +177,10 @@ export default function RootLayout({
             })
           }}
         />
+        <GoogleTagManager />
       </head>
       <body className="font-body antialiased">
+        <GoogleTagManagerNoScript />
         <GoogleAnalytics />
         <FirebaseClientProvider>
           <a href="#main-content" className="skip-link">
