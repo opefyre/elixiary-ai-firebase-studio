@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { LogIn, LogOut, Crown, Settings, CreditCard, Loader2, Key } from 'lucide-react';
+import { LogIn, LogOut, Crown, Settings, CreditCard, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
@@ -155,15 +155,6 @@ export function AuthButton() {
             <span>My Account</span>
           </Link>
         </DropdownMenuItem>
-
-        {isPro && (
-          <DropdownMenuItem asChild>
-            <Link href="/api" className="cursor-pointer">
-              <Key className="mr-2 h-4 w-4" />
-              <span>API Management</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
 
         {isPro && subscription?.stripeCustomerId && (
           <DropdownMenuItem onClick={handleManageBilling} disabled={isLoadingPortal}>
