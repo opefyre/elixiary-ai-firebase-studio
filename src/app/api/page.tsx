@@ -28,7 +28,16 @@ export default function APIPage() {
       
       try {
         setIsLoadingStats(true);
-        const response = await fetch('/api/account/api-keys');
+        
+        // Get Firebase token for authentication
+        const token = await user.getIdToken();
+        
+        const response = await fetch('/api/account/api-keys', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data.length > 0) {
