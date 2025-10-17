@@ -27,7 +27,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { BadgeStats, BadgeGrid } from '@/components/badge-display';
 import { BadgeCelebration } from '@/components/badge-celebration';
-import { APIKeyManager } from '@/components/api-key-manager';
 import Link from 'next/link';
 import { useState } from 'react';
 import { signOut } from 'firebase/auth';
@@ -437,43 +436,6 @@ export default function AccountPage() {
         </Card>
       )}
 
-      {/* API Keys - Pro Users Only */}
-      {isPro && (
-        <div className="mb-6">
-          <APIKeyManager />
-        </div>
-      )}
-
-      {/* API Documentation - Pro Users Only */}
-      {isPro && (
-        <div className="mb-6">
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ExternalLink className="h-5 w-5" />
-                API Documentation
-              </CardTitle>
-              <CardDescription>
-                Interactive API documentation with live examples and code snippets
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Access our comprehensive API documentation with interactive examples, 
-                  code snippets in multiple languages, and live testing capabilities.
-                </p>
-                <Button asChild className="w-full">
-                  <Link href="/api/docs">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open API Documentation
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Account Actions */}
       <Card>
