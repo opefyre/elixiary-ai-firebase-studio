@@ -140,6 +140,8 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="apple-touch-fullscreen" content="yes" />
+        <meta name="apple-mobile-web-app-orientations" content="portrait" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -246,6 +248,13 @@ export default function RootLayout({
               // Fix for iOS PWA status bar
               if (window.navigator.standalone === true) {
                 document.documentElement.classList.add('ios-pwa');
+                console.log('iOS PWA detected - applying status bar fixes');
+              }
+              
+              // Also detect iOS PWA by checking for specific iOS features
+              if (/iPad|iPhone|iPod/.test(navigator.userAgent) && window.navigator.standalone !== false) {
+                document.documentElement.classList.add('ios-pwa');
+                console.log('iOS PWA detected via user agent');
               }
             `,
           }}

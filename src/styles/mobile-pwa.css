@@ -28,7 +28,22 @@
     left: 0;
     right: 0;
     z-index: 50;
-    /* Add safe area padding for iOS */
+    /* Extend behind status bar on iOS PWA */
+    padding-top: env(safe-area-inset-top, 0px);
+    /* Make navbar extend to very top */
+    margin-top: 0;
+  }
+  
+  /* iOS PWA specific - extend navbar behind status bar */
+  .ios-pwa .mobile-navbar-fix {
+    /* Remove any top padding/margin to extend behind status bar */
+    padding-top: 0;
+    margin-top: 0;
+    /* Add padding to content inside navbar instead */
+  }
+  
+  .ios-pwa .mobile-navbar-fix .container {
+    /* Add safe area padding to the content inside navbar */
     padding-top: env(safe-area-inset-top, 0px);
   }
   
@@ -62,6 +77,23 @@
   .ios-scroll-fix {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Critical fix for iOS PWA status bar overlap */
+  .ios-pwa .mobile-navbar-fix {
+    /* Force navbar to extend behind status bar */
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    /* Make sure navbar background covers status bar area */
+    background: var(--background);
+  }
+  
+  .ios-pwa .mobile-navbar-fix .container {
+    /* Add safe area padding to content inside navbar */
+    padding-top: max(env(safe-area-inset-top, 0px), 0px);
+    /* Ensure content doesn't overlap with status bar */
+    min-height: calc(4rem + env(safe-area-inset-top, 0px));
   }
 }
 
