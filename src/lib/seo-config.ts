@@ -1,9 +1,11 @@
+import { config } from '@/lib/config';
+
 export const seoConfig = {
   site: {
     name: 'Elixiary AI',
-    url: 'https://ai.elixiary.com',
+    url: config.baseUrl,
     description: 'AI-Powered Cocktail Recipe Generator',
-    logo: 'https://ai.elixiary.com/icon.png',
+    logo: `${config.baseUrl}/icon.png`,
     twitter: '@elixiary_ai',
     email: 'hello@elixiary.com',
   },
@@ -135,8 +137,8 @@ export const seoConfig = {
     organization: {
       '@type': 'Organization',
       name: 'Elixiary AI',
-      url: 'https://ai.elixiary.com',
-      logo: 'https://ai.elixiary.com/icon.png',
+      url: config.baseUrl,
+      logo: `${config.baseUrl}/icon.png`,
       description: 'AI-Powered Cocktail Recipe Generator',
       sameAs: [
         'https://twitter.com/elixiary_ai',
@@ -153,7 +155,7 @@ export const seoConfig = {
       '@type': 'WebApplication',
       name: 'Elixiary AI',
       description: 'AI-Powered Cocktail Recipe Generator',
-      url: 'https://ai.elixiary.com',
+      url: config.baseUrl,
       applicationCategory: 'Food & Drink',
       operatingSystem: 'Web Browser',
       offers: {
@@ -165,7 +167,7 @@ export const seoConfig = {
       creator: {
         '@type': 'Organization',
         name: 'Elixiary AI',
-        url: 'https://ai.elixiary.com',
+        url: config.baseUrl,
       },
       featureList: [
         'AI Cocktail Recipe Generation',

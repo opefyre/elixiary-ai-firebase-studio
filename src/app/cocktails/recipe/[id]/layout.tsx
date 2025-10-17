@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         description: `Learn how to make ${recipe.name} cocktail.`,
       },
       alternates: {
-        canonical: `https://ai.elixiary.com/cocktails/recipe/${params.id}`,
+        canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com'}/cocktails/recipe/${params.id}`,
       },
     };
   } catch (error) {

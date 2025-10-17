@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Key, Mail, Copy, Code, BookOpen, Globe, Shield, Clock, ChevronDown, ChevronRight, ExternalLink, Info, AlertCircle, Users, Star, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { config, getApiUrl } from '@/lib/config';
 
 export default function APIDocsPage() {
   const { user, isUserLoading } = useFirebase();
@@ -97,7 +98,7 @@ export default function APIDocsPage() {
               <Globe className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Base URL</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1 font-mono">https://ai.elixiary.com/api/v1</p>
+            <p className="text-xs text-muted-foreground mt-1 font-mono">{config.apiBaseUrl}</p>
           </CardContent>
         </Card>
         
@@ -789,7 +790,7 @@ export default function APIDocsPage() {
                     <p className="text-sm font-medium mb-1">cURL</p>
                     <div className="bg-muted p-3 rounded-lg">
                       <pre className="text-sm font-mono overflow-x-auto">
-{`curl -X GET "https://ai.elixiary.com/api/v1/recipes?category=Cocktails&limit=5" \\
+{`curl -X GET "${config.apiBaseUrl}/recipes?category=Cocktails&limit=5" \\
   -H "x-api-key: ${apiKey || 'your_api_key_here'}" \\
   -H "x-user-email: ${userEmail || 'your_email@example.com'}" \\
   -H "Content-Type: application/json"`}
@@ -801,7 +802,7 @@ export default function APIDocsPage() {
                     <p className="text-sm font-medium mb-1">JavaScript (Fetch API)</p>
                     <div className="bg-muted p-3 rounded-lg">
                       <pre className="text-sm font-mono overflow-x-auto">
-{`const response = await fetch('https://ai.elixiary.com/api/v1/recipes?category=Cocktails&limit=5', {
+{`const response = await fetch('${config.apiBaseUrl}/recipes?category=Cocktails&limit=5', {
   method: 'GET',
   headers: {
     'x-api-key': '${apiKey || 'your_api_key_here'}',
@@ -834,7 +835,7 @@ headers = {
 }
 
 response = requests.get(
-    'https://ai.elixiary.com/api/v1/recipes',
+    '${config.apiBaseUrl}/recipes',
     headers=headers,
     params={
         'category': 'Cocktails',
@@ -861,7 +862,7 @@ else:
                 <div className="bg-muted p-3 rounded-lg">
                   <pre className="text-sm font-mono overflow-x-auto">
 {`// Search for classic gin cocktails that are easy to make
-const response = await fetch('https://ai.elixiary.com/api/v1/recipes?' + new URLSearchParams({
+const response = await fetch('${config.apiBaseUrl}/recipes?' + new URLSearchParams({
   search: 'gin',
   category: 'Cocktails',
   difficulty: 'Easy',
@@ -886,7 +887,7 @@ const response = await fetch('https://ai.elixiary.com/api/v1/recipes?' + new URL
                     <div className="bg-muted p-3 rounded-lg">
                       <pre className="text-sm font-mono overflow-x-auto">
 {`// Save a recipe to user's collection
-const response = await fetch('https://ai.elixiary.com/api/v1/user/recipes', {
+const response = await fetch('${config.apiBaseUrl}/user/recipes', {
   method: 'POST',
   headers: {
     'x-api-key': '${apiKey || 'your_api_key_here'}',
@@ -906,7 +907,7 @@ const response = await fetch('https://ai.elixiary.com/api/v1/user/recipes', {
                     <div className="bg-muted p-3 rounded-lg">
                       <pre className="text-sm font-mono overflow-x-auto">
 {`// Get user's saved recipes with filtering
-const response = await fetch('https://ai.elixiary.com/api/v1/user/recipes?source=curated&page=1&limit=20', {
+const response = await fetch('${config.apiBaseUrl}/user/recipes?source=curated&page=1&limit=20', {
   headers: {
     'x-api-key': '${apiKey || 'your_api_key_here'}',
     'x-user-email': '${userEmail || 'your_email@example.com'}'

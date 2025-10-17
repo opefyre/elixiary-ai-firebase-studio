@@ -32,7 +32,7 @@ export function WebApplicationStructuredData() {
       data={{
         name: 'Elixiary AI',
         description: 'AI-Powered Cocktail Recipe Generator',
-        url: 'https://ai.elixiary.com',
+        url: process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com',
         applicationCategory: 'Food & Drink',
         operatingSystem: 'Web Browser',
         offers: {
@@ -44,7 +44,7 @@ export function WebApplicationStructuredData() {
         creator: {
           '@type': 'Organization',
           name: 'Elixiary AI',
-          url: 'https://ai.elixiary.com',
+          url: process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com',
         },
         featureList: [
           'AI Cocktail Recipe Generation',
@@ -117,8 +117,8 @@ export function OrganizationStructuredData() {
       type="Organization"
       data={{
         name: 'Elixiary AI',
-        url: 'https://ai.elixiary.com',
-        logo: 'https://ai.elixiary.com/icon.png',
+        url: process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com',
+        logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com'}/icon.png`,
         description: 'AI-Powered Cocktail Recipe Generator',
         sameAs: [
           'https://twitter.com/elixiary_ai',

@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { config } from '@/lib/config';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -93,8 +94,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: '/',
       },
     ],
-    sitemap: 'https://ai.elixiary.com/sitemap.xml',
-    host: 'https://ai.elixiary.com',
+    sitemap: `${config.baseUrl}/sitemap.xml`,
+    host: config.baseUrl,
     // Add crawl delay for Bing
     crawlDelay: 1,
   };

@@ -9,9 +9,10 @@ import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
 import { AuthGuard } from "@/components/auth-guard";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
+import { config, getCanonicalUrl } from "@/lib/config";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ai.elixiary.com'),
+  metadataBase: new URL(config.baseUrl),
   title: {
     default: 'Elixiary AI - AI-Powered Cocktail Recipe Generator | Free Mixology Tool',
     template: '%s | Elixiary AI',
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
     'cocktail trends',
     'mixology guide',
   ],
-  authors: [{ name: 'Elixiary AI', url: 'https://ai.elixiary.com' }],
+  authors: [{ name: 'Elixiary AI', url: config.baseUrl }],
   creator: 'Elixiary AI',
   publisher: 'Elixiary AI',
   applicationName: 'Elixiary AI',
@@ -58,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://ai.elixiary.com',
+    url: config.baseUrl,
     title: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
     description: 'Generate unique cocktail recipes with AI! Free cocktail recipe generator powered by Google Gemini. Discover 500+ curated recipes and create unlimited AI cocktails.',
     siteName: 'Elixiary AI',
@@ -98,7 +99,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://ai.elixiary.com',
+    canonical: getCanonicalUrl(),
   },
   category: 'food',
   classification: 'Cocktail Recipe Generator',
@@ -152,7 +153,7 @@ export default function RootLayout({
               "@type": "WebApplication",
               "name": "Elixiary AI",
               "description": "AI-Powered Cocktail Recipe Generator",
-              "url": "https://ai.elixiary.com",
+              "url": config.baseUrl,
               "applicationCategory": "Food & Drink",
               "operatingSystem": "Web Browser",
               "offers": {
@@ -164,7 +165,7 @@ export default function RootLayout({
               "creator": {
                 "@type": "Organization",
                 "name": "Elixiary AI",
-                "url": "https://ai.elixiary.com"
+                "url": config.baseUrl
               },
               "featureList": [
                 "AI Cocktail Recipe Generation",

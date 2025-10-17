@@ -1,4 +1,5 @@
 import { initializeFirebaseServer } from '@/firebase/server';
+import { config } from '@/lib/config';
 
 export interface SitemapEntry {
   url: string;
@@ -8,7 +9,7 @@ export interface SitemapEntry {
 }
 
 export class SitemapGenerator {
-  private baseUrl = 'https://ai.elixiary.com';
+  private baseUrl = config.baseUrl;
   private cache: Map<string, SitemapEntry[]> = new Map();
   private cacheExpiry: Map<string, number> = new Map();
   private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours

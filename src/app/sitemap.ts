@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { config } from '@/lib/config';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://ai.elixiary.com';
+  const baseUrl = config.baseUrl;
   const now = new Date();
 
   // Static pages that actually exist

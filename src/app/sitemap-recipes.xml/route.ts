@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { config } from '@/lib/config';
 
 export async function GET() {
-  const baseUrl = 'https://ai.elixiary.com';
+  const baseUrl = config.baseUrl;
   const now = new Date();
 
   try {
