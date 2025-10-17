@@ -256,6 +256,30 @@ export default function RootLayout({
                 document.documentElement.classList.add('ios-pwa');
                 console.log('iOS PWA detected via user agent');
               }
+              
+              // Force update safe area insets for iOS PWA
+              function updateSafeAreaInsets() {
+                const safeTop = getComputedStyle(document.documentElement).getPropertyValue('--safe-top');
+                console.log('Safe area top:', safeTop);
+                
+                // Force update if safe area is not working
+                if (safeTop === '0px' || safeTop === '') {
+                  const computedStyle = getComputedStyle(document.documentElement);
+                  const safeAreaTop = computedStyle.getPropertyValue('env(safe-area-inset-top)');
+                  console.log('Raw safe area top:', safeAreaTop);
+                  
+                  if (safeAreaTop && safeAreaTop !== '0px') {
+                    document.documentElement.style.setProperty('--safe-top', safeAreaTop);
+                    console.log('Updated safe area top to:', safeAreaTop);
+                  }
+                }
+              }
+              
+              // Update safe area on load and orientation change
+              updateSafeAreaInsets();
+              window.addEventListener('orientationchange', function() {
+                setTimeout(updateSafeAreaInsets, 100);
+              });
             `,
           }}
         />

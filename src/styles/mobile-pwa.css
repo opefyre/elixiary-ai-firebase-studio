@@ -8,6 +8,17 @@
   --safe-left: env(safe-area-inset-left, 0px);
 }
 
+/* CRITICAL: Apply safe area padding to body for iOS PWA */
+/* Only apply on mobile devices to avoid desktop issues */
+@media screen and (max-width: 768px) {
+  body {
+    /* Only apply side and bottom padding, top is handled by navbar */
+    padding-right: var(--safe-right);
+    padding-bottom: var(--safe-bottom);
+    padding-left: var(--safe-left);
+  }
+}
+
 /* Paint behind the status bar on iOS - Critical fix from web.dev article */
 body::before {
   content: "";
@@ -30,15 +41,14 @@ body::before {
     left: 0;
     right: 0;
     z-index: 50;
-    /* Give navbar safe padding at the top */
-    padding-top: max(12px, var(--safe-top));
-    /* Ensure navbar extends to edges */
+    /* Add safe area padding to navbar content */
+    padding-top: var(--safe-top);
     margin: 0;
   }
   
   /* Add padding to body to account for fixed navbar */
   .mobile-body-padding {
-    padding-top: calc(4rem + max(12px, var(--safe-top)));
+    padding-top: calc(4rem + var(--safe-top));
   }
   
   /* Fix for content appearing above navbar when scrolling */
