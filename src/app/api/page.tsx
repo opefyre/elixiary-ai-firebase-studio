@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useFirebase } from '@/firebase';
+import { useAPIKeys } from '@/hooks/use-api-keys';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,48 +20,30 @@ interface APIUsageStats {
 
 export default function APIPage() {
   const { user, isUserLoading } = useFirebase();
+  const { apiKeys, loading: apiKeysLoading } = useAPIKeys();
   const [usageStats, setUsageStats] = useState<APIUsageStats | null>(null);
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
-    const fetchUsageStats = async () => {
-      if (!user) return;
-      
-      try {
-        setIsLoadingStats(true);
-        
-        // Get Firebase token for authentication
-        const token = await user.getIdToken();
-        
-        const response = await fetch('/api/account/api-keys', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data.length > 0) {
-            // Calculate usage stats from the first API key
-            const firstKey = data.data[0];
-            setUsageStats({
-              requestsToday: firstKey.usage?.requestsToday || 0,
-              requestsThisMonth: firstKey.usage?.requestsThisMonth || 0,
-              totalRequests: firstKey.usage?.totalRequests || 0,
-              remainingToday: Math.max(0, 1000 - (firstKey.usage?.requestsToday || 0)),
-              remainingThisMonth: Math.max(0, 10000 - (firstKey.usage?.requestsThisMonth || 0))
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching usage stats:', error);
-      } finally {
-        setIsLoadingStats(false);
-      }
-    };
-
-    fetchUsageStats();
-  }, [user]);
+    if (apiKeys.length > 0) {
+      // Calculate usage stats from the first API key
+      const firstKey = apiKeys[0];
+      setUsageStats({
+        requestsToday: firstKey.usage?.requestsToday || 0,
+        requestsThisMonth: firstKey.usage?.requestsThisMonth || 0,
+        totalRequests: firstKey.usage?.totalRequests || 0,
+        remainingToday: Math.max(0, 1000 - (firstKey.usage?.requestsToday || 0)),
+        remainingThisMonth: Math.max(0, 10000 - (firstKey.usage?.requestsThisMonth || 0))
+      });
+    } else {
+      setUsageStats({
+        requestsToday: 0,
+        requestsThisMonth: 0,
+        totalRequests: 0,
+        remainingToday: 1000,
+        remainingThisMonth: 10000
+      });
+    }
+  }, [apiKeys]);
 
   if (isUserLoading) {
     return (
@@ -137,7 +120,7 @@ export default function APIPage() {
               <span className="text-sm font-medium">Today's Requests</span>
             </div>
             <p className="text-2xl font-bold mt-2">
-              {isLoadingStats ? (
+              {apiKeysLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
                 usageStats?.requestsToday || 0
@@ -156,7 +139,7 @@ export default function APIPage() {
               <span className="text-sm font-medium">This Month</span>
             </div>
             <p className="text-2xl font-bold mt-2">
-              {isLoadingStats ? (
+              {apiKeysLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
                 usageStats?.requestsThisMonth || 0
@@ -175,7 +158,7 @@ export default function APIPage() {
               <span className="text-sm font-medium">Total Requests</span>
             </div>
             <p className="text-2xl font-bold mt-2">
-              {isLoadingStats ? (
+              {apiKeysLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
                 usageStats?.totalRequests || 0
