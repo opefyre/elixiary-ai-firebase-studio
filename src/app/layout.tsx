@@ -8,6 +8,7 @@ import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
 import { AuthGuard } from "@/components/auth-guard";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 import { config, getCanonicalUrl } from "@/lib/config";
 
@@ -106,10 +107,11 @@ export const metadata: Metadata = {
   other: {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
-    'apple-mobile-web-app-title': 'Elixiary AI',
+    'apple-mobile-web-app-title': 'Elixiary',
     'mobile-web-app-capable': 'yes',
     'msapplication-TileColor': '#8b5cf6',
     'msapplication-config': '/browserconfig.xml',
+    'format-detection': 'telephone=no',
   },
 };
 
@@ -208,7 +210,27 @@ export default function RootLayout({
           </div>
           <Toaster />
           <OfflineWarning />
+          <PWAInstallPrompt />
         </FirebaseClientProvider>
+        
+        {/* Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                      console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(function(error) {
+                      console.log('Service Worker registration failed:', error);
+                    });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
