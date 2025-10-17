@@ -25,13 +25,12 @@ export function useSavedRecipes() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/v1/user/recipes?userId=${user.uid}`);
+      const response = await fetch(`/api/user-recipes/saved?userId=${user.uid}`);
       const data = await response.json();
 
-      if (data.success) {
-        const recipes = data.data.recipes || [];
-        setSavedRecipes(recipes);
-        setSavedRecipeIds(new Set(recipes.map((r: SavedRecipe) => r.recipeId)));
+      if (response.ok) {
+        setSavedRecipes(data.savedRecipes || []);
+        setSavedRecipeIds(new Set(data.savedRecipes?.map((r: SavedRecipe) => r.recipeId) || []));
       }
     } catch (error) {
       // Silent error handling for fetching saved recipes
@@ -50,7 +49,7 @@ export function useSavedRecipes() {
     if (!user) return false;
 
     try {
-      const response = await fetch('/api/v1/user/recipes', {
+      const response = await fetch('/api/user-recipes/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -62,7 +61,7 @@ export function useSavedRecipes() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok) {
         // Optimistic update
         setSavedRecipeIds(prev => new Set([...prev, recipeId]));
         toast({
@@ -93,15 +92,18 @@ export function useSavedRecipes() {
     if (!user) return false;
 
     try {
-      const response = await fetch(`/api/v1/user/recipes/${recipeId}`, {
+      const response = await fetch('/api/user-recipes/unsave', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
+        body: JSON.stringify({
+          recipeId,
+          userId: user.uid
+        })
       });
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok) {
         // Optimistic update
         setSavedRecipeIds(prev => {
           const newSet = new Set(prev);

@@ -97,8 +97,8 @@ export default function CuratedPage() {
   const fetchData = async () => {
     try {
       const [categoriesRes, tagsRes] = await Promise.all([
-        fetch('/api/v1/categories'),
-        fetch('/api/v1/tags')
+        fetch('/api/curated-categories'),
+        fetch('/api/curated-tags')
       ]);
 
       const [categoriesData, tagsData] = await Promise.all([
@@ -106,8 +106,8 @@ export default function CuratedPage() {
         tagsRes.json()
       ]);
 
-      setCategories(categoriesData.data || []);
-      setTags(tagsData.data || []);
+      setCategories(categoriesData.categories);
+      setTags(tagsData.tags);
       
       // Don't set loading to false here - wait for recipes to load
     } catch (error) {
@@ -128,7 +128,7 @@ export default function CuratedPage() {
           offset: ((page - 1) * 20).toString()
         });
 
-        const response = await fetch(`/api/v1/recipes?${params}`);
+        const response = await fetch(`/api/curated-recipes/search?${params}`);
         
         if (!response.ok) {
           throw new Error(`Search failed: ${response.status}`);
@@ -136,20 +136,17 @@ export default function CuratedPage() {
         
         const data = await response.json();
 
-        if (!data.success) {
-          throw new Error(data.error || 'Search failed');
+        if (data.error) {
+          throw new Error(data.error);
         }
-
-        const recipes = data.data.recipes || [];
-        const pagination = data.data.pagination || {};
 
         if (page === 1) {
-          setRecipes(recipes);
+          setRecipes(data.recipes || []);
         } else {
-          setRecipes(prev => [...prev, ...recipes]);
+          setRecipes(prev => [...prev, ...(data.recipes || [])]);
         }
 
-        setHasMore(pagination.hasNext || false);
+        setHasMore(data.hasMore || false);
         setIsSearching(false);
         return;
       }
@@ -164,7 +161,7 @@ export default function CuratedPage() {
       if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
       if (selectedTags.length > 0) params.append('tags', selectedTags.join(','));
 
-      const response = await fetch(`/api/v1/recipes?${params}`);
+      const response = await fetch(`/api/curated-recipes?${params}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch recipes: ${response.status}`);
@@ -172,20 +169,17 @@ export default function CuratedPage() {
       
       const data = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch recipes');
+      if (data.error) {
+        throw new Error(data.error);
       }
-
-      const recipes = data.data.recipes || [];
-      const pagination = data.data.pagination || {};
 
       if (page === 1) {
-        setRecipes(recipes);
+        setRecipes(data.recipes || []);
       } else {
-        setRecipes(prev => [...prev, ...recipes]);
+        setRecipes(prev => [...prev, ...(data.recipes || [])]);
       }
 
-      setHasMore(pagination.hasNext || false);
+      setHasMore(data.pagination?.hasNext || false);
       setIsSearching(false);
       setLoading(false); // Set loading to false when recipes are loaded
     } catch (error: any) {

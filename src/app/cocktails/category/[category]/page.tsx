@@ -75,10 +75,10 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const fetchCategoryAndRecipes = async () => {
     try {
       // Fetch category info
-      const categoriesResponse = await fetch('/api/v1/categories');
+      const categoriesResponse = await fetch('/api/curated-categories');
       const categoriesData = await categoriesResponse.json();
       
-      const foundCategory = categoriesData.data.find(
+      const foundCategory = categoriesData.categories.find(
         (cat: Category) => cat.id === params.category
       );
       
@@ -102,23 +102,20 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         category: params.category
       });
 
-      const response = await fetch(`/api/v1/recipes?${params}`);
+      const response = await fetch(`/api/curated-recipes?${params}`);
       const data = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch recipes');
+      if (data.error) {
+        throw new Error(data.error);
       }
-
-      const recipes = data.data.recipes || [];
-      const pagination = data.data.pagination || {};
 
       if (page === 1) {
-        setRecipes(recipes);
+        setRecipes(data.recipes);
       } else {
-        setRecipes(prev => [...prev, ...recipes]);
+        setRecipes(prev => [...prev, ...data.recipes]);
       }
 
-      setHasMore(pagination.hasNext || false);
+      setHasMore(data.pagination.hasNext);
     } catch (error) {
       console.error('Error fetching recipes:', error);
     }

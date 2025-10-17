@@ -70,12 +70,12 @@ export default function RecipeDetailPage({ params }: RecipeDetailPageProps) {
       setLoading(true);
       setPageLoading(true);
       
-      const response = await fetch(`/api/v1/recipes/${params.id}`);
+      const response = await fetch(`/api/curated-recipes/${params.id}`);
       const data = await response.json();
       
-      if (data.success) {
-        setRecipe(data.data);
-        setRelatedRecipes(data.data.relatedRecipes || []);
+      if (response.ok) {
+        setRecipe(data.recipe);
+        setRelatedRecipes(data.relatedRecipes);
       } else {
         console.error('Error fetching recipe:', data.error);
       }
