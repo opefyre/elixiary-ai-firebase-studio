@@ -1,0 +1,37 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /account
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /privacy
+
+# Sitemap
+Sitemap: https://ai.elixiary.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Block unwanted bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
