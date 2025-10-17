@@ -245,32 +245,48 @@ export default function RootLayout({
                 setTimeout(setViewportHeight, 100);
               });
               
-              // Fix for iOS PWA status bar
-              if (window.navigator.standalone === true) {
-                document.documentElement.classList.add('ios-pwa');
-                console.log('iOS PWA detected - applying status bar fixes');
-              }
-              
-              // Also detect iOS PWA by checking for specific iOS features
-              if (/iPad|iPhone|iPod/.test(navigator.userAgent) && window.navigator.standalone !== false) {
-                document.documentElement.classList.add('ios-pwa');
-                console.log('iOS PWA detected via user agent');
+              // Enhanced iOS PWA detection
+              function detectIOSPWA() {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isStandalone = window.navigator.standalone === true;
+                const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+                
+                console.log('iOS Detection:', { isIOS, isStandalone, isPWA });
+                
+                if (isIOS && (isStandalone || isPWA)) {
+                  document.documentElement.classList.add('ios-pwa');
+                  console.log('iOS PWA detected - applying aggressive status bar fixes');
+                  return true;
+                }
+                return false;
               }
               
               // Force update safe area insets for iOS PWA
               function updateSafeAreaInsets() {
-                const safeTop = getComputedStyle(document.documentElement).getPropertyValue('--safe-top');
-                console.log('Safe area top:', safeTop);
+                const isIOSPWA = detectIOSPWA();
                 
-                // Force update if safe area is not working
-                if (safeTop === '0px' || safeTop === '') {
-                  const computedStyle = getComputedStyle(document.documentElement);
-                  const safeAreaTop = computedStyle.getPropertyValue('env(safe-area-inset-top)');
+                if (isIOSPWA) {
+                  // Force safe area values for iOS PWA
+                  const safeAreaTop = getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)');
                   console.log('Raw safe area top:', safeAreaTop);
                   
-                  if (safeAreaTop && safeAreaTop !== '0px') {
-                    document.documentElement.style.setProperty('--safe-top', safeAreaTop);
-                    console.log('Updated safe area top to:', safeAreaTop);
+                  // Use 44px as fallback for iPhone status bar height
+                  const fallbackHeight = '44px';
+                  const finalHeight = safeAreaTop && safeAreaTop !== '0px' ? safeAreaTop : fallbackHeight;
+                  
+                  document.documentElement.style.setProperty('--safe-top', finalHeight);
+                  document.documentElement.style.setProperty('--safe-right', '0px');
+                  document.documentElement.style.setProperty('--safe-bottom', '0px');
+                  document.documentElement.style.setProperty('--safe-left', '0px');
+                  
+                  console.log('Applied safe area top:', finalHeight);
+                  
+                  // Force update navbar positioning
+                  const navbar = document.querySelector('.mobile-navbar-fix');
+                  if (navbar) {
+                    navbar.style.top = '0px';
+                    navbar.style.paddingTop = finalHeight;
+                    console.log('Updated navbar positioning');
                   }
                 }
               }
@@ -278,6 +294,11 @@ export default function RootLayout({
               // Update safe area on load and orientation change
               updateSafeAreaInsets();
               window.addEventListener('orientationchange', function() {
+                setTimeout(updateSafeAreaInsets, 100);
+              });
+              
+              // Also update on resize
+              window.addEventListener('resize', function() {
                 setTimeout(updateSafeAreaInsets, 100);
               });
             `,

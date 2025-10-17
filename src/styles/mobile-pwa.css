@@ -58,6 +58,40 @@ body::before {
   }
 }
 
+/* AGGRESSIVE iOS PWA FIX - Force status bar handling */
+@supports (-webkit-touch-callout: none) {
+  /* iOS PWA specific - when running as standalone app */
+  .ios-pwa .mobile-navbar-fix {
+    /* Force navbar to extend behind status bar */
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    /* Make sure navbar background covers status bar area */
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(12px);
+  }
+  
+  .ios-pwa .mobile-navbar-fix .container {
+    /* Add safe area padding to content inside navbar */
+    padding-top: max(env(safe-area-inset-top, 44px), 44px) !important;
+    /* 44px is minimum safe area for iPhone status bar */
+  }
+  
+  .ios-pwa .mobile-body-padding {
+    /* Adjust body padding for PWA mode */
+    padding-top: calc(4rem + max(env(safe-area-inset-top, 44px), 44px)) !important;
+  }
+  
+  /* Force status bar area to be painted */
+  .ios-pwa body::before {
+    height: max(env(safe-area-inset-top, 44px), 44px) !important;
+    background: hsl(var(--background)) !important;
+    z-index: 48 !important;
+  }
+}
+
 /* iOS PWA specific fixes */
 @supports (-webkit-touch-callout: none) {
   /* iOS Safari specific styles */
