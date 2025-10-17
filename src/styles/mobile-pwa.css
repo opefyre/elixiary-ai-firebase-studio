@@ -1,55 +1,44 @@
 /* Mobile PWA Fixes - iOS Safe Area and Viewport Handling */
 
-/* iOS Safe Area Support */
-@supports (padding: max(0px)) {
-  .ios-safe-area-top {
-    padding-top: max(env(safe-area-inset-top), 0px);
-  }
-  
-  .ios-safe-area-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-  }
-  
-  .ios-safe-area-left {
-    padding-left: max(env(safe-area-inset-left), 0px);
-  }
-  
-  .ios-safe-area-right {
-    padding-right: max(env(safe-area-inset-right), 0px);
-  }
+/* Global safe area CSS variables */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
 }
 
-/* Fix for iOS PWA navbar positioning */
+/* Paint behind the status bar on iOS - Critical fix from web.dev article */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  right: 0;
+  height: var(--safe-top);
+  background: hsl(var(--background));
+  pointer-events: none;
+  z-index: 49; /* Just below navbar */
+}
+
+/* Fix for iOS PWA navbar positioning - Based on web.dev article */
 @media screen and (max-width: 768px) {
-  /* Ensure the navbar is always at the very top on mobile */
+  /* Navbar with proper safe area handling */
   .mobile-navbar-fix {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 50;
-    /* Extend behind status bar on iOS PWA */
-    padding-top: env(safe-area-inset-top, 0px);
-    /* Make navbar extend to very top */
-    margin-top: 0;
-  }
-  
-  /* iOS PWA specific - extend navbar behind status bar */
-  .ios-pwa .mobile-navbar-fix {
-    /* Remove any top padding/margin to extend behind status bar */
-    padding-top: 0;
-    margin-top: 0;
-    /* Add padding to content inside navbar instead */
-  }
-  
-  .ios-pwa .mobile-navbar-fix .container {
-    /* Add safe area padding to the content inside navbar */
-    padding-top: env(safe-area-inset-top, 0px);
+    /* Give navbar safe padding at the top */
+    padding-top: max(12px, var(--safe-top));
+    /* Ensure navbar extends to edges */
+    margin: 0;
   }
   
   /* Add padding to body to account for fixed navbar */
   .mobile-body-padding {
-    padding-top: calc(4rem + env(safe-area-inset-top, 0px));
+    padding-top: calc(4rem + max(12px, var(--safe-top)));
   }
   
   /* Fix for content appearing above navbar when scrolling */
@@ -64,7 +53,7 @@
   /* iOS Safari specific styles */
   .ios-pwa-fix {
     /* Prevent content from appearing behind status bar */
-    padding-top: env(safe-area-inset-top, 0px);
+    padding-top: var(--safe-top);
   }
   
   /* Fix for iOS viewport height issues */
@@ -77,23 +66,6 @@
   .ios-scroll-fix {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Critical fix for iOS PWA status bar overlap */
-  .ios-pwa .mobile-navbar-fix {
-    /* Force navbar to extend behind status bar */
-    top: 0 !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    /* Make sure navbar background covers status bar area */
-    background: var(--background);
-  }
-  
-  .ios-pwa .mobile-navbar-fix .container {
-    /* Add safe area padding to content inside navbar */
-    padding-top: max(env(safe-area-inset-top, 0px), 0px);
-    /* Ensure content doesn't overlap with status bar */
-    min-height: calc(4rem + env(safe-area-inset-top, 0px));
   }
 }
 
