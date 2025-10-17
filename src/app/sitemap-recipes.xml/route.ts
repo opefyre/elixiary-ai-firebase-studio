@@ -9,11 +9,11 @@ export async function GET() {
     // Initialize Firebase Admin
     const { adminDb } = await initializeFirebaseServer();
 
-    // Fetch all curated recipes (limit to 1000 for performance)
+    // Fetch actual curated recipes (limit to 500 for performance)
     const recipesSnapshot = await adminDb
       .collection('curated-recipes')
       .orderBy('createdAt', 'desc')
-      .limit(1000)
+      .limit(500)
       .get();
 
     const recipes = recipesSnapshot.docs.map(doc => {
