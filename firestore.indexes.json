@@ -47,6 +47,20 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "difficulty",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "name",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "curated-recipes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "glassware",
           "order": "ASCENDING"
         },
