@@ -20,6 +20,7 @@ export class APIAuthenticator {
     apiKey: any;
     rateLimit: any;
   }> {
+    console.log('=== API Authentication Started ===');
     let apiKey: string | null = null;
     let email: string | null = null;
     
@@ -61,7 +62,9 @@ export class APIAuthenticator {
       };
 
       // Update API key usage counters
+      console.log('About to call updateAPIKeyUsage...');
       await this.updateAPIKeyUsage(apiKey, email);
+      console.log('updateAPIKeyUsage completed');
 
       return {
         user,
