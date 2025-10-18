@@ -3,7 +3,6 @@ import "./globals.css";
 import "../styles/mobile-pwa.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
-import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
@@ -208,11 +207,6 @@ export default function RootLayout({
           {/* Desktop Header */}
           <div className="hidden md:block">
             <Header />
-          </div>
-          
-          {/* Mobile Header */}
-          <div className="md:hidden">
-            <MobileHeader />
           </div>
           
           <div className="relative min-h-screen flex flex-col ios-viewport-fix mobile-content-container">

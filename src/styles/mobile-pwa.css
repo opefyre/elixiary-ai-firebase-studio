@@ -8,34 +8,10 @@
   --safe-left: env(safe-area-inset-left, 0px);
 }
 
-/* Paint behind the status bar on iOS - Critical fix from web.dev article */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0; 
-  left: 0; 
-  right: 0;
-  height: var(--safe-top);
-  background: hsl(var(--background));
-  pointer-events: none;
-  z-index: 49; /* Just below navbar */
-}
+/* No top navbar on mobile PWA - content goes full screen */
 
-/* Mobile PWA Layout - Bottom Navigation Design */
+/* Mobile PWA Layout - Bottom Navigation Only */
 @media screen and (max-width: 768px) {
-  /* Mobile header - simple top bar */
-  .mobile-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 40;
-    /* Give header safe padding at the top */
-    padding-top: max(12px, var(--safe-top));
-    /* Ensure header extends to edges */
-    margin: 0;
-  }
-  
   /* Bottom navigation - native app style */
   .bottom-nav {
     position: fixed;
@@ -49,9 +25,9 @@ body::before {
     margin: 0;
   }
   
-  /* Add padding to body to account for fixed header and bottom nav */
+  /* Add padding to body to account for bottom nav only */
   .mobile-body-padding {
-    padding-top: calc(4rem + max(12px, var(--safe-top)));
+    padding-top: 0; /* No top padding - full screen */
     padding-bottom: calc(5rem + max(8px, var(--safe-bottom)));
   }
   
