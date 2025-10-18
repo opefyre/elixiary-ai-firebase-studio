@@ -38,12 +38,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 type RecipeGenerationFormProps = {
-  handleGenerateRecipe: (
-    input: FormValues
-  ) => Promise<{
-    recipe: GenerateCocktailRecipeOutput | null;
-    error: string | null;
-  }>;
+  // Removed handleGenerateRecipe prop - will use API route instead
 };
 
 const luckyPrompts = [
@@ -90,7 +85,6 @@ const luckyPrompts = [
 ];
 
 export function RecipeGenerationForm({
-  handleGenerateRecipe,
 }: RecipeGenerationFormProps) {
   const [recipe, setRecipe] = useState<GenerateCocktailRecipeOutput | null>(
     null
@@ -294,7 +288,16 @@ ${window.location.origin}`.trim();
       }
     }
     
-    const result = await handleGenerateRecipe({ prompt: enhancedPrompt });
+    // Call API route instead of server action
+    const response = await fetch('/api/generate-recipe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt: enhancedPrompt }),
+    });
+
+    const result = await response.json();
     setRecipe(result.recipe);
     setError(result.error);
     setIsLoading(false);

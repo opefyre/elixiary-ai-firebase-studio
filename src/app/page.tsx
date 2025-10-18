@@ -1,6 +1,5 @@
 'use client';
 
-import { handleGenerateRecipe } from '@/app/actions';
 import { RecipeGenerationForm } from '@/components/recipe-generation-form';
 import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';
@@ -29,7 +28,7 @@ export default function Home() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : user ? (
-          <RecipeGenerationForm handleGenerateRecipe={handleGenerateRecipe} />
+          <RecipeGenerationForm />
         ) : (
           <div className="text-center space-y-8 py-8">
             {/* Icon */}
