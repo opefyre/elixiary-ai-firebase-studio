@@ -67,7 +67,7 @@ export function FeatureUpgradeDialog({
           {/* Pricing */}
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2">
-              <span className="text-3xl font-bold">$1.49</span>
+              <span className="text-3xl font-bold">$2.49</span>
               <span className="text-sm text-muted-foreground">/month</span>
             </div>
             <Badge variant="secondary" className="gap-1">

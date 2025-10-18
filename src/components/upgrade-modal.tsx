@@ -124,7 +124,7 @@ export function UpgradeModal({ open, onOpenChange, reason = 'generation_limit' }
             </div>
             <div className="text-2xl font-bold mb-1">
               <span className="line-through text-muted-foreground text-lg mr-2">$4.99</span>
-              $1.49/month
+              $2.49/month
             </div>
             <div className="text-xs text-muted-foreground">
               🔥 70% off for first 50 users • First 3 months
