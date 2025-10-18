@@ -39,20 +39,6 @@ export async function POST(request: NextRequest) {
       webhookSignature: 'manual_fix',
     };
 
-    // Create audit trail entry
-    const auditEntry = {
-      timestamp: new Date(),
-      event: 'manual_fix',
-      from: currentData,
-      to: updateData,
-      source: 'manual' as const,
-      webhookId: 'manual_fix',
-    };
-
-    // Add to subscription history
-    const existingHistory = currentData.subscriptionHistory || [];
-    updateData.subscriptionHistory = [...existingHistory, auditEntry].slice(-50);
-
     await userRef.update(updateData);
 
     return NextResponse.json({ 
