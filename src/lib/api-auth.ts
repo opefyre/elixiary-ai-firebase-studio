@@ -45,7 +45,7 @@ export class APIAuthenticator {
       }
 
       // Check rate limiting
-      const rateLimitStatus = await rateLimiter.checkRateLimit(apiKey, email);
+      const rateLimitStatus = await this.rateLimiter.checkRateLimit(apiKey, email);
 
       // Validate API key and get user data
       const keyData = await this.apiKeyManager.validateAPIKey(apiKey, email);
