@@ -67,7 +67,15 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case 'customer.subscription.created': {
+        console.log('🔍 Handling customer.subscription.created');
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionCreated(subscription, stripe, firestore);
+        break;
+      }
+
       case 'customer.subscription.updated': {
+        console.log('🔍 Handling customer.subscription.updated');
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionUpdated(subscription, firestore);
         break;
@@ -123,6 +131,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
     console.error('❌ No firebaseUID in session metadata');
     console.error('❌ Available metadata keys:', Object.keys(session.metadata || {}));
     throw new Error('No firebaseUID in session metadata');
+  }
+
+  // Check if subscription exists in the session
+  if (!session.subscription) {
+    console.log('⚠️ No subscription in checkout session yet - this is normal for subscription mode');
+    console.log('⚠️ Will wait for customer.subscription.created or customer.subscription.updated event');
+    return; // Exit early - subscription will be handled by subscription events
   }
 
   const subscription = await stripe.subscriptions.retrieve(
@@ -208,6 +223,106 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   // Add to subscription history
   const existingHistory = currentData.subscriptionHistory || [];
   userData.subscriptionHistory = [...existingHistory, auditEntry].slice(-50); // Keep last 50 changes
+
+  console.log('🔍 About to update user:', userId);
+  console.log('🔍 User data to set/update:', userData);
+
+  if (!userDoc.exists) {
+    console.log('🔍 Creating new user document');
+    userData.createdAt = new Date().toISOString();
+    await userRef.set(userData);
+    console.log('✅ User document created successfully');
+  } else {
+    console.log('🔍 Updating existing user document');
+    console.log('🔍 Current user data:', currentData);
+    await userRef.update(userData);
+    console.log('✅ User document updated successfully');
+  }
+}
+
+async function handleSubscriptionCreated(subscription: Stripe.Subscription, stripe: Stripe, firestore: any) {
+  console.log('🔍 DEBUG: Processing customer.subscription.created');
+  console.log('🔍 Subscription ID:', subscription.id);
+  console.log('🔍 Subscription metadata:', subscription.metadata);
+  console.log('🔍 Customer ID:', subscription.customer);
+  
+  const userId = subscription.metadata?.firebaseUID;
+  const isEarlyBird = subscription.metadata?.isEarlyBird === 'true';
+
+  console.log('🔍 Extracted userId:', userId);
+  console.log('🔍 Extracted isEarlyBird:', isEarlyBird);
+
+  if (!userId) {
+    console.error('❌ No firebaseUID in subscription metadata');
+    console.error('❌ Available metadata keys:', Object.keys(subscription.metadata || {}));
+    return; // Don't throw error, just log and return
+  }
+
+  // Get product information for enhanced tracking
+  const price = subscription.items.data[0].price;
+  const product = await stripe.products.retrieve(price.product as string);
+  
+  // Determine product type based on price interval
+  const productType = price.recurring?.interval === 'year' ? 'annual' : 'monthly';
+  const productName = `${product.name} (${productType})`;
+
+  const userRef = firestore.collection('users').doc(userId);
+  
+  // Get current early bird count if this is an early bird
+  let earlyBirdNumber: number | undefined;
+  if (isEarlyBird) {
+    const configRef = firestore.collection('config').doc('earlyBird');
+    const configSnap = await configRef.get();
+    
+    if (configSnap.exists) {
+      const currentCount = configSnap.data()?.count || 0;
+      earlyBirdNumber = currentCount + 1;
+      
+      await configRef.update({
+        count: earlyBirdNumber,
+        isActive: earlyBirdNumber < 50,
+      });
+    } else {
+      earlyBirdNumber = 1;
+      await configRef.set({
+        count: 1,
+        isActive: true,
+        maxCount: 50,
+      });
+    }
+  }
+
+  // Check if user document exists
+  const userDoc = await userRef.get();
+  const currentData = userDoc.exists ? userDoc.data() : {};
+  
+  // Build user data with enhanced tracking
+  const userData: any = {
+    subscriptionTier: 'pro',
+    subscriptionStatus: subscription.status,
+    stripeCustomerId: subscription.customer as string,
+    stripeSubscriptionId: subscription.id,
+    stripePriceId: price.id,
+    stripeProductId: product.id,
+    productName: productName,
+    productType: productType,
+    isEarlyBird: isEarlyBird,
+    ...(earlyBirdNumber && { earlyBirdNumber }),
+    subscriptionStartDate: new Date().toISOString(),
+    cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+    lastWebhookEvent: 'customer.subscription.created',
+    webhookSignature: subscription.id,
+    updatedAt: new Date().toISOString(),
+  };
+
+  // Add timestamp fields if they exist
+  if (subscription.current_period_start) {
+    userData.currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
+  }
+  
+  if (subscription.current_period_end) {
+    userData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+  }
 
   console.log('🔍 About to update user:', userId);
   console.log('🔍 User data to set/update:', userData);
