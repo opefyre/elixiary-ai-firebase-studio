@@ -60,6 +60,9 @@ export class APIAuthenticator {
         ...userDoc.data()
       };
 
+      // Update API key usage counters
+      await this.updateAPIKeyUsage(apiKey, email);
+
       return {
         user,
         apiKey: keyData,
@@ -79,6 +82,54 @@ export class APIAuthenticator {
         email: email
       });
       throw new APIError('Authentication failed', `Invalid credentials or server error: ${error.message}`, 401);
+    }
+  }
+
+  /**
+   * Update API key usage counters
+   */
+  private async updateAPIKeyUsage(apiKey: string, email: string): Promise<void> {
+    try {
+      const { initializeFirebaseServer } = await import('@/firebase/server');
+      const { adminDb } = initializeFirebaseServer();
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      // Update usage counters in the API key document
+      await adminDb.collection('api_keys').doc(apiKey).update({
+        'usage.totalRequests': adminDb.FieldValue.increment(1),
+        'usage.lastUsed': now,
+        'usage.requestsToday': adminDb.FieldValue.increment(1),
+        'usage.requestsThisMonth': adminDb.FieldValue.increment(1),
+        'updatedAt': now
+      });
+      
+      // Reset daily counter if it's a new day
+      const keyDoc = await adminDb.collection('api_keys').doc(apiKey).get();
+      if (keyDoc.exists) {
+        const keyData = keyDoc.data();
+        const lastUsed = keyData.usage?.lastUsed?.toDate ? keyData.usage.lastUsed.toDate() : new Date(keyData.usage?.lastUsed);
+        const lastUsedDate = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), lastUsed.getDate());
+        
+        if (lastUsedDate < today) {
+          await adminDb.collection('api_keys').doc(apiKey).update({
+            'usage.requestsToday': 1
+          });
+        }
+        
+        // Reset monthly counter if it's a new month
+        const lastUsedMonth = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), 1);
+        if (lastUsedMonth < thisMonth) {
+          await adminDb.collection('api_keys').doc(apiKey).update({
+            'usage.requestsThisMonth': 1
+          });
+        }
+      }
+    } catch (error) {
+      // Don't throw error to avoid breaking the API
+      console.error('Error updating API key usage:', error);
     }
   }
 
