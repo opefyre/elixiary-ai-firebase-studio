@@ -8,52 +8,54 @@
   --safe-left: env(safe-area-inset-left, 0px);
 }
 
-/* CRITICAL: Apply safe area padding to body for iOS PWA */
-/* Only apply on mobile devices to avoid desktop issues */
-@media screen and (max-width: 768px) {
-  body {
-    /* Only apply side and bottom padding, top is handled by navbar */
-    padding-right: var(--safe-right);
-    padding-bottom: var(--safe-bottom);
-    padding-left: var(--safe-left);
-  }
-}
-
-/* Fake navbar section behind status bar - BIG negative offset! */
+/* Paint behind the status bar on iOS - Critical fix from web.dev article */
 body::before {
   content: "";
   position: fixed;
-  top: calc(-1 * var(--safe-top) * 3); /* BIG negative offset - 3x for massive coverage */
+  top: 0; 
   left: 0; 
   right: 0;
-  height: calc(var(--safe-top) * 3 + 4rem); /* BIG height to cover massive area above */
-  background: hsl(var(--background) / 0.8); /* Same as navbar */
-  backdrop-filter: blur(12px); /* Same as navbar */
-  border-bottom: 1px solid hsl(var(--border)); /* Same as navbar */
+  height: var(--safe-top);
+  background: hsl(var(--background));
   pointer-events: none;
-  z-index: 49; /* Just below real navbar */
+  z-index: 49; /* Just below navbar */
 }
 
-/* Fix for iOS PWA navbar positioning - Based on web.dev article */
+/* Mobile PWA Layout - Bottom Navigation Design */
 @media screen and (max-width: 768px) {
-  /* Navbar with proper safe area handling - ORIGINAL SIZE */
-  .mobile-navbar-fix {
+  /* Mobile header - simple top bar */
+  .mobile-header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 50;
-    /* NO safe area padding - keep original size */
-    padding-top: 0;
+    z-index: 40;
+    /* Give header safe padding at the top */
+    padding-top: max(12px, var(--safe-top));
+    /* Ensure header extends to edges */
     margin: 0;
   }
   
-  /* Add padding to body to account for fixed navbar - ORIGINAL SIZE */
-  .mobile-body-padding {
-    padding-top: 4rem; /* Only navbar height, no safe area padding */
+  /* Bottom navigation - native app style */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    /* Give bottom nav safe padding at the bottom */
+    padding-bottom: max(8px, var(--safe-bottom));
+    /* Ensure bottom nav extends to edges */
+    margin: 0;
   }
   
-  /* Fix for content appearing above navbar when scrolling */
+  /* Add padding to body to account for fixed header and bottom nav */
+  .mobile-body-padding {
+    padding-top: calc(4rem + max(12px, var(--safe-top)));
+    padding-bottom: calc(5rem + max(8px, var(--safe-bottom)));
+  }
+  
+  /* Fix for content appearing above elements when scrolling */
   .mobile-content-container {
     position: relative;
     z-index: 1;
@@ -78,16 +80,6 @@ body::before {
   .ios-scroll-fix {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-  }
-  
-  /* iOS PWA specific - MASSIVE fake navbar coverage */
-  .ios-pwa body::before {
-    /* MASSIVE height and offset for complete status bar coverage */
-    height: calc(max(var(--safe-top), 44px) * 4 + 4rem) !important;
-    top: calc(-1 * max(var(--safe-top), 44px) * 4) !important;
-    /* Ensure it covers the entire status bar area and more */
-    background: hsl(var(--background) / 0.9) !important;
-    backdrop-filter: blur(16px) !important;
   }
 }
 

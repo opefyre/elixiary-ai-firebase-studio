@@ -3,6 +3,8 @@ import "./globals.css";
 import "../styles/mobile-pwa.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
+import { MobileHeader } from "@/components/layout/mobile-header";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
 import { FirebaseClientProvider } from "@/firebase";
@@ -202,7 +204,17 @@ export default function RootLayout({
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
-          <Header />
+          
+          {/* Desktop Header */}
+          <div className="hidden md:block">
+            <Header />
+          </div>
+          
+          {/* Mobile Header */}
+          <div className="md:hidden">
+            <MobileHeader />
+          </div>
+          
           <div className="relative min-h-screen flex flex-col ios-viewport-fix mobile-content-container">
             <div className="absolute top-1/4 left-1/4 h-32 w-32 animate-float text-primary/10 [animation-delay:-2s]">
               <Martini className="h-full w-full" />
@@ -219,7 +231,16 @@ export default function RootLayout({
             <main id="main-content" className="relative z-10 flex-1 mobile-body-padding">
               <AuthGuard>{children}</AuthGuard>
             </main>
-            <Footer />
+            
+            {/* Desktop Footer */}
+            <div className="hidden md:block">
+              <Footer />
+            </div>
+            
+            {/* Mobile Bottom Navigation */}
+            <div className="md:hidden">
+              <BottomNav />
+            </div>
           </div>
           <Toaster />
           <OfflineWarning />
@@ -256,34 +277,6 @@ export default function RootLayout({
                 document.documentElement.classList.add('ios-pwa');
                 console.log('iOS PWA detected via user agent');
               }
-              
-              // Force update safe area insets for iOS PWA
-              function updateSafeAreaInsets() {
-                const safeTop = getComputedStyle(document.documentElement).getPropertyValue('--safe-top');
-                console.log('Safe area top:', safeTop);
-                
-                // Force update if safe area is not working
-                if (safeTop === '0px' || safeTop === '') {
-                  const computedStyle = getComputedStyle(document.documentElement);
-                  const safeAreaTop = computedStyle.getPropertyValue('env(safe-area-inset-top)');
-                  console.log('Raw safe area top:', safeAreaTop);
-                  
-                  if (safeAreaTop && safeAreaTop !== '0px') {
-                    document.documentElement.style.setProperty('--safe-top', safeAreaTop);
-                    console.log('Updated safe area top to:', safeAreaTop);
-                  } else {
-                    // Fallback: Use 66px for iPhone status bar height (50% extra for safety)
-                    document.documentElement.style.setProperty('--safe-top', '66px');
-                    console.log('Using fallback safe area top: 66px (50% extra for safety)');
-                  }
-                }
-              }
-              
-              // Update safe area on load and orientation change
-              updateSafeAreaInsets();
-              window.addEventListener('orientationchange', function() {
-                setTimeout(updateSafeAreaInsets, 100);
-              });
             `,
           }}
         />
