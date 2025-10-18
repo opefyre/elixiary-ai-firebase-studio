@@ -63,8 +63,13 @@ export class APIAuthenticator {
 
       // Update API key usage counters
       console.log('About to call updateAPIKeyUsage...');
-      await this.updateAPIKeyUsage(apiKey, email);
-      console.log('updateAPIKeyUsage completed');
+      try {
+        await this.updateAPIKeyUsage(apiKey, email, adminDb);
+        console.log('updateAPIKeyUsage completed successfully');
+      } catch (error) {
+        console.error('updateAPIKeyUsage failed:', error);
+        // Don't throw error to avoid breaking the API
+      }
 
       return {
         user,
@@ -91,16 +96,12 @@ export class APIAuthenticator {
   /**
    * Update API key usage counters
    */
-  private async updateAPIKeyUsage(apiKey: string, email: string): Promise<void> {
+  private async updateAPIKeyUsage(apiKey: string, email: string, adminDb: any): Promise<void> {
     try {
       console.log('=== Starting API key usage update ===');
       console.log('API Key:', apiKey.substring(0, 20) + '...');
       console.log('Email:', email);
-      
-      const { initializeFirebaseServer } = await import('@/firebase/server');
-      const { adminDb } = initializeFirebaseServer();
-      
-      console.log('Firebase admin initialized');
+      console.log('Using provided adminDb instance');
       
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
