@@ -55,27 +55,20 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    console.log('🔍 Webhook event received:', event.type);
-    console.log('🔍 Event ID:', event.id);
-    console.log('🔍 Event data:', JSON.stringify(event.data, null, 2));
-    
     switch (event.type) {
       case 'checkout.session.completed': {
-        console.log('🔍 Handling checkout.session.completed');
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutCompleted(session, stripe, firestore);
         break;
       }
 
       case 'customer.subscription.created': {
-        console.log('🔍 Handling customer.subscription.created');
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionCreated(subscription, stripe, firestore);
         break;
       }
 
       case 'customer.subscription.updated': {
-        console.log('🔍 Handling customer.subscription.updated');
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionUpdated(subscription, firestore);
         break;
@@ -115,28 +108,17 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe: Stripe, firestore: any) {
-  console.log('🔍 DEBUG: Processing checkout.session.completed');
-  console.log('🔍 Session ID:', session.id);
-  console.log('🔍 Session metadata:', session.metadata);
-  console.log('🔍 Customer ID:', session.customer);
-  console.log('🔍 Subscription ID:', session.subscription);
-  
   const userId = session.metadata?.firebaseUID;
   const isEarlyBird = session.metadata?.isEarlyBird === 'true';
 
-  console.log('🔍 Extracted userId:', userId);
-  console.log('🔍 Extracted isEarlyBird:', isEarlyBird);
-
   if (!userId) {
-    console.error('❌ No firebaseUID in session metadata');
-    console.error('❌ Available metadata keys:', Object.keys(session.metadata || {}));
+    console.error('No firebaseUID in session metadata');
     throw new Error('No firebaseUID in session metadata');
   }
 
   // Check if subscription exists in the session
   if (!session.subscription) {
-    console.log('⚠️ No subscription in checkout session yet - this is normal for subscription mode');
-    console.log('⚠️ Will wait for customer.subscription.created or customer.subscription.updated event');
+    console.log('No subscription in checkout session yet - waiting for subscription events');
     return; // Exit early - subscription will be handled by subscription events
   }
 
@@ -224,37 +206,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   const existingHistory = currentData.subscriptionHistory || [];
   userData.subscriptionHistory = [...existingHistory, auditEntry].slice(-50); // Keep last 50 changes
 
-  console.log('🔍 About to update user:', userId);
-  console.log('🔍 User data to set/update:', userData);
-
   if (!userDoc.exists) {
-    console.log('🔍 Creating new user document');
     userData.createdAt = new Date().toISOString();
     await userRef.set(userData);
-    console.log('✅ User document created successfully');
   } else {
-    console.log('🔍 Updating existing user document');
-    console.log('🔍 Current user data:', currentData);
     await userRef.update(userData);
-    console.log('✅ User document updated successfully');
   }
 }
 
 async function handleSubscriptionCreated(subscription: Stripe.Subscription, stripe: Stripe, firestore: any) {
-  console.log('🔍 DEBUG: Processing customer.subscription.created');
-  console.log('🔍 Subscription ID:', subscription.id);
-  console.log('🔍 Subscription metadata:', subscription.metadata);
-  console.log('🔍 Customer ID:', subscription.customer);
-  
   const userId = subscription.metadata?.firebaseUID;
   const isEarlyBird = subscription.metadata?.isEarlyBird === 'true';
 
-  console.log('🔍 Extracted userId:', userId);
-  console.log('🔍 Extracted isEarlyBird:', isEarlyBird);
-
   if (!userId) {
-    console.error('❌ No firebaseUID in subscription metadata');
-    console.error('❌ Available metadata keys:', Object.keys(subscription.metadata || {}));
+    console.error('No firebaseUID in subscription metadata');
     return; // Don't throw error, just log and return
   }
 
@@ -324,19 +289,11 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, stri
     userData.currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
   }
 
-  console.log('🔍 About to update user:', userId);
-  console.log('🔍 User data to set/update:', userData);
-
   if (!userDoc.exists) {
-    console.log('🔍 Creating new user document');
     userData.createdAt = new Date().toISOString();
     await userRef.set(userData);
-    console.log('✅ User document created successfully');
   } else {
-    console.log('🔍 Updating existing user document');
-    console.log('🔍 Current user data:', currentData);
     await userRef.update(userData);
-    console.log('✅ User document updated successfully');
   }
 }
 
