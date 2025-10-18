@@ -146,7 +146,7 @@ export default function CuratedPage() {
           setRecipes(prev => [...prev, ...(data.recipes || [])]);
         }
 
-        setHasMore(data.hasMore || false);
+        setHasMore(data.pagination?.hasNext || false);
         setIsSearching(false);
         return;
       }
@@ -220,6 +220,13 @@ export default function CuratedPage() {
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, lastSearchQuery]);
+
+  // Handle filter changes
+  useEffect(() => {
+    setPage(1);
+    setRecipes([]);
+    fetchRecipes();
+  }, [selectedCategory, selectedDifficulty, selectedTags]);
 
   const handleSearch = () => {
     setPage(1);

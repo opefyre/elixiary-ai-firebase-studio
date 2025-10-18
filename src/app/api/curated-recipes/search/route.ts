@@ -44,8 +44,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       recipes: paginatedRecipes, 
-      total,
-      hasMore: offset + paginatedRecipes.length < total
+      pagination: {
+        page: Math.floor(offset / limit) + 1,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: offset + paginatedRecipes.length < total,
+        hasPrev: offset > 0
+      }
     });
 
   } catch (error: any) {
