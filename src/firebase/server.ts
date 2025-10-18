@@ -19,7 +19,6 @@ export function initializeFirebaseServer() {
     try {
       serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
     } catch (error) {
-      console.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON:', error);
       throw new Error('Invalid GOOGLE_APPLICATION_CREDENTIALS_JSON format');
     }
   } else {

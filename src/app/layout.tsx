@@ -261,13 +261,11 @@ export default function RootLayout({
               // Fix for iOS PWA status bar
               if (window.navigator.standalone === true) {
                 document.documentElement.classList.add('ios-pwa');
-                console.log('iOS PWA detected - applying status bar fixes');
               }
               
               // Also detect iOS PWA by checking for specific iOS features
               if (/iPad|iPhone|iPod/.test(navigator.userAgent) && window.navigator.standalone !== false) {
                 document.documentElement.classList.add('ios-pwa');
-                console.log('iOS PWA detected via user agent');
               }
             `,
           }}
@@ -281,10 +279,10 @@ export default function RootLayout({
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
-                      console.log('Service Worker registered successfully:', registration.scope);
+                      // Service Worker registered successfully
                     })
                     .catch(function(error) {
-                      console.log('Service Worker registration failed:', error);
+                      // Service Worker registration failed
                     });
                 });
               }

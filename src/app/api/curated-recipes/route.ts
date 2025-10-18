@@ -14,8 +14,6 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const tags = searchParams.get('tags')?.split(',').filter(Boolean);
 
-    console.log('Query params:', { page, limit, category, difficulty, search, tags });
-
     // Build query based on available filters
     let query = adminDb.collection('curated-recipes');
 
@@ -48,8 +46,6 @@ export async function GET(request: NextRequest) {
       ...doc.data()
     }));
 
-    console.log(`Found ${recipes.length} recipes before filtering`);
-
     // Apply client-side filters for complex queries (tags, search)
     if (tags && tags.length > 0) {
       recipes = recipes.filter(recipe => 
@@ -70,14 +66,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log(`Found ${recipes.length} recipes after filtering`);
-
     // Apply pagination
     const total = recipes.length;
     const offset = (page - 1) * limit;
     const paginatedRecipes = recipes.slice(offset, offset + limit);
-
-    console.log(`Returning ${paginatedRecipes.length} recipes for page ${page}`);
 
     return NextResponse.json({
       recipes: paginatedRecipes,
@@ -92,12 +84,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error fetching curated recipes:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack
-    });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch recipes' },
       { status: 500 }

@@ -19,40 +19,31 @@ const STATIC_FILES = [
 
 // Install event - cache static files
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log('Service Worker: Caching static files');
         return cache.addAll(STATIC_FILES);
       })
       .then(() => {
-        console.log('Service Worker: Installation complete');
         return self.skipWaiting();
-      })
-      .catch((error) => {
-        console.error('Service Worker: Installation failed', error);
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log('Service Worker: Deleting old cache', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log('Service Worker: Activation complete');
         return self.clients.claim();
       })
   );
@@ -83,7 +74,6 @@ self.addEventListener('fetch', (event) => {
       .then((cachedResponse) => {
         // Return cached version if available
         if (cachedResponse) {
-          console.log('Service Worker: Serving from cache', request.url);
           return cachedResponse;
         }
 
@@ -107,8 +97,6 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch((error) => {
-            console.log('Service Worker: Fetch failed', error);
-            
             // Return offline page for navigation requests
             if (request.mode === 'navigate') {
               return caches.match('/');
@@ -122,19 +110,16 @@ self.addEventListener('fetch', (event) => {
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
-  console.log('Service Worker: Background sync', event.tag);
-  
   if (event.tag === 'background-sync') {
     event.waitUntil(
       // Handle any pending offline actions here
-      console.log('Service Worker: Processing background sync')
+      Promise.resolve()
     );
   }
 });
 
 // Push notifications (for future use)
 self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push received', event);
   
   const options = {
     body: event.data ? event.data.text() : 'New notification from Elixiary',
@@ -166,7 +151,6 @@ self.addEventListener('push', (event) => {
 
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked', event);
   
   event.notification.close();
 

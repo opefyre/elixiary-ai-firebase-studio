@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ recipe: fixedRecipe, error: null });
   } catch (error: any) {
-    console.error('Recipe generation error:', error);
     return NextResponse.json(
       { 
         error: `Failed to generate recipe: ${error.message || 'Unknown error'}`,

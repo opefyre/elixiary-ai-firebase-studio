@@ -69,7 +69,7 @@ export function AuthButton() {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error('Error signing out', error);
+      // Error signing out
     }
   };
 
@@ -89,7 +89,7 @@ export function AuthButton() {
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {
-      console.error('Error signing in with Google', error);
+      // Error signing in with Google
     }
   };
 

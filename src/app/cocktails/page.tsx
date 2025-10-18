@@ -111,7 +111,6 @@ export default function CuratedPage() {
       
       // Don't set loading to false here - wait for recipes to load
     } catch (error) {
-      console.error('Error fetching data:', error);
       setLoading(false); // Only set to false on error
     }
   };
@@ -183,7 +182,6 @@ export default function CuratedPage() {
       setIsSearching(false);
       setLoading(false); // Set loading to false when recipes are loaded
     } catch (error: any) {
-      console.error('Error fetching recipes:', error);
       setSearchError(error.message || 'Failed to fetch recipes');
       setIsSearching(false);
       setLoading(false); // Set loading to false even on error

@@ -222,7 +222,7 @@ ${window.location.origin}`.trim();
           recipeWithImage = { ...recipe, imageUrl: gradientImage };
         } catch (error) {
           // Continue without image if generation fails
-          console.error('Error generating gradient image for manual save:', error);
+          // Error generating gradient image for manual save
         }
       }
 
@@ -331,7 +331,7 @@ ${window.location.origin}`.trim();
           setRecipe(prev => prev ? { ...prev, imageUrl: gradientImage } : null);
         } catch (error) {
           // Silent error handling for image generation
-          console.error('Error generating gradient image:', error);
+          // Error generating gradient image
         }
       }
     } catch (err) {
@@ -355,7 +355,7 @@ ${window.location.origin}`.trim();
             recipeWithImage = { ...result.recipe, imageUrl: gradientImage };
           } catch (error) {
             // Continue without image if generation fails
-            console.error('Error generating gradient image for auto-save:', error);
+            // Error generating gradient image for auto-save
           }
 
           await saveRecipe(recipeWithImage, data.prompt);
