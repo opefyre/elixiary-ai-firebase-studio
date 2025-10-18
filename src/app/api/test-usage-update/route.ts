@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
-import { APIAuthenticator } from '@/lib/api-auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,12 +16,19 @@ export async function GET(request: NextRequest) {
     console.log('API Key:', apiKey.substring(0, 20) + '...');
     console.log('Email:', email);
     
-    // Create APIAuthenticator instance
-    const authenticator = new APIAuthenticator();
+    // Test direct Firestore update
+    const now = new Date();
+    console.log('Updating Firestore document...');
     
-    // Call updateAPIKeyUsage directly using reflection to access private method
-    const updateMethod = (authentator as any).updateAPIKeyUsage.bind(authenticator);
-    await updateMethod(apiKey, email, adminDb);
+    await adminDb.collection('api_keys').doc(apiKey).update({
+      'usage.totalRequests': adminDb.FieldValue.increment(1),
+      'usage.lastUsed': now,
+      'usage.requestsToday': adminDb.FieldValue.increment(1),
+      'usage.requestsThisMonth': adminDb.FieldValue.increment(1),
+      'updatedAt': now
+    });
+    
+    console.log('Firestore update completed');
     
     // Check the updated document
     const keyDoc = await adminDb.collection('api_keys').doc(apiKey).get();
@@ -32,7 +38,8 @@ export async function GET(request: NextRequest) {
       success: true,
       message: 'Usage update test completed',
       apiKey: apiKey.substring(0, 20) + '...',
-      updatedUsage: keyData.usage
+      updatedUsage: keyData.usage,
+      lastUsed: keyData.usage?.lastUsed?.toDate ? keyData.usage.lastUsed.toDate().toISOString() : keyData.usage?.lastUsed
     });
     
   } catch (error: any) {
