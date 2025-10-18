@@ -90,16 +90,25 @@ export class APIAuthenticator {
    */
   private async updateAPIKeyUsage(apiKey: string, email: string): Promise<void> {
     try {
+      console.log('=== Starting API key usage update ===');
+      console.log('API Key:', apiKey.substring(0, 20) + '...');
+      console.log('Email:', email);
+      
       const { initializeFirebaseServer } = await import('@/firebase/server');
       const { adminDb } = initializeFirebaseServer();
       
-      console.log('Updating API key usage for:', apiKey.substring(0, 20) + '...');
+      console.log('Firebase admin initialized');
       
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       
+      console.log('Current time:', now.toISOString());
+      console.log('Today:', today.toISOString());
+      console.log('This month:', thisMonth.toISOString());
+      
       // First, get the current usage data
+      console.log('Fetching API key document...');
       const keyDoc = await adminDb.collection('api_keys').doc(apiKey).get();
       if (!keyDoc.exists) {
         console.error('API key document not found:', apiKey);
@@ -107,7 +116,7 @@ export class APIAuthenticator {
       }
       
       const keyData = keyDoc.data();
-      console.log('Current usage data:', keyData.usage);
+      console.log('Current usage data:', JSON.stringify(keyData.usage, null, 2));
       
       // Check if we need to reset daily/monthly counters
       let requestsToday = 1;
@@ -118,34 +127,53 @@ export class APIAuthenticator {
         const lastUsedDate = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), lastUsed.getDate());
         const lastUsedMonth = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), 1);
         
+        console.log('Last used:', lastUsed.toISOString());
+        console.log('Last used date:', lastUsedDate.toISOString());
+        console.log('Last used month:', lastUsedMonth.toISOString());
+        
         if (lastUsedDate >= today) {
           requestsToday = (keyData.usage.requestsToday || 0) + 1;
+          console.log('Same day - incrementing today counter to:', requestsToday);
+        } else {
+          console.log('New day - resetting today counter to 1');
         }
         
         if (lastUsedMonth >= thisMonth) {
           requestsThisMonth = (keyData.usage.requestsThisMonth || 0) + 1;
+          console.log('Same month - incrementing month counter to:', requestsThisMonth);
+        } else {
+          console.log('New month - resetting month counter to 1');
         }
+      } else {
+        console.log('No lastUsed data - initializing counters to 1');
       }
       
       // Update usage counters in the API key document
-      await adminDb.collection('api_keys').doc(apiKey).update({
+      console.log('Updating Firestore document...');
+      const updateData = {
         'usage.totalRequests': adminDb.FieldValue.increment(1),
         'usage.lastUsed': now,
         'usage.requestsToday': requestsToday,
         'usage.requestsThisMonth': requestsThisMonth,
         'updatedAt': now
-      });
+      };
       
-      console.log('Updated usage counters:', {
+      console.log('Update data:', JSON.stringify(updateData, null, 2));
+      
+      await adminDb.collection('api_keys').doc(apiKey).update(updateData);
+      
+      console.log('Successfully updated usage counters:', {
         totalRequests: 'incremented by 1',
         lastUsed: now.toISOString(),
         requestsToday: requestsToday,
         requestsThisMonth: requestsThisMonth
       });
+      console.log('=== API key usage update completed ===');
       
     } catch (error) {
       // Don't throw error to avoid breaking the API
       console.error('Error updating API key usage:', error);
+      console.error('Error stack:', error.stack);
     }
   }
 
