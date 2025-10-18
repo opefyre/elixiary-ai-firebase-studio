@@ -70,6 +70,9 @@ export class APIAuthenticator {
         console.error('updateAPIKeyUsage failed:', error);
         // Don't throw error to avoid breaking the API
       }
+      
+      // Add a test field to the response to verify this code is running
+      console.log('USAGE_UPDATE_ATTEMPTED: true');
 
       return {
         user,
