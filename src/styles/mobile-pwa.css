@@ -19,14 +19,14 @@
   }
 }
 
-/* Fake navbar section behind status bar - Your brilliant solution! */
+/* Fake navbar section behind status bar - BIG negative offset! */
 body::before {
   content: "";
   position: fixed;
-  top: calc(-1 * var(--safe-top) * 1.5); /* 50% more negative offset for safety */
+  top: calc(-1 * var(--safe-top) * 3); /* BIG negative offset - 3x for massive coverage */
   left: 0; 
   right: 0;
-  height: calc(var(--safe-top) * 1.5 + 4rem); /* 50% larger height for full coverage */
+  height: calc(var(--safe-top) * 3 + 4rem); /* BIG height to cover massive area above */
   background: hsl(var(--background) / 0.8); /* Same as navbar */
   backdrop-filter: blur(12px); /* Same as navbar */
   border-bottom: 1px solid hsl(var(--border)); /* Same as navbar */
@@ -36,21 +36,21 @@ body::before {
 
 /* Fix for iOS PWA navbar positioning - Based on web.dev article */
 @media screen and (max-width: 768px) {
-  /* Navbar with proper safe area handling */
+  /* Navbar with proper safe area handling - ORIGINAL SIZE */
   .mobile-navbar-fix {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 50;
-    /* Add safe area padding to navbar content */
-    padding-top: var(--safe-top);
+    /* NO safe area padding - keep original size */
+    padding-top: 0;
     margin: 0;
   }
   
-  /* Add padding to body to account for fixed navbar */
+  /* Add padding to body to account for fixed navbar - ORIGINAL SIZE */
   .mobile-body-padding {
-    padding-top: calc(4rem + var(--safe-top));
+    padding-top: 4rem; /* Only navbar height, no safe area padding */
   }
   
   /* Fix for content appearing above navbar when scrolling */
@@ -80,12 +80,12 @@ body::before {
     -webkit-overflow-scrolling: touch;
   }
   
-  /* iOS PWA specific - Enhanced fake navbar */
+  /* iOS PWA specific - MASSIVE fake navbar coverage */
   .ios-pwa body::before {
-    /* Force minimum height for iPhone status bar with 50% extra */
-    height: calc(max(var(--safe-top), 44px) * 1.5 + 4rem) !important;
-    top: calc(-1 * max(var(--safe-top), 44px) * 1.5) !important;
-    /* Ensure it covers the entire status bar area */
+    /* MASSIVE height and offset for complete status bar coverage */
+    height: calc(max(var(--safe-top), 44px) * 4 + 4rem) !important;
+    top: calc(-1 * max(var(--safe-top), 44px) * 4) !important;
+    /* Ensure it covers the entire status bar area and more */
     background: hsl(var(--background) / 0.9) !important;
     backdrop-filter: blur(16px) !important;
   }
