@@ -12,29 +12,54 @@
 
 /* Mobile PWA Layout - Bottom Navigation Only */
 @media screen and (max-width: 768px) {
-  /* Bottom navigation - native app style */
+  /* Bottom navigation - native app style with increased height */
   .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 50;
+    /* Increased height for better touch targets and rounded corners */
+    min-height: calc(5.5rem + max(12px, var(--safe-bottom)));
     /* Give bottom nav safe padding at the bottom */
-    padding-bottom: max(8px, var(--safe-bottom));
+    padding-bottom: max(12px, var(--safe-bottom));
     /* Ensure bottom nav extends to edges */
     margin: 0;
   }
   
-  /* Add padding to body to account for bottom nav only */
+  /* Add padding to body to account for increased bottom nav height */
   .mobile-body-padding {
     padding-top: 0; /* No top padding - full screen */
-    padding-bottom: calc(5rem + max(8px, var(--safe-bottom)));
+    padding-bottom: calc(5.5rem + max(12px, var(--safe-bottom)));
   }
   
   /* Fix for content appearing above elements when scrolling */
   .mobile-content-container {
     position: relative;
     z-index: 1;
+  }
+  
+  /* Ensure bottom nav buttons are properly positioned and not cut off */
+  .bottom-nav .flex {
+    /* Center buttons vertically within the increased height */
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
+    /* Add extra padding to account for rounded corners */
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  
+  /* Make sure buttons have proper touch targets */
+  .bottom-nav a {
+    /* Ensure minimum touch target size */
+    min-height: 44px;
+    min-width: 44px;
+    /* Center content within button */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 }
 

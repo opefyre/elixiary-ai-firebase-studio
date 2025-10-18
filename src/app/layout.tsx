@@ -10,7 +10,6 @@ import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
 import { AuthGuard } from "@/components/auth-guard";
-import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 import { config, getCanonicalUrl } from "@/lib/config";
 
@@ -238,7 +237,6 @@ export default function RootLayout({
           </div>
           <Toaster />
           <OfflineWarning />
-          <PWAInstallPrompt />
         </FirebaseClientProvider>
         
         {/* Mobile Viewport Height Fix */}
