@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,10 +22,10 @@ export async function GET(request: NextRequest) {
     console.log('Updating Firestore document...');
     
     await adminDb.collection('api_keys').doc(apiKey).update({
-      'usage.totalRequests': adminDb.FieldValue.increment(1),
+      'usage.totalRequests': FieldValue.increment(1),
       'usage.lastUsed': now,
-      'usage.requestsToday': adminDb.FieldValue.increment(1),
-      'usage.requestsThisMonth': adminDb.FieldValue.increment(1),
+      'usage.requestsToday': FieldValue.increment(1),
+      'usage.requestsThisMonth': FieldValue.increment(1),
       'updatedAt': now
     });
     
