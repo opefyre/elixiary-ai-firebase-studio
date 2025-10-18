@@ -40,14 +40,14 @@ export async function GET(request: NextRequest) {
     const apiKeyManager = new APIKeyManager();
     const keys = await apiKeyManager.getUserAPIKeys(user.uid);
     
-    // Don't return sensitive data
+    // Don't return sensitive data and ensure proper date formatting
     const response = keys.map(key => ({
       id: key.id,
       name: key.name,
       status: key.status,
-      createdAt: key.createdAt,
-      expiresAt: key.expiresAt,
-      lastUsed: key.usage.lastUsed,
+      createdAt: key.createdAt instanceof Date ? key.createdAt.toISOString() : new Date(key.createdAt).toISOString(),
+      expiresAt: key.expiresAt instanceof Date ? key.expiresAt.toISOString() : new Date(key.expiresAt).toISOString(),
+      lastUsed: key.usage.lastUsed ? (key.usage.lastUsed instanceof Date ? key.usage.lastUsed.toISOString() : new Date(key.usage.lastUsed).toISOString()) : null,
       usage: {
         requestsToday: key.usage.requestsToday,
         requestsThisMonth: key.usage.requestsThisMonth,

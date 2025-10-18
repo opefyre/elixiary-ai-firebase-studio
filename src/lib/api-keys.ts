@@ -136,7 +136,19 @@ export class APIKeyManager {
       .where('userId', '==', userId)
       .get();
 
-    const keys = keysSnapshot.docs.map(doc => doc.data() as APIKey);
+    const keys = keysSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+        expiresAt: data.expiresAt?.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt),
+        usage: {
+          ...data.usage,
+          lastUsed: data.usage?.lastUsed?.toDate ? data.usage.lastUsed.toDate() : (data.usage?.lastUsed ? new Date(data.usage.lastUsed) : null)
+        }
+      } as APIKey;
+    });
     
     // Sort by createdAt on the client side
     return keys.sort((a, b) => {
