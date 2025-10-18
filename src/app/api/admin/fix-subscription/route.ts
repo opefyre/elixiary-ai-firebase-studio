@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
 
     const currentData = userDoc.data() || {};
 
-    // Update user to Pro status
-    const updateData = {
+    // Update user to Pro status - update fields one by one to avoid circular reference
+    await userRef.update({
       subscriptionTier: 'pro',
       subscriptionStatus: 'active',
       stripeCustomerId: stripeCustomerId,
@@ -37,15 +37,13 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
       lastWebhookEvent: 'manual_fix',
       webhookSignature: 'manual_fix',
-    };
-
-    await userRef.update(updateData);
+    });
 
     return NextResponse.json({ 
       success: true, 
       message: 'User subscription fixed successfully',
       userId: userId,
-      updatedFields: Object.keys(updateData)
+      updatedFields: ['subscriptionTier', 'subscriptionStatus', 'stripeCustomerId', 'stripeSubscriptionId', 'subscriptionStartDate', 'cancelAtPeriodEnd', 'updatedAt', 'lastWebhookEvent', 'webhookSignature']
     });
 
   } catch (error: any) {
