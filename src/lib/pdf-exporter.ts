@@ -291,7 +291,7 @@ export function exportRecipeToPDF(recipe: RecipeData) {
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(colors.light);
-  doc.text('ai.elixiary.com', pageWidth / 2, yPosition, { align: 'center' });
+  doc.text('elixiary.com', pageWidth / 2, yPosition, { align: 'center' });
 
   // Save the PDF
   const fileName = `${cleanText(recipe.name).replace(/\s+/g, '_').toLowerCase()}.pdf`;

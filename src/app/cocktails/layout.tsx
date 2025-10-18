@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description: 'Discover 500+ expertly curated cocktail recipes from around the world.',
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com'}/cocktails`,
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/cocktails`,
   },
 };
 

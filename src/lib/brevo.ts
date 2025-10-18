@@ -54,7 +54,7 @@ export async function sendWelcomeEmail(email: string, displayName?: string) {
       </div>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com'}" 
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}" 
            style="background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
           Start Creating Cocktails
         </a>
@@ -84,7 +84,7 @@ export async function sendWelcomeEmail(email: string, displayName?: string) {
       <div style="text-align: center;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
           You're receiving this because you signed up for Elixiary AI.<br>
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com'}/privacy" style="color: #8b5cf6;">Privacy Policy</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/privacy" style="color: #8b5cf6;">Privacy Policy</a>
         </p>
       </div>
     </div>

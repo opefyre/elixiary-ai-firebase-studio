@@ -176,7 +176,7 @@ export default function PrivacyPage() {
             </p>
             <div className="space-y-2">
               <p><strong>Email:</strong> hello@elixiary.com</p>
-              <p><strong>Website:</strong> <a href="https://ai.elixiary.com" className="text-primary hover:underline">ai.elixiary.com</a></p>
+              <p><strong>Website:</strong> <a href="https://elixiary.com" className="text-primary hover:underline">elixiary.com</a></p>
             </div>
           </CardContent>
         </Card>

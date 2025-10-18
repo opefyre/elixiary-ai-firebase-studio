@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     description: 'Upgrade to Elixiary AI Pro for unlimited AI-generated cocktail recipes and advanced features.',
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.elixiary.com'}/pricing`,
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/pricing`,
   },
 };
 
