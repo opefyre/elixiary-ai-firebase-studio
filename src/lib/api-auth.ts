@@ -44,19 +44,8 @@ export class APIAuthenticator {
         throw new APIError('Invalid email format', 'Please provide a valid email address', 401);
       }
 
-      // For now, skip rate limiting during build to avoid issues
-      // TODO: Re-enable rate limiting after build is fixed
-      const rateLimitStatus = {
-        requestsPerHour: 0,
-        requestsPerDay: 0,
-        requestsPerMonth: 0,
-        remainingHourly: 100,
-        remainingDaily: 1000,
-        remainingMonthly: 10000,
-        resetTimeHourly: new Date(),
-        resetTimeDaily: new Date(),
-        resetTimeMonthly: new Date()
-      };
+      // Check rate limiting
+      const rateLimitStatus = await rateLimiter.checkRateLimit(apiKey, email);
 
       // Validate API key and get user data
       const keyData = await this.apiKeyManager.validateAPIKey(apiKey, email);
