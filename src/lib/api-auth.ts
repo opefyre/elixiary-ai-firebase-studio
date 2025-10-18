@@ -93,40 +93,56 @@ export class APIAuthenticator {
       const { initializeFirebaseServer } = await import('@/firebase/server');
       const { adminDb } = initializeFirebaseServer();
       
+      console.log('Updating API key usage for:', apiKey.substring(0, 20) + '...');
+      
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      // First, get the current usage data
+      const keyDoc = await adminDb.collection('api_keys').doc(apiKey).get();
+      if (!keyDoc.exists) {
+        console.error('API key document not found:', apiKey);
+        return;
+      }
+      
+      const keyData = keyDoc.data();
+      console.log('Current usage data:', keyData.usage);
+      
+      // Check if we need to reset daily/monthly counters
+      let requestsToday = 1;
+      let requestsThisMonth = 1;
+      
+      if (keyData.usage?.lastUsed) {
+        const lastUsed = keyData.usage.lastUsed?.toDate ? keyData.usage.lastUsed.toDate() : new Date(keyData.usage.lastUsed);
+        const lastUsedDate = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), lastUsed.getDate());
+        const lastUsedMonth = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), 1);
+        
+        if (lastUsedDate >= today) {
+          requestsToday = (keyData.usage.requestsToday || 0) + 1;
+        }
+        
+        if (lastUsedMonth >= thisMonth) {
+          requestsThisMonth = (keyData.usage.requestsThisMonth || 0) + 1;
+        }
+      }
       
       // Update usage counters in the API key document
       await adminDb.collection('api_keys').doc(apiKey).update({
         'usage.totalRequests': adminDb.FieldValue.increment(1),
         'usage.lastUsed': now,
-        'usage.requestsToday': adminDb.FieldValue.increment(1),
-        'usage.requestsThisMonth': adminDb.FieldValue.increment(1),
+        'usage.requestsToday': requestsToday,
+        'usage.requestsThisMonth': requestsThisMonth,
         'updatedAt': now
       });
       
-      // Reset daily counter if it's a new day
-      const keyDoc = await adminDb.collection('api_keys').doc(apiKey).get();
-      if (keyDoc.exists) {
-        const keyData = keyDoc.data();
-        const lastUsed = keyData.usage?.lastUsed?.toDate ? keyData.usage.lastUsed.toDate() : new Date(keyData.usage?.lastUsed);
-        const lastUsedDate = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), lastUsed.getDate());
-        
-        if (lastUsedDate < today) {
-          await adminDb.collection('api_keys').doc(apiKey).update({
-            'usage.requestsToday': 1
-          });
-        }
-        
-        // Reset monthly counter if it's a new month
-        const lastUsedMonth = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), 1);
-        if (lastUsedMonth < thisMonth) {
-          await adminDb.collection('api_keys').doc(apiKey).update({
-            'usage.requestsThisMonth': 1
-          });
-        }
-      }
+      console.log('Updated usage counters:', {
+        totalRequests: 'incremented by 1',
+        lastUsed: now.toISOString(),
+        requestsToday: requestsToday,
+        requestsThisMonth: requestsThisMonth
+      });
+      
     } catch (error) {
       // Don't throw error to avoid breaking the API
       console.error('Error updating API key usage:', error);
