@@ -1,9 +1,126 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getUserByUid, verifyFirebaseToken } from '@/lib/firebase-auth-verify';
+
+type PortalSessionRequestBody = {
+  customerId?: string;
+  userId?: string;
+};
 
 export async function POST(request: NextRequest) {
   console.log('=== Customer Portal Session Request ===');
-  
+
+  let body: PortalSessionRequestBody;
+  try {
+    body = await request.json();
+  } catch (parseError) {
+    console.error('Failed to parse request body for portal session:', parseError);
+    return NextResponse.json(
+      { error: 'Invalid JSON body' },
+      { status: 400 }
+    );
+  }
+
+  const { customerId, userId: userIdFromBody } = body ?? {};
+
+  if (!customerId) {
+    console.error('No customer ID provided');
+    return NextResponse.json(
+      { error: 'Customer ID is required' },
+      { status: 400 }
+    );
+  }
+
+  const authHeader = request.headers.get('authorization');
+  const serviceKeyHeader = request.headers.get('x-internal-service-key');
+  const expectedServiceKey = process.env.INTERNAL_SERVICE_KEY;
+
+  let authenticatedUserId: string | null = null;
+
+  if (serviceKeyHeader) {
+    if (!expectedServiceKey) {
+      console.error('Internal service key header provided but INTERNAL_SERVICE_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    if (serviceKeyHeader !== expectedServiceKey) {
+      console.warn('Invalid internal service key provided');
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    if (!userIdFromBody) {
+      console.warn('Internal service key authentication requires a userId in the request body');
+      return NextResponse.json(
+        { error: 'userId is required when using internal service key' },
+        { status: 400 }
+      );
+    }
+
+    authenticatedUserId = userIdFromBody;
+    console.log('Authenticated via internal service key for user:', authenticatedUserId);
+  } else {
+    const { user, error } = await verifyFirebaseToken(authHeader);
+
+    if (!user) {
+      console.warn('Firebase authentication failed for portal session:', error);
+      return NextResponse.json(
+        { error: 'Unauthorized', details: error || 'Invalid or missing token' },
+        { status: 401 }
+      );
+    }
+
+    authenticatedUserId = user.uid;
+    console.log('Authenticated Firebase user for portal session:', authenticatedUserId);
+  }
+
+  if (!authenticatedUserId) {
+    console.error('Unable to resolve authenticated user for portal session request');
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  const userRecord = await getUserByUid(authenticatedUserId);
+
+  if (!userRecord) {
+    console.warn('No Firestore user found for portal session request:', authenticatedUserId);
+    return NextResponse.json(
+      { error: 'User not found' },
+      { status: 404 }
+    );
+  }
+
+  const storedCustomerId =
+    (userRecord as any).stripeCustomerId ||
+    (userRecord as any).subscription?.stripeCustomerId;
+
+  if (!storedCustomerId) {
+    console.warn('Authenticated user missing Stripe customer ID in Firestore:', authenticatedUserId);
+    return NextResponse.json(
+      { error: 'No billing information found for user' },
+      { status: 404 }
+    );
+  }
+
+  if (storedCustomerId !== customerId) {
+    console.warn('Customer ID mismatch for portal session request', {
+      userId: authenticatedUserId,
+      providedCustomerId: customerId,
+      storedCustomerId,
+    });
+    return NextResponse.json(
+      { error: 'Forbidden', details: 'Customer ID mismatch' },
+      { status: 403 }
+    );
+  }
+
   if (!process.env.STRIPE_SECRET_KEY) {
     console.error('STRIPE_SECRET_KEY not configured');
     return NextResponse.json(
@@ -27,20 +144,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    console.log('Request body received:', { hasCustomerId: !!body.customerId });
-    const { customerId } = body;
-
-    if (!customerId) {
-      console.error('No customer ID provided');
-      return NextResponse.json(
-        { error: 'Customer ID is required' },
-        { status: 400 }
-      );
-    }
-
     console.log('Creating portal session for customer:', customerId);
-    
+
     // Create the billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,

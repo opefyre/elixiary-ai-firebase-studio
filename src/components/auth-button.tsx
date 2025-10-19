@@ -42,9 +42,17 @@ export function AuthButton() {
 
     setIsLoadingPortal(true);
     try {
+      if (!auth.currentUser) {
+        throw new Error('You must be signed in to manage billing.');
+      }
+
+      const token = await auth.currentUser.getIdToken();
       const response = await fetch('/api/stripe/create-portal-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
       });
 
