@@ -7,11 +7,26 @@ const createKeySchema = z.object({
   name: z.string().min(1).max(50)
 });
 
+function resolveAuthContext(request: NextRequest) {
+  const authHeader =
+    request.headers.get('authorization') ||
+    request.headers.get('Authorization');
+  const fallbackToken =
+    request.headers.get('x-firebase-id-token') ||
+    request.headers.get('X-Firebase-Id-Token') ||
+    request.cookies.get('__session')?.value ||
+    null;
+
+  return { authHeader, fallbackToken };
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    
-    const { user, error } = await verifyFirebaseToken(authHeader);
+    const { authHeader, fallbackToken } = resolveAuthContext(request);
+
+    const { user, error } = await verifyFirebaseToken(authHeader, {
+      fallbackToken,
+    });
     
     if (!user || error) {
       return NextResponse.json(
@@ -68,8 +83,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const { user, error } = await verifyFirebaseToken(authHeader);
+    const { authHeader, fallbackToken } = resolveAuthContext(request);
+    const { user, error } = await verifyFirebaseToken(authHeader, {
+      fallbackToken,
+    });
     
     if (!user || error) {
       return NextResponse.json(
