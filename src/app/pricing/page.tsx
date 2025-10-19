@@ -8,13 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Check, Loader2, Sparkles, Zap, ArrowRight, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { doc, getDoc } from 'firebase/firestore';
 import { useFirebase } from '@/firebase';
 
 function PricingContent() {
   const { user, isUserLoading } = useUser();
   const { isPro, subscription } = useSubscription();
-  const { firestore } = useFirebase();
+  const { auth } = useFirebase();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -103,9 +102,17 @@ function PricingContent() {
 
     setIsLoadingPortal(true);
     try {
+      if (!auth.currentUser) {
+        throw new Error('You must be signed in to manage billing.');
+      }
+
+      const token = await auth.currentUser.getIdToken();
       const response = await fetch('/api/stripe/create-portal-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
       });
 
