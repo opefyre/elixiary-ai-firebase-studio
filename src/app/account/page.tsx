@@ -35,7 +35,7 @@ import { useFirebase } from '@/firebase';
 
 export default function AccountPage() {
   const { user, isUserLoading } = useUser();
-  const { firebase } = useFirebase();
+  const { auth } = useFirebase();
   const { 
     subscription, 
     isLoading: isSubLoading, 
@@ -64,9 +64,18 @@ export default function AccountPage() {
 
     setIsLoadingPortal(true);
     try {
+      if (!auth.currentUser) {
+        throw new Error('You must be signed in to manage billing.');
+      }
+
+      const token = await auth.currentUser.getIdToken();
       const response = await fetch('/api/stripe/create-portal-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'X-Firebase-Id-Token': token,
+        },
         body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
       });
 
@@ -89,7 +98,7 @@ export default function AccountPage() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(firebase.auth);
+      await signOut(auth);
       toast({
         title: 'Signed Out',
         description: 'You have been successfully signed out.',
