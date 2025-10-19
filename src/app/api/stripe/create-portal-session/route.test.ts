@@ -44,14 +44,13 @@ describe('create portal session route', () => {
     const request = {
       json: async () => ({ customerId: 'cus_123' }),
       headers,
-      cookies: { get: () => undefined },
     } as any;
 
     const response = await POST(request);
 
     expect(response.status).toBe(401);
     expect(await response.json()).toMatchObject({ error: 'Unauthorized' });
-    expect(verifyFirebaseTokenMock).toHaveBeenCalledWith(null, { fallbackToken: null });
+    expect(verifyFirebaseTokenMock).toHaveBeenCalledTimes(1);
   });
 
   it('returns 403 when customerId does not match Firestore record', async () => {
@@ -62,7 +61,6 @@ describe('create portal session route', () => {
     const request = {
       json: async () => ({ customerId: 'cus_123' }),
       headers,
-      cookies: { get: () => undefined },
     } as any;
 
     const response = await POST(request);
@@ -80,7 +78,6 @@ describe('create portal session route', () => {
     const request = {
       json: async () => ({ customerId: 'cus_123' }),
       headers,
-      cookies: { get: () => undefined },
     } as any;
 
     const response = await POST(request);
@@ -100,7 +97,6 @@ describe('create portal session route', () => {
     const request = {
       json: async () => ({ customerId: 'cus_123' }),
       headers,
-      cookies: { get: () => undefined },
     } as any;
 
     const response = await POST(request);
@@ -108,26 +104,5 @@ describe('create portal session route', () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toMatchObject({ error: expect.stringContaining('userId') });
     expect(verifyFirebaseTokenMock).not.toHaveBeenCalled();
-  });
-
-  it('authenticates using the firebase id token header when authorization is stripped', async () => {
-    verifyFirebaseTokenMock.mockResolvedValue({ user: { uid: 'user_123' } as any, error: null });
-    getUserByUidMock.mockResolvedValue({ stripeCustomerId: 'cus_123' } as any);
-    mockCreate.mockResolvedValue({ id: 'bps_123', url: 'https://stripe.test' });
-
-    const headers = new Headers({ 'x-firebase-id-token': 'token-from-header' });
-    const request = {
-      json: async () => ({ customerId: 'cus_123' }),
-      headers,
-      cookies: { get: () => undefined },
-    } as any;
-
-    const response = await POST(request);
-
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ url: 'https://stripe.test' });
-    expect(verifyFirebaseTokenMock).toHaveBeenCalledWith(null, {
-      fallbackToken: 'token-from-header',
-    });
   });
 });

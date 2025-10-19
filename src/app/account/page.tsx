@@ -74,7 +74,6 @@ export default function AccountPage() {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
-          'X-Firebase-Id-Token': token,
         },
         body: JSON.stringify({ customerId: subscription.stripeCustomerId }),
       });

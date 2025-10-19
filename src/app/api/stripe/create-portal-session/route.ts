@@ -31,15 +31,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const authHeader =
-    request.headers.get('authorization') ||
-    request.headers.get('Authorization');
+  const authHeader = request.headers.get('authorization');
   const serviceKeyHeader = request.headers.get('x-internal-service-key');
   const expectedServiceKey = process.env.INTERNAL_SERVICE_KEY;
-  const firebaseIdTokenHeader =
-    request.headers.get('x-firebase-id-token') ||
-    request.headers.get('X-Firebase-Id-Token');
-  const sessionCookieToken = request.cookies.get('__session')?.value ?? null;
 
   let authenticatedUserId: string | null = null;
 
@@ -71,9 +65,7 @@ export async function POST(request: NextRequest) {
     authenticatedUserId = userIdFromBody;
     console.log('Authenticated via internal service key for user:', authenticatedUserId);
   } else {
-    const { user, error } = await verifyFirebaseToken(authHeader, {
-      fallbackToken: firebaseIdTokenHeader || sessionCookieToken || null,
-    });
+    const { user, error } = await verifyFirebaseToken(authHeader);
 
     if (!user) {
       console.warn('Firebase authentication failed for portal session:', error);
