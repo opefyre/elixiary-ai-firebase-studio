@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Try both case variations for authorization header
-  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
+  // Get authorization header (Next.js normalizes headers to lowercase)
+  const authHeader = request.headers.get('authorization');
   const serviceKeyHeader = request.headers.get('x-internal-service-key');
   const expectedServiceKey = process.env.INTERNAL_SERVICE_KEY;
   
@@ -72,6 +72,14 @@ export async function POST(request: NextRequest) {
     authenticatedUserId = userIdFromBody;
     console.log('Authenticated via internal service key for user:', authenticatedUserId);
   } else {
+    if (!authHeader) {
+      console.warn('No authorization header provided for portal session');
+      return NextResponse.json(
+        { error: 'Unauthorized', details: 'No authorization header provided' },
+        { status: 401 }
+      );
+    }
+
     const { user, error } = await verifyFirebaseToken(authHeader);
 
     if (!user) {
