@@ -31,14 +31,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const authHeader = request.headers.get('authorization');
+  // Try both case variations for authorization header
+  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
   const serviceKeyHeader = request.headers.get('x-internal-service-key');
   const expectedServiceKey = process.env.INTERNAL_SERVICE_KEY;
   
   console.log('=== Authorization Headers ===');
-  console.log('Authorization header:', authHeader);
+  console.log('Authorization header (lowercase):', request.headers.get('authorization'));
+  console.log('Authorization header (uppercase):', request.headers.get('Authorization'));
+  console.log('Final authHeader:', authHeader);
   console.log('Service key header:', serviceKeyHeader ? 'present' : 'not present');
-  console.log('All headers:', Object.fromEntries(request.headers.entries()));
 
   let authenticatedUserId: string | null = null;
 

@@ -6,20 +6,29 @@ type VerifyOptions = {
 };
 
 function extractBearerToken(authHeader: string | null) {
+  console.log('extractBearerToken input:', authHeader);
+  
   if (!authHeader) {
+    console.log('No auth header provided');
     return null;
   }
 
   const trimmed = authHeader.trim();
+  console.log('Trimmed header:', trimmed);
+  
   if (!trimmed) {
+    console.log('Header is empty after trimming');
     return null;
   }
 
   if (trimmed.toLowerCase().startsWith('bearer ')) {
-    return trimmed.slice(7).trim();
+    const token = trimmed.slice(7).trim();
+    console.log('Extracted Bearer token:', token.substring(0, 20) + '...');
+    return token;
   }
 
   // Some proxies or platforms may strip the "Bearer" prefix but keep the raw token.
+  console.log('No Bearer prefix found, returning trimmed header as token');
   return trimmed;
 }
 
