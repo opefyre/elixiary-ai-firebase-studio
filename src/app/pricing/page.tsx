@@ -80,7 +80,7 @@ function PricingContent() {
       // Redirect to Stripe Checkout
       window.location.href = data.url;
     } catch (error: any) {
-      console.error('Checkout error:', error);
+      // Handle checkout error without exposing details
       toast({
         title: "Checkout Failed",
         description: error.message || "Something went wrong. Please try again.",
@@ -177,7 +177,7 @@ function PricingContent() {
       // Redirect to Stripe Checkout for plan change
       window.location.href = data.url;
     } catch (error: any) {
-      console.error('Plan switch error:', error);
+      // Handle plan switch error without exposing details
       toast({
         title: "Plan Switch Failed",
         description: error.message || "Something went wrong. Please try again.",

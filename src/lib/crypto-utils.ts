@@ -4,7 +4,16 @@ import { createHash, createHmac, timingSafeEqual } from 'crypto';
  * Cryptographic utility functions for secure storage and validation
  */
 export class CryptoUtils {
-  private static readonly SECRET_KEY = process.env.API_KEY_SECRET || 'fallback-secret-key-change-in-production';
+  private static readonly SECRET_KEY = (() => {
+    const secret = process.env.API_KEY_SECRET;
+    if (!secret) {
+      throw new Error('API_KEY_SECRET environment variable is required but not set');
+    }
+    if (process.env.NODE_ENV === 'production' && secret.length < 32) {
+      throw new Error('API_KEY_SECRET must be at least 32 characters in production');
+    }
+    return secret;
+  })();
 
   /**
    * Hash an API key for secure storage

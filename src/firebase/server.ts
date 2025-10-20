@@ -24,13 +24,13 @@ export function initializeFirebaseServer() {
   } else {
     // Fallback: try to use individual environment variables
     serviceAccount = {
-      project_id: process.env.FIREBASE_PROJECT_ID || "studio-1063505923-cbb37",
+      project_id: process.env.FIREBASE_PROJECT_ID,
       client_email: process.env.FIREBASE_CLIENT_EMAIL,
       private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     };
     
-    if (!serviceAccount.client_email || !serviceAccount.private_key) {
-      throw new Error('Firebase service account credentials not found. Please set GOOGLE_APPLICATION_CREDENTIALS_JSON or FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY environment variables.');
+    if (!serviceAccount.client_email || !serviceAccount.private_key || !serviceAccount.project_id) {
+      throw new Error('Firebase service account credentials not found. Please set GOOGLE_APPLICATION_CREDENTIALS_JSON or FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY environment variables.');
     }
   }
 
