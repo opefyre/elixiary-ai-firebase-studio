@@ -4,13 +4,13 @@ import { APIKeyManager } from '@/lib/api-keys';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   try {
     const authenticator = new APIAuthenticator();
     const { user } = await authenticator.authenticateRequest(request);
     
-    const { keyId } = params;
+    const { keyId } = await params;
     
     const apiKeyManager = new APIKeyManager();
     await apiKeyManager.revokeAPIKey(keyId, user.uid);
@@ -38,16 +38,16 @@ export async function DELETE(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   try {
     const authenticator = new APIAuthenticator();
     const { user } = await authenticator.authenticateRequest(request);
     
-    const { keyId } = params;
+    const { keyId } = await params;
     
     const apiKeyManager = new APIKeyManager();
-    const newKey = await apiKeyManager.rotateAPIKey(keyId, user.uid);
+    const newKey = await apiKeyManager.rotateAPIKeyById(keyId, user.uid);
     
     return NextResponse.json(authenticator.createSuccessResponse({
       newApiKey: newKey,

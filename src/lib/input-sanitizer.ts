@@ -131,13 +131,53 @@ export class InputSanitizer {
   }
 
   /**
-   * Remove potential SQL injection patterns
+   * Remove potential SQL/NoSQL injection patterns
    */
   static sanitizeForDatabase(input: string): string {
+    if (typeof input !== 'string') {
+      return String(input);
+    }
+    
     return this.sanitizeString(input)
-      .replace(/[';]/g, '') // Remove quotes and semicolons that could be used for SQL injection
+      // SQL injection patterns
+      .replace(/[';]/g, '') // Remove quotes and semicolons
       .replace(/--/g, '') // Remove SQL comment markers
       .replace(/\/\*/g, '') // Remove SQL comment start
-      .replace(/\*\//g, ''); // Remove SQL comment end
+      .replace(/\*\//g, '') // Remove SQL comment end
+      // NoSQL injection patterns
+      .replace(/\$where/g, '') // Remove MongoDB $where
+      .replace(/\$ne/g, '') // Remove $ne operators
+      .replace(/\$gt/g, '') // Remove $gt operators
+      .replace(/\$regex/g, '') // Remove $regex operators
+      .replace(/\{\s*\$where/g, '') // Remove $where in objects
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/this\./g, '') // Remove this. references
+      .replace(/function\s*\(/g, '') // Remove function calls
+      // Additional dangerous patterns
+      .replace(/eval\s*\(/gi, '') // Remove eval() calls
+      .replace(/exec\s*\(/gi, '') // Remove exec() calls
+      .replace(/system\s*\(/gi, '') // Remove system() calls
+      .trim();
+  }
+
+  /**
+   * Sanitize query parameters specifically for Firestore operations
+   */
+  static sanitizeQueryParam(param: string, maxLength: number = 100): string {
+    if (typeof param !== 'string') {
+      throw new Error('Query parameter must be a string');
+    }
+    
+    const sanitized = this.sanitizeForDatabase(param);
+    
+    if (sanitized.length > maxLength) {
+      throw new Error(`Query parameter too long (max ${maxLength} characters)`);
+    }
+    
+    if (sanitized !== param) {
+      throw new Error('Invalid characters in query parameter');
+    }
+    
+    return sanitized;
   }
 }

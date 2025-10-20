@@ -106,27 +106,29 @@ export class RateLimiter {
       const resetTime = Date.now() + (ttlSeconds * 1000);
       
       // Use a transaction to safely increment
+      let newCount = 1;
       await this.adminDb.runTransaction(async (transaction: any) => {
         const docRef = this.adminDb.collection('rate_limits').doc(key);
         const doc = await transaction.get(docRef);
         
         if (doc.exists) {
           const currentCount = doc.data().count || 0;
+          newCount = currentCount + 1;
           transaction.update(docRef, {
-            count: currentCount + 1,
+            count: newCount,
             lastUpdated: new Date()
           });
         } else {
           transaction.set(docRef, {
-            count: 1,
+            count: newCount,
             resetTime,
             lastUpdated: new Date()
           });
         }
       });
 
-      // Update cache
-      this.rateLimitCache.set(key, { count: 1, resetTime });
+      // Update cache with actual count
+      this.rateLimitCache.set(key, { count: newCount, resetTime });
     } catch (error) {
       // Don't throw error to avoid breaking the API
     }
@@ -147,6 +149,92 @@ export class RateLimiter {
 
     await this.incrementRateLimit(minuteKey, 60); // 1 minute TTL
     return true;
+  }
+
+  /**
+   * Check and track failed authentication attempts for brute force protection
+   */
+  async checkBruteForceProtection(
+    identifier: string, // Can be IP, email, or user ID
+    context: 'api_auth' | 'firebase_auth' = 'api_auth'
+  ): Promise<{ allowed: boolean; retryAfter?: number; attemptsRemaining?: number }> {
+    const now = Date.now();
+    const key = `brute_force:${context}:${identifier}:${Math.floor(now / (60 * 1000))}`; // 1 minute windows
+    
+    try {
+      const attemptCount = await this.getRateLimitCount(key);
+      const maxAttempts = 5; // 5 failed attempts per minute
+      
+      if (attemptCount >= maxAttempts) {
+        // Calculate retry after time (next minute)
+        const nextWindow = Math.ceil(now / (60 * 1000)) * (60 * 1000);
+        const retryAfter = Math.ceil((nextWindow - now) / 1000);
+        
+        return {
+          allowed: false,
+          retryAfter,
+          attemptsRemaining: 0
+        };
+      }
+      
+      // Increment attempt count
+      await this.incrementRateLimit(key, 60); // 1 minute TTL
+      
+      return {
+        allowed: true,
+        attemptsRemaining: maxAttempts - attemptCount - 1
+      };
+    } catch (error) {
+      // If rate limiting fails, allow the request but log the error
+      console.error('Brute force protection error:', error);
+      return { allowed: true };
+    }
+  }
+
+  /**
+   * Clear brute force protection for an identifier (after successful auth)
+   */
+  async clearBruteForceProtection(
+    identifier: string,
+    context: 'api_auth' | 'firebase_auth' = 'api_auth'
+  ): Promise<void> {
+    const now = Date.now();
+    const key = `brute_force:${context}:${identifier}:${Math.floor(now / (60 * 1000))}`;
+    
+    try {
+      // Clear the current window
+      await this.adminDb.collection('rate_limits').doc(key).delete();
+    } catch (error) {
+      // Don't fail if cleanup fails
+      console.error('Failed to clear brute force protection:', error);
+    }
+  }
+
+  /**
+   * Enhanced rate limiting with bypass detection
+   */
+  async checkRateLimitWithBypassDetection(
+    userId: string, 
+    ipAddress: string
+  ): Promise<RateLimitStatus & { bypassDetected?: boolean }> {
+    const rateLimitStatus = await this.checkRateLimit(userId, ipAddress);
+    
+    // Check for potential bypass attempts
+    const userKey = `rate_limit:user:${userId}:hour:${Math.floor(Date.now() / (60 * 60 * 1000))}`;
+    const ipKey = `rate_limit:ip:${ipAddress}:hour:${Math.floor(Date.now() / (60 * 60 * 1000))}`;
+    
+    const [userCount, ipCount] = await Promise.all([
+      this.getRateLimitCount(userKey),
+      this.getRateLimitCount(ipKey)
+    ]);
+    
+    // Detect potential bypass: IP count much higher than user count
+    const bypassDetected = ipCount > userCount * 3 && ipCount > 50;
+    
+    return {
+      ...rateLimitStatus,
+      bypassDetected
+    };
   }
 
   /**

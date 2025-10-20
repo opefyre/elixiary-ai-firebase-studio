@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { APIKeyManager } from '@/lib/api-keys';
 import { verifyFirebaseToken, getUserByUid } from '@/lib/firebase-auth-verify';
+import { SecurityMiddleware } from '@/lib/security-middleware';
 import { z } from 'zod';
 
 const createKeySchema = z.object({
@@ -45,9 +46,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is Pro
-    if (userData.subscriptionTier !== 'pro') {
+    if ((userData as any)?.subscriptionTier !== 'pro') {
       return NextResponse.json(
-        { success: false, error: `Pro subscription required. Current tier: ${userData.subscriptionTier || 'none'}` },
+        { success: false, error: `Pro subscription required. Current tier: ${(userData as any)?.subscriptionTier || 'none'}` },
         { status: 403 }
       );
     }
@@ -74,8 +75,9 @@ export async function GET(request: NextRequest) {
     
   } catch (error: any) {
     console.error('Error fetching API keys:', error);
+    // SECURITY: Don't expose internal error messages
     return NextResponse.json(
-      { success: false, error: `Failed to fetch API keys: ${error.message}` },
+      { success: false, error: 'Failed to fetch API keys' },
       { status: 500 }
     );
   }
@@ -83,6 +85,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply CSRF protection for state-changing operations
+    const csrfValidation = SecurityMiddleware.validateCSRFToken(request, process.env.NEXT_PUBLIC_APP_URL);
+    if (!csrfValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: csrfValidation.error },
+        { status: 403 }
+      );
+    }
+
     const { authHeader, fallbackToken } = resolveAuthContext(request);
     const { user, error } = await verifyFirebaseToken(authHeader, {
       fallbackToken,
@@ -108,9 +119,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is Pro
-    if (userData.subscriptionTier !== 'pro') {
+    if ((userData as any)?.subscriptionTier !== 'pro') {
       return NextResponse.json(
-        { success: false, error: `Pro subscription required. Current tier: ${userData.subscriptionTier || 'none'}` },
+        { success: false, error: `Pro subscription required. Current tier: ${(userData as any)?.subscriptionTier || 'none'}` },
         { status: 403 }
       );
     }

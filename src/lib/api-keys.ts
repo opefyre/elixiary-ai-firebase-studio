@@ -12,10 +12,11 @@ export class APIKeyManager {
   }
 
   /**
-   * Generate a new API key
+   * Generate a new API key with enhanced entropy
    */
   generateAPIKey(): string {
-    const randomPart = randomBytes(16).toString('hex');
+    // Use 32 bytes for better entropy (256 bits)
+    const randomPart = randomBytes(32).toString('hex');
     return `elx_live_${randomPart}`;
   }
 
@@ -54,6 +55,9 @@ export class APIKeyManager {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
 
+    // Validate secret key at runtime before using it
+    CryptoUtils.validateSecretKey();
+    
     // Generate secure document ID based on key content
     const keyId = CryptoUtils.generateAPIKeyId(apiKey);
     
@@ -101,6 +105,9 @@ export class APIKeyManager {
    * Validate an API key using secure hash verification
    */
   async validateAPIKey(apiKey: string, email: string): Promise<APIKey> {
+    // Validate secret key at runtime before using it
+    CryptoUtils.validateSecretKey();
+    
     // Generate the key ID from the API key to find the document
     const keyId = CryptoUtils.generateAPIKeyId(apiKey);
     const keyDoc = await this.adminDb.collection('api_keys').doc(keyId).get();
@@ -122,9 +129,48 @@ export class APIKeyManager {
     }
 
     // Check if key is expired
-    const expiresAt = keyData.expiresAt instanceof Date ? keyData.expiresAt : keyData.expiresAt.toDate();
-    if (new Date() > expiresAt) {
+    const expiresAt = keyData.expiresAt instanceof Date ? 
+      keyData.expiresAt : 
+      (keyData.expiresAt && typeof keyData.expiresAt.toDate === 'function' ? 
+        keyData.expiresAt.toDate() : 
+        new Date(keyData.expiresAt));
+    const now = new Date();
+    if (now > expiresAt) {
       throw new Error('API key has expired');
+    }
+
+    // Check if key expires within 30 days and log warning
+    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    if (expiresAt <= thirtyDaysFromNow) {
+      // Log expiration warning for monitoring
+      try {
+        const { AuditLogger } = await import('./audit-logger');
+        const auditLogger = new AuditLogger();
+        const requestId = AuditLogger.generateRequestId();
+        
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed', // Reusing for security monitoring
+          {
+            endpoint: 'api-key-validation',
+            method: 'AUTH',
+            ipAddress: 'system',
+            userAgent: 'api-key-validator'
+          },
+          {
+            userId: keyData.userId,
+            errorMessage: 'API key expiring soon',
+            metadata: {
+              keyId: keyData.id,
+              expiresAt: expiresAt.toISOString(),
+              daysUntilExpiry: Math.ceil((expiresAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
+            }
+          }
+        );
+      } catch (error) {
+        // Don't fail validation if logging fails
+        console.warn('Failed to log API key expiration warning:', error);
+      }
     }
 
     // Verify email matches (case-insensitive, sanitized)
@@ -210,7 +256,62 @@ export class APIKeyManager {
   }
 
   /**
-   * Rotate an API key
+   * Rotate an API key by keyId (for API endpoint)
+   */
+  async rotateAPIKeyById(keyId: string, userId: string): Promise<string> {
+    const keyDoc = await this.adminDb.collection('api_keys').doc(keyId).get();
+    
+    if (!keyDoc.exists) {
+      throw new Error('API key not found');
+    }
+
+    const keyData = keyDoc.data() as APIKey;
+    
+    if (keyData.userId !== userId) {
+      throw new Error('Unauthorized');
+    }
+
+    if (keyData.status !== 'active') {
+      throw new Error('Cannot rotate inactive API key');
+    }
+
+    // Validate secret key at runtime before using it
+    CryptoUtils.validateSecretKey();
+
+    // Generate new API key
+    const newApiKey = this.generateAPIKey();
+    const newKeyId = CryptoUtils.generateAPIKeyId(newApiKey);
+    const newKeyHash = CryptoUtils.hashAPIKey(newApiKey);
+    const now = new Date();
+
+    // Create new key with same data but new ID and hash
+    const newKeyData: APIKey = {
+      ...keyData,
+      id: newKeyId,
+      keyHash: newKeyHash,
+      lastRotated: now,
+      usage: {
+        requestsToday: 0,
+        requestsThisMonth: 0,
+        totalRequests: 0,
+        lastUsed: now
+      },
+      createdAt: now
+    };
+
+    // Save new key and revoke old one
+    await this.adminDb.collection('api_keys').doc(newKeyId).set(newKeyData);
+    await this.adminDb.collection('api_keys').doc(keyId).update({
+      status: 'revoked',
+      updatedAt: now,
+      revokedAt: now
+    });
+
+    return newApiKey;
+  }
+
+  /**
+   * Rotate an API key by actual key string
    */
   async rotateAPIKey(oldApiKey: string, userId: string): Promise<string> {
     const oldKeyId = CryptoUtils.generateAPIKeyId(oldApiKey);
@@ -273,7 +374,11 @@ export class APIKeyManager {
     if (!keyDoc.exists) return;
 
     const keyData = keyDoc.data() as APIKey;
-    const lastUsed = keyData.usage.lastUsed instanceof Date ? keyData.usage.lastUsed : keyData.usage.lastUsed.toDate();
+    const lastUsed = keyData.usage.lastUsed instanceof Date ? 
+      keyData.usage.lastUsed : 
+      (keyData.usage.lastUsed && typeof keyData.usage.lastUsed.toDate === 'function' ? 
+        keyData.usage.lastUsed.toDate() : 
+        new Date(keyData.usage.lastUsed));
     const lastUsedToday = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), lastUsed.getDate());
     const lastUsedMonth = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), 1);
 
@@ -287,11 +392,111 @@ export class APIKeyManager {
       ? keyData.usage.requestsThisMonth + 1
       : 1;
 
+    // Check for usage anomalies
+    await this.checkUsageAnomalies(keyData, requestsToday, requestsThisMonth, now);
+
     await this.adminDb.collection('api_keys').doc(keyId).update({
       'usage.requestsToday': requestsToday,
       'usage.requestsThisMonth': requestsThisMonth,
       'usage.lastUsed': now,
       'usage.totalRequests': keyData.usage.totalRequests + 1
     });
+  }
+
+  /**
+   * Check for usage anomalies and log security events
+   */
+  private async checkUsageAnomalies(
+    keyData: APIKey, 
+    requestsToday: number, 
+    requestsThisMonth: number, 
+    now: Date
+  ): Promise<void> {
+    try {
+      const { AuditLogger } = await import('./audit-logger');
+      const auditLogger = new AuditLogger();
+      const requestId = AuditLogger.generateRequestId();
+
+      // Check for unusual daily usage patterns
+      const dailyLimit = keyData.permissions.dailyLimit || 1000;
+      if (requestsToday > dailyLimit * 0.8) { // More than 80% of daily limit
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed', // Reusing for security monitoring
+          {
+            endpoint: 'api-usage-monitoring',
+            method: 'USAGE_CHECK',
+            ipAddress: 'system',
+            userAgent: 'usage-anomaly-detector'
+          },
+          {
+            userId: keyData.userId,
+            errorMessage: 'High daily API usage detected',
+            metadata: {
+              keyId: keyData.id,
+              requestsToday,
+              dailyLimit,
+              percentageUsed: Math.round((requestsToday / dailyLimit) * 100)
+            }
+          }
+        );
+      }
+
+      // Check for unusual monthly usage patterns
+      const monthlyLimit = keyData.permissions.monthlyLimit || 10000;
+      if (requestsThisMonth > monthlyLimit * 0.9) { // More than 90% of monthly limit
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed',
+          {
+            endpoint: 'api-usage-monitoring',
+            method: 'USAGE_CHECK',
+            ipAddress: 'system',
+            userAgent: 'usage-anomaly-detector'
+          },
+          {
+            userId: keyData.userId,
+            errorMessage: 'High monthly API usage detected',
+            metadata: {
+              keyId: keyData.id,
+              requestsThisMonth,
+              monthlyLimit,
+              percentageUsed: Math.round((requestsThisMonth / monthlyLimit) * 100)
+            }
+          }
+        );
+      }
+
+      // Check for unusually rapid usage (more than 50 requests in last 5 minutes)
+      const lastUsed = keyData.usage.lastUsed instanceof Date ? keyData.usage.lastUsed : new Date(keyData.usage.lastUsed);
+      const timeDiff = now.getTime() - lastUsed.getTime();
+      
+      if (timeDiff < 5 * 60 * 1000 && requestsToday > 50) { // Less than 5 minutes and high daily count
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed',
+          {
+            endpoint: 'api-usage-monitoring',
+            method: 'USAGE_CHECK',
+            ipAddress: 'system',
+            userAgent: 'usage-anomaly-detector'
+          },
+          {
+            userId: keyData.userId,
+            errorMessage: 'Unusually rapid API usage detected',
+            metadata: {
+              keyId: keyData.id,
+              requestsToday,
+              timeSinceLastRequest: Math.round(timeDiff / 1000),
+              potentialAbuse: true
+            }
+          }
+        );
+      }
+
+    } catch (error) {
+      // Don't fail if anomaly detection fails
+      console.warn('Failed to check usage anomalies:', error);
+    }
   }
 }

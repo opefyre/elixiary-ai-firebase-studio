@@ -19,6 +19,15 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Validate request size before parsing JSON
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 1024 * 1024) { // 1MB limit
+      return NextResponse.json(
+        { error: 'Request payload too large' },
+        { status: 413 }
+      );
+    }
+
     const { email, displayName } = await request.json();
 
     if (!email) {
@@ -90,11 +99,13 @@ export function __resetRateLimitStateForTests() {
 }
 
 function buildRateLimitKey(request: NextRequest, auth: AuthSuccess) {
-  const ipAddress =
-    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-    request.headers.get('x-real-ip') ||
-    request.ip ||
-    'unknown';
+  const forwarded = request.headers.get('x-forwarded-for');
+  const realIP = request.headers.get('x-real-ip');
+  
+  // SECURITY: Extract IP address with proper validation
+  const ipAddress = forwarded ? 
+    forwarded.split(',')[0].trim() : 
+    (realIP || 'unknown');
 
   return `${auth.rateLimitKey}|ip:${ipAddress}`;
 }

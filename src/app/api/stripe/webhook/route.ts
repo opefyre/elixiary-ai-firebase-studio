@@ -44,8 +44,10 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err: any) {
+    // SECURITY: Don't expose internal error details in webhook responses
+    console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
+      { error: 'Webhook signature verification failed' },
       { status: 400 }
     );
   }

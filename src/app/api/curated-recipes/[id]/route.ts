@@ -3,11 +3,11 @@ import { initializeFirebaseServer } from '@/firebase/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { adminDb } = initializeFirebaseServer();
-    const recipeId = params.id;
+    const { id: recipeId } = await params;
 
     // Get recipe
     const recipeDoc = await adminDb.collection('curated-recipes').doc(recipeId).get();

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "../styles/mobile-pwa.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -48,18 +48,6 @@ export const metadata: Metadata = {
   applicationName: 'Elixiary AI',
   generator: 'Next.js',
   referrer: 'origin-when-cross-origin',
-  colorScheme: 'dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#8b5cf6' },
-    { media: '(prefers-color-scheme: dark)', color: '#8b5cf6' },
-  ],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -116,6 +104,19 @@ export const metadata: Metadata = {
     'msapplication-config': '/browserconfig.xml',
     'format-detection': 'telephone=no',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  colorScheme: 'dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#8b5cf6' },
+    { media: '(prefers-color-scheme: dark)', color: '#8b5cf6' },
+  ],
 };
 
 export default function RootLayout({

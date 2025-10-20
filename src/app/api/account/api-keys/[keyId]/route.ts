@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { APIKeyManager } from '@/lib/api-keys';
 import { verifyFirebaseToken, getUserByUid } from '@/lib/firebase-auth-verify';
+import { SecurityMiddleware } from '@/lib/security-middleware';
 
 function resolveAuthContext(request: NextRequest) {
   const authHeader =
@@ -17,9 +18,18 @@ function resolveAuthContext(request: NextRequest) {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   try {
+    // Apply CSRF protection for state-changing operations
+    const csrfValidation = SecurityMiddleware.validateCSRFToken(request, process.env.NEXT_PUBLIC_APP_URL);
+    if (!csrfValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: csrfValidation.error },
+        { status: 403 }
+      );
+    }
+
     const { authHeader, fallbackToken } = resolveAuthContext(request);
     const { user, error } = await verifyFirebaseToken(authHeader, {
       fallbackToken,
@@ -32,7 +42,7 @@ export async function DELETE(
       );
     }
 
-    const { keyId } = params;
+    const { keyId } = await params;
     
     const userData = await getUserByUid(user.uid);
     if (!userData) {
@@ -43,7 +53,7 @@ export async function DELETE(
     }
 
     // Check if user is Pro
-    if (userData.subscriptionTier !== 'pro') {
+    if ((userData as any)?.subscriptionTier !== 'pro') {
       return NextResponse.json(
         { success: false, error: 'Pro subscription required' },
         { status: 403 }
@@ -69,9 +79,18 @@ export async function DELETE(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   try {
+    // Apply CSRF protection for state-changing operations
+    const csrfValidation = SecurityMiddleware.validateCSRFToken(request, process.env.NEXT_PUBLIC_APP_URL);
+    if (!csrfValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: csrfValidation.error },
+        { status: 403 }
+      );
+    }
+
     const { authHeader, fallbackToken } = resolveAuthContext(request);
     const { user, error } = await verifyFirebaseToken(authHeader, {
       fallbackToken,
@@ -84,7 +103,7 @@ export async function POST(
       );
     }
 
-    const { keyId } = params;
+    const { keyId } = await params;
     
     const userData = await getUserByUid(user.uid);
     if (!userData) {
@@ -95,7 +114,7 @@ export async function POST(
     }
 
     // Check if user is Pro
-    if (userData.subscriptionTier !== 'pro') {
+    if ((userData as any)?.subscriptionTier !== 'pro') {
       return NextResponse.json(
         { success: false, error: 'Pro subscription required' },
         { status: 403 }

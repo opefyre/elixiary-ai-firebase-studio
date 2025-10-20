@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCocktailRecipe } from '@/ai/flows/generate-cocktail-recipe';
 import { SecureErrorHandler } from '@/lib/error-handler';
+import { SecurityMiddleware } from '@/lib/security-middleware';
 import { z } from 'zod';
 
 const requestSchema = z.object({
@@ -22,12 +23,21 @@ const requestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate content-type for JSON requests
-    const contentType = request.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
+    // Apply security middleware validation
+    const requestValidation = SecurityMiddleware.validateRequestSizeAndType(request);
+    if (!requestValidation.valid) {
       return NextResponse.json(
-        { error: 'Content-Type must be application/json' },
-        { status: 400 }
+        { error: requestValidation.error },
+        { status: requestValidation.error?.includes('too large') ? 413 : 400 }
+      );
+    }
+
+    // Apply CSRF protection for state-changing operations
+    const csrfValidation = SecurityMiddleware.validateCSRFToken(request, process.env.NEXT_PUBLIC_APP_URL);
+    if (!csrfValidation.valid) {
+      return NextResponse.json(
+        { error: csrfValidation.error },
+        { status: 403 }
       );
     }
 
@@ -58,7 +68,8 @@ export async function POST(request: NextRequest) {
       }),
     };
     
-    return NextResponse.json({ recipe: fixedRecipe, error: null });
+    const response = NextResponse.json({ recipe: fixedRecipe, error: null });
+    return SecurityMiddleware.addSecurityHeaders(response);
   } catch (error: any) {
     const secureResponse = SecureErrorHandler.createErrorResponse(error, undefined, 'Failed to generate recipe');
     const responseBody = await secureResponse.json();

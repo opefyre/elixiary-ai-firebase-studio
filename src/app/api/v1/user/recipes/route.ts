@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { APIAuthenticator, APIError } from '@/lib/api-auth';
+import { SecurityMiddleware } from '@/lib/security-middleware';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
 
@@ -130,12 +131,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Validate request size and type before authentication and parsing
+    const requestValidation = SecurityMiddleware.validateRequestSizeAndType(request);
+    if (!requestValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: requestValidation.error },
+        { status: 400 }
+      );
+    }
+
     const authenticator = new APIAuthenticator();
     const { user, rateLimit } = await authenticator.authenticateRequest(request);
     
-    // Validate request size
+    // Additional request size validation
     authenticator.validateRequestSize(request);
     
+    // SECURITY: Parse JSON with size limits
     const body = await request.json();
     const { recipeId } = body;
     

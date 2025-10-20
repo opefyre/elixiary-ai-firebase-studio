@@ -4,7 +4,7 @@ import { RateLimiter } from './rate-limiter';
 import { InputSanitizer } from './input-sanitizer';
 import { CryptoUtils } from './crypto-utils';
 import { AuditLogger } from './audit-logger';
-import { APIError, APIResponse } from '@/types/api';
+import { APIError as APIErrorInterface, APIResponse } from '@/types/api';
 
 export class APIAuthenticator {
   private apiKeyManager: APIKeyManager;
@@ -44,7 +44,7 @@ export class APIAuthenticator {
             endpoint: AuditLogger.getEndpoint(request),
             method: request.method,
             ipAddress: AuditLogger.getClientIP(request),
-            userAgent: request.headers.get('user-agent') || undefined
+            userAgent: request.headers.get('user-agent') ?? undefined
           },
           {
             errorMessage: 'Missing required headers',
@@ -52,6 +52,30 @@ export class APIAuthenticator {
           }
         );
         throw new APIError('Missing required headers', 'x-api-key and x-user-email headers are required', 401);
+      }
+
+      // Check brute force protection before processing
+      const clientIP = AuditLogger.getClientIP(request);
+      const bruteForceCheck = await this.rateLimiter.checkBruteForceProtection(clientIP, 'api_auth');
+      
+      if (!bruteForceCheck.allowed) {
+        // Log brute force attempt
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed',
+          {
+            endpoint: AuditLogger.getEndpoint(request),
+            method: request.method,
+            ipAddress: clientIP,
+            userAgent: request.headers.get('user-agent') ?? undefined
+          },
+          {
+            email: rawEmail,
+            errorMessage: 'Rate limit exceeded - too many failed attempts',
+            statusCode: 429
+          }
+        );
+        throw new APIError('Rate limit exceeded', `Too many failed attempts. Try again in ${bruteForceCheck.retryAfter} seconds.`, 429);
       }
 
       try {
@@ -67,7 +91,7 @@ export class APIAuthenticator {
             endpoint: AuditLogger.getEndpoint(request),
             method: request.method,
             ipAddress: AuditLogger.getClientIP(request),
-            userAgent: request.headers.get('user-agent') || undefined
+            userAgent: request.headers.get('user-agent') ?? undefined
           },
           {
             email: rawEmail,
@@ -91,14 +115,47 @@ export class APIAuthenticator {
         ...userDoc.data()
       };
 
-      // Check rate limiting using authenticated user ID (not email)
-      const rateLimitStatus = await this.rateLimiter.checkRateLimit(keyData.userId, AuditLogger.getClientIP(request));
+      // Check rate limiting with bypass detection
+      const rateLimitStatus = await this.rateLimiter.checkRateLimitWithBypassDetection(keyData.userId, clientIP);
+      
+      // Log potential bypass attempts
+      if (rateLimitStatus.bypassDetected) {
+        try {
+          await auditLogger.logSecurityEvent(
+            requestId,
+            'authentication_failed',
+            {
+              endpoint: AuditLogger.getEndpoint(request),
+              method: request.method,
+              ipAddress: clientIP,
+              userAgent: request.headers.get('user-agent') ?? undefined
+            },
+            {
+              userId: keyData.userId,
+              errorMessage: 'Potential rate limit bypass detected',
+              metadata: {
+                userRateLimit: rateLimitStatus,
+                bypassDetected: true
+              }
+            }
+          );
+        } catch (error) {
+          // Don't fail authentication if security logging fails
+        }
+      }
 
       // Update API key usage counters
       try {
         await this.updateAPIKeyUsage(apiKey, email, adminDb);
       } catch (error) {
         // Don't throw error to avoid breaking the API
+      }
+
+      // Clear brute force protection on successful authentication
+      try {
+        await this.rateLimiter.clearBruteForceProtection(clientIP, 'api_auth');
+      } catch (error) {
+        // Don't fail authentication if brute force clearing fails
       }
 
       return {
@@ -129,7 +186,7 @@ export class APIAuthenticator {
           endpoint: AuditLogger.getEndpoint(request),
           method: request.method,
           ipAddress: AuditLogger.getClientIP(request),
-          userAgent: request.headers.get('user-agent') || undefined
+          userAgent: request.headers.get('user-agent') ?? undefined
         },
         {
           email: email,
@@ -200,17 +257,31 @@ export class APIAuthenticator {
   }
 
   /**
-   * Get client IP address
+   * Get client IP address - SECURITY: Validate IP format to prevent spoofing
    */
   private getClientIP(request: NextRequest): string {
     const forwarded = request.headers.get('x-forwarded-for');
     const realIP = request.headers.get('x-real-ip');
     
+    // SECURITY: Validate IP format to prevent spoofing - strict validation
+    const isValidIP = (ip: string): boolean => {
+      // Strict IPv4 validation (each octet must be 0-255)
+      const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+      
+      // More comprehensive IPv6 validation
+      const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/;
+      
+      return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+    };
+    
     if (forwarded) {
-      return forwarded.split(',')[0].trim();
+      const firstIP = forwarded.split(',')[0].trim();
+      if (isValidIP(firstIP)) {
+        return firstIP;
+      }
     }
     
-    if (realIP) {
+    if (realIP && isValidIP(realIP)) {
       return realIP;
     }
     

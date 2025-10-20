@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { APIAuthenticator, APIError } from '@/lib/api-auth';
 import { SecureErrorHandler } from '@/lib/error-handler';
+import { SecurityMiddleware } from '@/lib/security-middleware';
+import { InputSanitizer } from '@/lib/input-sanitizer';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
 
@@ -13,28 +15,44 @@ const recipeQuerySchema = z.object({
   limit: z.number().int().min(1).max(20).default(10)
 });
 
+// Handle CORS preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return SecurityMiddleware.handleCorsPreflight(request);
+}
+
 export async function GET(request: NextRequest) {
   try {
+    // Apply security middleware
+    const requestValidation = SecurityMiddleware.validateRequestSizeAndType(request);
+    if (!requestValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: requestValidation.error },
+        { status: 400 }
+      );
+    }
+
     const authenticator = new APIAuthenticator();
     const { user, rateLimit } = await authenticator.authenticateRequest(request);
     
     // Validate request size
     authenticator.validateRequestSize(request);
     
-    // Parse and validate query parameters
+    // Parse and validate query parameters with proper sanitization
     const { searchParams } = new URL(request.url);
-    const queryParams = {
-      category: searchParams.get('category') || undefined,
-      difficulty: searchParams.get('difficulty') as 'Easy' | 'Medium' | 'Hard' || undefined,
-      search: searchParams.get('search') || undefined,
-      tags: searchParams.get('tags') || undefined,
+    
+    // SECURITY: Sanitize query parameters before validation to prevent injection
+    const safeQueryParams = {
+      category: searchParams.get('category') ? InputSanitizer.sanitizeQueryParam(searchParams.get('category')!, 50) : undefined,
+      difficulty: searchParams.get('difficulty') ? InputSanitizer.sanitizeQueryParam(searchParams.get('difficulty')!, 10) as 'Easy' | 'Medium' | 'Hard' : undefined,
+      search: searchParams.get('search') ? InputSanitizer.sanitizeQueryParam(searchParams.get('search')!, 100) : undefined,
+      tags: searchParams.get('tags') ? InputSanitizer.sanitizeQueryParam(searchParams.get('tags')!, 200) : undefined,
       page: parseInt(searchParams.get('page') || '1'),
       limit: parseInt(searchParams.get('limit') || '10')
     };
     
-    const validatedParams = recipeQuerySchema.parse(queryParams);
+    const validatedParams = recipeQuerySchema.parse(safeQueryParams);
     
-    // Sanitize input
+    // Additional sanitization
     const sanitizedParams = authenticator.sanitizeInput(validatedParams);
     
     const { adminDb } = initializeFirebaseServer();
@@ -116,12 +134,14 @@ export async function GET(request: NextRequest) {
       }
     };
     
-    return NextResponse.json(authenticator.createSuccessResponse(response, rateLimit));
+    const responseJson = NextResponse.json(authenticator.createSuccessResponse(response, rateLimit));
+    return SecurityMiddleware.addSecurityHeaders(responseJson);
     
   } catch (error: any) {
     if (error instanceof APIError) {
+      // SECURITY: Don't expose detailed error messages
       return NextResponse.json(
-        { success: false, error: error.message },
+        { success: false, error: 'Request failed' },
         { status: error.statusCode }
       );
     }
@@ -130,6 +150,7 @@ export async function GET(request: NextRequest) {
       return SecureErrorHandler.handleValidationError(error);
     }
     
+    // SECURITY: Use secure error handler to prevent information disclosure
     return SecureErrorHandler.createErrorResponse(error, undefined, 'Failed to fetch recipes');
   }
 }

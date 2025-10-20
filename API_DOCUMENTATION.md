@@ -1,8 +1,8 @@
 # 🍸 Elixiary AI - Open API Documentation
 
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Base URL**: `https://elixiary.com/api/v1`  
-**Last Updated**: October 2025
+**Last Updated**: January 2025
 
 ---
 
@@ -59,9 +59,19 @@ Content-Type: application/json
 ### Security Best Practices
 - **Never expose API keys** in client-side code
 - **Use environment variables** to store keys securely
-- **Rotate keys regularly** for enhanced security
+- **Rotate keys regularly** for enhanced security (use the rotate endpoint)
 - **Monitor usage** through the account dashboard
 - **Revoke unused keys** to minimize attack surface
+
+### Enhanced Security Features (January 2025)
+- **IP Address Validation**: Strict validation prevents IP spoofing attacks
+- **Request Size Limits**: 1MB maximum payload size enforced
+- **Timing Attack Protection**: Constant-time cryptographic comparisons
+- **NoSQL Injection Prevention**: Comprehensive input sanitization
+- **Brute Force Protection**: Automatic blocking after failed attempts
+- **Rate Limit Bypass Detection**: Advanced monitoring for suspicious patterns
+- **Security Headers**: Full CORS, CSP, HSTS, and other security headers
+- **Audit Logging**: Complete security event tracking and monitoring
 
 ---
 
@@ -448,25 +458,25 @@ curl -X GET "https://elixiary.com/api/v1/docs" \
 ### Common Error Messages
 
 ```json
-// Invalid API key
+// Invalid API key (generic for security)
 {
   "success": false,
-  "error": "API key must start with elx_live_ and be at least 40 characters long"
+  "error": "Authentication failed"
 }
 
 // Missing headers
 {
   "success": false,
-  "error": "x-api-key and x-user-email headers are required"
+  "error": "Request failed"
 }
 
 // Pro subscription required
 {
   "success": false,
-  "error": "Pro subscription required. Current tier: free"
+  "error": "Request failed"
 }
 
-// Rate limit exceeded
+// Rate limit exceeded (with enhanced protection)
 {
   "success": false,
   "error": "Rate limit exceeded. Try again later.",
@@ -476,9 +486,24 @@ curl -X GET "https://elixiary.com/api/v1/docs" \
 // Resource not found
 {
   "success": false,
-  "error": "The requested recipe does not exist"
+  "error": "Request failed"
+}
+
+// Request too large (security enhancement)
+{
+  "success": false,
+  "error": "Request payload too large"
+}
+
+// CSRF protection (for state-changing operations)
+{
+  "success": false,
+  "error": "Invalid request origin"
 }
 ```
+
+### Security-Enhanced Error Responses (January 2025)
+For security reasons, error messages are now generic to prevent information disclosure. The API returns standardized error responses that don't expose internal system details while maintaining proper HTTP status codes for your application to handle appropriately.
 
 ---
 

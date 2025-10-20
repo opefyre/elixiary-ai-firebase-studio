@@ -44,7 +44,8 @@ service cloud.firestore {
     match /api_keys/{keyId} {
       allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
-      allow update: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      // SECURITY: Remove update permission - API key updates should be server-side only
+      // allow update: if isAuthenticated() && request.auth.uid == resource.data.userId;
       allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
     }
     
