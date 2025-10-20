@@ -76,6 +76,29 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "img-src 'self' data: blob: https://lh3.googleusercontent.com https://images.unsplash.com https://picsum.photos https://placehold.co https://drive.google.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebase.com https://*.firebaseapp.com https://*.stripe.com https://api.stripe.com https://checkout.stripe.com wss://*.firebase.com https://www.google-analytics.com",
+              "frame-src 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'"
+            ].join('; ')
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'Upgrade-Insecure-Requests',
+            value: '1',
+          },
         ],
       },
       {

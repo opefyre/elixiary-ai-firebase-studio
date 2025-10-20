@@ -11,13 +11,13 @@ export class RateLimiter {
   }
 
   /**
-   * Check if request is within rate limits
+   * Check if request is within rate limits using authenticated user ID
    */
-  async checkRateLimit(apiKey: string, ipAddress: string): Promise<RateLimitStatus> {
+  async checkRateLimit(userId: string, ipAddress: string): Promise<RateLimitStatus> {
     const now = Date.now();
-    const hourKey = `rate_limit:${apiKey}:hour:${Math.floor(now / (60 * 60 * 1000))}`;
-    const dayKey = `rate_limit:${apiKey}:day:${Math.floor(now / (24 * 60 * 60 * 1000))}`;
-    const monthKey = `rate_limit:${apiKey}:month:${Math.floor(now / (30 * 24 * 60 * 60 * 1000))}`;
+    const hourKey = `rate_limit:user:${userId}:hour:${Math.floor(now / (60 * 60 * 1000))}`;
+    const dayKey = `rate_limit:user:${userId}:day:${Math.floor(now / (24 * 60 * 60 * 1000))}`;
+    const monthKey = `rate_limit:user:${userId}:month:${Math.floor(now / (30 * 24 * 60 * 60 * 1000))}`;
     const ipKey = `rate_limit:ip:${ipAddress}:hour:${Math.floor(now / (60 * 60 * 1000))}`;
 
     // Check multiple rate limits
@@ -92,7 +92,7 @@ export class RateLimiter {
         return count;
       }
     } catch (error) {
-      console.error('Error getting rate limit count:', error);
+      // Silently handle error to avoid breaking the API
     }
 
     return 0;
@@ -128,17 +128,16 @@ export class RateLimiter {
       // Update cache
       this.rateLimitCache.set(key, { count: 1, resetTime });
     } catch (error) {
-      console.error('Error incrementing rate limit:', error);
       // Don't throw error to avoid breaking the API
     }
   }
 
   /**
-   * Check burst limit (requests per minute)
+   * Check burst limit (requests per minute) using authenticated user ID
    */
-  async checkBurstLimit(apiKey: string): Promise<boolean> {
+  async checkBurstLimit(userId: string): Promise<boolean> {
     const now = Date.now();
-    const minuteKey = `burst_limit:${apiKey}:${Math.floor(now / (60 * 1000))}`;
+    const minuteKey = `burst_limit:user:${userId}:${Math.floor(now / (60 * 1000))}`;
     
     const count = await this.getRateLimitCount(minuteKey);
     

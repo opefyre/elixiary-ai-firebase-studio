@@ -5,6 +5,7 @@ export interface APIKey {
   name: string;                 // API key name (user-defined)
   tier: "pro";                  // Always pro for API access
   status: "active" | "suspended" | "revoked";
+  keyHash?: string;             // Hashed version of the API key for secure storage
   permissions: {
     recipes: boolean;           // Access to recipe endpoints
     userData: boolean;          // Access to user's saved recipes

@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server';
 import { APIKeyManager } from './api-keys';
 import { RateLimiter } from './rate-limiter';
+import { InputSanitizer } from './input-sanitizer';
+import { CryptoUtils } from './crypto-utils';
+import { AuditLogger } from './audit-logger';
 import { APIError, APIResponse } from '@/types/api';
 
 export class APIAuthenticator {
@@ -19,36 +22,63 @@ export class APIAuthenticator {
     user: any;
     apiKey: any;
     rateLimit: any;
+    requestId: string;
   }> {
-    console.log('=== API Authentication Started ===');
     let apiKey: string | null = null;
     let email: string | null = null;
+    const requestId = AuditLogger.getRequestId(request);
+    const auditLogger = new AuditLogger();
+    const startTime = Date.now();
     
     try {
-      // Extract credentials
-      apiKey = request.headers.get('x-api-key');
-      email = request.headers.get('x-user-email');
+      // Extract and sanitize credentials
+      const rawApiKey = request.headers.get('x-api-key');
+      const rawEmail = request.headers.get('x-user-email');
 
-      // Validate required headers
-      if (!apiKey || !email) {
+      if (!rawApiKey || !rawEmail) {
+        // Log missing headers security event
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed',
+          {
+            endpoint: AuditLogger.getEndpoint(request),
+            method: request.method,
+            ipAddress: AuditLogger.getClientIP(request),
+            userAgent: request.headers.get('user-agent') || undefined
+          },
+          {
+            errorMessage: 'Missing required headers',
+            statusCode: 401
+          }
+        );
         throw new APIError('Missing required headers', 'x-api-key and x-user-email headers are required', 401);
       }
 
-      // Validate API key format
-      if (!apiKey.startsWith('elx_live_') || apiKey.length < 40) {
-        throw new APIError('Invalid API key format', 'API key must start with elx_live_ and be at least 40 characters long', 401);
+      try {
+        // Sanitize and validate inputs
+        apiKey = this.sanitizeApiKey(rawApiKey);
+        email = this.sanitizeEmail(rawEmail);
+      } catch (sanitizationError: any) {
+        // Log invalid input security event
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed',
+          {
+            endpoint: AuditLogger.getEndpoint(request),
+            method: request.method,
+            ipAddress: AuditLogger.getClientIP(request),
+            userAgent: request.headers.get('user-agent') || undefined
+          },
+          {
+            email: rawEmail,
+            errorMessage: 'Invalid input format',
+            statusCode: 401
+          }
+        );
+        throw new APIError('Invalid input format', sanitizationError.message, 401);
       }
 
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        throw new APIError('Invalid email format', 'Please provide a valid email address', 401);
-      }
-
-      // Check rate limiting
-      const rateLimitStatus = await this.rateLimiter.checkRateLimit(apiKey, email);
-
-      // Validate API key and get user data
+      // Validate API key and get user data first
       const keyData = await this.apiKeyManager.validateAPIKey(apiKey, email);
 
       // Get user data
@@ -61,38 +91,59 @@ export class APIAuthenticator {
         ...userDoc.data()
       };
 
+      // Check rate limiting using authenticated user ID (not email)
+      const rateLimitStatus = await this.rateLimiter.checkRateLimit(keyData.userId, AuditLogger.getClientIP(request));
+
       // Update API key usage counters
-      console.log('About to call updateAPIKeyUsage...');
       try {
         await this.updateAPIKeyUsage(apiKey, email, adminDb);
-        console.log('updateAPIKeyUsage completed successfully');
       } catch (error) {
-        console.error('updateAPIKeyUsage failed:', error);
         // Don't throw error to avoid breaking the API
       }
-      
-      // Add a test field to the response to verify this code is running
-      console.log('USAGE_UPDATE_ATTEMPTED: true');
 
       return {
         user,
         apiKey: keyData,
-        rateLimit: rateLimitStatus
+        rateLimit: rateLimitStatus,
+        requestId
       };
 
     } catch (error: any) {
+      // Log authentication failures with appropriate event type
+      let eventType: 'authentication_failed' | 'invalid_key' | 'expired_key' = 'authentication_failed';
+      let errorMessage = 'Authentication failed';
+      
+      if (error.message?.includes('Invalid API key')) {
+        eventType = 'invalid_key';
+        errorMessage = 'Invalid API key';
+      } else if (error.message?.includes('expired')) {
+        eventType = 'expired_key';
+        errorMessage = 'API key has expired';
+      }
+
+      // Log security event
+      await auditLogger.logSecurityEvent(
+        requestId,
+        eventType,
+        {
+          endpoint: AuditLogger.getEndpoint(request),
+          method: request.method,
+          ipAddress: AuditLogger.getClientIP(request),
+          userAgent: request.headers.get('user-agent') || undefined
+        },
+        {
+          email: email,
+          errorMessage: errorMessage,
+          statusCode: error instanceof APIError ? error.statusCode : 401
+        }
+      );
+
       if (error instanceof APIError) {
         throw error;
       }
       
-      console.error('API authentication error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        apiKey: apiKey?.substring(0, 10) + '...',
-        email: email
-      });
-      throw new APIError('Authentication failed', `Invalid credentials or server error: ${error.message}`, 401);
+      // Log error without exposing sensitive information
+      throw new APIError('Authentication failed', 'Invalid credentials or server error', 401);
     }
   }
 
@@ -101,29 +152,18 @@ export class APIAuthenticator {
    */
   private async updateAPIKeyUsage(apiKey: string, email: string, adminDb: any): Promise<void> {
     try {
-      console.log('=== Starting API key usage update ===');
-      console.log('API Key:', apiKey.substring(0, 20) + '...');
-      console.log('Email:', email);
-      console.log('Using provided adminDb instance');
-      
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       
-      console.log('Current time:', now.toISOString());
-      console.log('Today:', today.toISOString());
-      console.log('This month:', thisMonth.toISOString());
-      
-      // First, get the current usage data
-      console.log('Fetching API key document...');
-      const keyDoc = await adminDb.collection('api_keys').doc(apiKey).get();
+      // First, get the current usage data using hashed storage
+      const keyId = CryptoUtils.generateAPIKeyId(apiKey);
+      const keyDoc = await adminDb.collection('api_keys').doc(keyId).get();
       if (!keyDoc.exists) {
-        console.error('API key document not found:', apiKey);
         return;
       }
       
       const keyData = keyDoc.data();
-      console.log('Current usage data:', JSON.stringify(keyData.usage, null, 2));
       
       // Check if we need to reset daily/monthly counters
       let requestsToday = 1;
@@ -134,29 +174,16 @@ export class APIAuthenticator {
         const lastUsedDate = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), lastUsed.getDate());
         const lastUsedMonth = new Date(lastUsed.getFullYear(), lastUsed.getMonth(), 1);
         
-        console.log('Last used:', lastUsed.toISOString());
-        console.log('Last used date:', lastUsedDate.toISOString());
-        console.log('Last used month:', lastUsedMonth.toISOString());
-        
         if (lastUsedDate >= today) {
           requestsToday = (keyData.usage.requestsToday || 0) + 1;
-          console.log('Same day - incrementing today counter to:', requestsToday);
-        } else {
-          console.log('New day - resetting today counter to 1');
         }
         
         if (lastUsedMonth >= thisMonth) {
           requestsThisMonth = (keyData.usage.requestsThisMonth || 0) + 1;
-          console.log('Same month - incrementing month counter to:', requestsThisMonth);
-        } else {
-          console.log('New month - resetting month counter to 1');
         }
-      } else {
-        console.log('No lastUsed data - initializing counters to 1');
       }
       
       // Update usage counters in the API key document
-      console.log('Updating Firestore document...');
       const updateData = {
         'usage.totalRequests': adminDb.FieldValue.increment(1),
         'usage.lastUsed': now,
@@ -165,22 +192,10 @@ export class APIAuthenticator {
         'updatedAt': now
       };
       
-      console.log('Update data:', JSON.stringify(updateData, null, 2));
-      
-      await adminDb.collection('api_keys').doc(apiKey).update(updateData);
-      
-      console.log('Successfully updated usage counters:', {
-        totalRequests: 'incremented by 1',
-        lastUsed: now.toISOString(),
-        requestsToday: requestsToday,
-        requestsThisMonth: requestsThisMonth
-      });
-      console.log('=== API key usage update completed ===');
+      await adminDb.collection('api_keys').doc(keyId).update(updateData);
       
     } catch (error) {
       // Don't throw error to avoid breaking the API
-      console.error('Error updating API key usage:', error);
-      console.error('Error stack:', error.stack);
     }
   }
 
@@ -213,31 +228,24 @@ export class APIAuthenticator {
   }
 
   /**
-   * Sanitize input data
+   * Sanitize input data using advanced sanitization
    */
   sanitizeInput(data: any): any {
-    if (typeof data === 'string') {
-      // Remove potentially dangerous characters
-      return data
-        .replace(/[<>]/g, '') // Remove < and >
-        .replace(/javascript:/gi, '') // Remove javascript: protocol
-        .replace(/on\w+=/gi, '') // Remove event handlers
-        .trim();
-    }
-    
-    if (Array.isArray(data)) {
-      return data.map(item => this.sanitizeInput(item));
-    }
-    
-    if (typeof data === 'object' && data !== null) {
-      const sanitized: any = {};
-      for (const [key, value] of Object.entries(data)) {
-        sanitized[key] = this.sanitizeInput(value);
-      }
-      return sanitized;
-    }
-    
-    return data;
+    return InputSanitizer.sanitizeObject(data);
+  }
+
+  /**
+   * Sanitize email input specifically
+   */
+  sanitizeEmail(email: string): string {
+    return InputSanitizer.sanitizeEmail(email);
+  }
+
+  /**
+   * Sanitize API key input specifically
+   */
+  sanitizeApiKey(apiKey: string): string {
+    return InputSanitizer.sanitizeApiKey(apiKey);
   }
 
   /**

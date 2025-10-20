@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { APIAuthenticator, APIError } from '@/lib/api-auth';
+import { SecureErrorHandler } from '@/lib/error-handler';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
 
@@ -118,13 +119,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(authenticator.createSuccessResponse(response, rateLimit));
     
   } catch (error: any) {
-    console.error('Error fetching recipes:', error);
-    console.error('Error details:', {
-      message: error.message,
-      name: error.name,
-      stack: error.stack
-    });
-    
     if (error instanceof APIError) {
       return NextResponse.json(
         { success: false, error: error.message },
@@ -133,15 +127,9 @@ export async function GET(request: NextRequest) {
     }
     
     if (error.name === 'ZodError') {
-      return NextResponse.json(
-        { success: false, error: 'Invalid query parameters', details: error.errors },
-        { status: 400 }
-      );
+      return SecureErrorHandler.handleValidationError(error);
     }
     
-    return NextResponse.json(
-      { success: false, error: `Failed to fetch recipes: ${error.message}` },
-      { status: 500 }
-    );
+    return SecureErrorHandler.createErrorResponse(error, undefined, 'Failed to fetch recipes');
   }
 }

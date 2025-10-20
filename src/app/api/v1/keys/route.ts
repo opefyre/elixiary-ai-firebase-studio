@@ -32,8 +32,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(authenticator.createSuccessResponse(response));
     
   } catch (error: any) {
-    console.error('Error creating API key:', error);
-    
     if (error instanceof APIError) {
       return NextResponse.json(
         { success: false, error: error.message },
@@ -75,8 +73,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(authenticator.createSuccessResponse(response));
     
   } catch (error: any) {
-    console.error('Error fetching API keys:', error);
-    
     if (error instanceof APIError) {
       return NextResponse.json(
         { success: false, error: error.message },

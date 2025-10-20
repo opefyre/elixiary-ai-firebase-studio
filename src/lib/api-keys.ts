@@ -1,5 +1,6 @@
 import { initializeFirebaseServer } from '@/firebase/server';
 import { APIKey, RATE_LIMITS, SECURITY_LIMITS } from '@/types/api';
+import { CryptoUtils } from './crypto-utils';
 import { randomBytes } from 'crypto';
 
 export class APIKeyManager {
@@ -53,13 +54,20 @@ export class APIKeyManager {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year
 
+    // Generate secure document ID based on key content
+    const keyId = CryptoUtils.generateAPIKeyId(apiKey);
+    
+    // Hash the API key for secure storage
+    const keyHash = CryptoUtils.hashAPIKey(apiKey);
+
     const keyData: APIKey = {
-      id: apiKey,
+      id: keyId, // Use hashed ID as document ID
       userId,
       email,
       name,
       tier: 'pro',
       status: 'active',
+      keyHash: keyHash, // Store hashed version
       permissions: {
         recipes: true,
         userData: true,
@@ -78,23 +86,35 @@ export class APIKeyManager {
       lastRotated: now
     };
 
-    // Save to database
-    await this.adminDb.collection('api_keys').doc(apiKey).set(keyData);
+    // Save to database using hashed ID
+    await this.adminDb.collection('api_keys').doc(keyId).set(keyData);
 
-    return keyData;
+    // Return key data with the original API key (only returned once)
+    return {
+      ...keyData,
+      id: apiKey, // Return original API key to user
+      keyHash: undefined // Don't return hash to user
+    };
   }
 
   /**
-   * Validate an API key
+   * Validate an API key using secure hash verification
    */
   async validateAPIKey(apiKey: string, email: string): Promise<APIKey> {
-    const keyDoc = await this.adminDb.collection('api_keys').doc(apiKey).get();
+    // Generate the key ID from the API key to find the document
+    const keyId = CryptoUtils.generateAPIKeyId(apiKey);
+    const keyDoc = await this.adminDb.collection('api_keys').doc(keyId).get();
     
     if (!keyDoc.exists) {
       throw new Error('Invalid API key');
     }
 
     const keyData = keyDoc.data() as APIKey;
+
+    // Verify the API key hash matches (constant time comparison)
+    if (!keyData.keyHash || !CryptoUtils.verifyAPIKey(apiKey, keyData.keyHash)) {
+      throw new Error('Invalid API key');
+    }
 
     // Check if key is active
     if (keyData.status !== 'active') {
@@ -107,8 +127,9 @@ export class APIKeyManager {
       throw new Error('API key has expired');
     }
 
-    // Verify email matches
-    if (keyData.email !== email) {
+    // Verify email matches (case-insensitive, sanitized)
+    const sanitizedEmail = email.toLowerCase().trim();
+    if (keyData.email.toLowerCase().trim() !== sanitizedEmail) {
       throw new Error('Email does not match API key');
     }
 
@@ -123,7 +144,11 @@ export class APIKeyManager {
       throw new Error('Pro subscription required');
     }
 
-    return keyData;
+    // Return key data without the hash for security
+    return {
+      ...keyData,
+      keyHash: undefined // Don't return hash
+    };
   }
 
   /**
@@ -162,44 +187,61 @@ export class APIKeyManager {
    * Revoke an API key (actually delete it)
    */
   async revokeAPIKey(apiKey: string, userId: string): Promise<void> {
-    const keyDoc = await this.adminDb.collection('api_keys').doc(apiKey).get();
+    const keyId = CryptoUtils.generateAPIKeyId(apiKey);
+    const keyDoc = await this.adminDb.collection('api_keys').doc(keyId).get();
     
     if (!keyDoc.exists) {
       throw new Error('API key not found');
     }
 
     const keyData = keyDoc.data() as APIKey;
+    
+    // Verify the API key hash matches before allowing revocation
+    if (!keyData.keyHash || !CryptoUtils.verifyAPIKey(apiKey, keyData.keyHash)) {
+      throw new Error('Invalid API key');
+    }
+    
     if (keyData.userId !== userId) {
       throw new Error('Unauthorized');
     }
 
     // Actually delete the API key document
-    await this.adminDb.collection('api_keys').doc(apiKey).delete();
+    await this.adminDb.collection('api_keys').doc(keyId).delete();
   }
 
   /**
    * Rotate an API key
    */
   async rotateAPIKey(oldApiKey: string, userId: string): Promise<string> {
-    const keyDoc = await this.adminDb.collection('api_keys').doc(oldApiKey).get();
+    const oldKeyId = CryptoUtils.generateAPIKeyId(oldApiKey);
+    const keyDoc = await this.adminDb.collection('api_keys').doc(oldKeyId).get();
     
     if (!keyDoc.exists) {
       throw new Error('API key not found');
     }
 
     const keyData = keyDoc.data() as APIKey;
+    
+    // Verify the API key hash matches before allowing rotation
+    if (!keyData.keyHash || !CryptoUtils.verifyAPIKey(oldApiKey, keyData.keyHash)) {
+      throw new Error('Invalid API key');
+    }
+    
     if (keyData.userId !== userId) {
       throw new Error('Unauthorized');
     }
 
     // Generate new API key
     const newApiKey = this.generateAPIKey();
+    const newKeyId = CryptoUtils.generateAPIKeyId(newApiKey);
+    const newKeyHash = CryptoUtils.hashAPIKey(newApiKey);
     const now = new Date();
 
     // Create new key
     const newKeyData: APIKey = {
       ...keyData,
-      id: newApiKey,
+      id: newKeyId,
+      keyHash: newKeyHash,
       lastRotated: now,
       usage: {
         ...keyData.usage,
@@ -209,8 +251,8 @@ export class APIKeyManager {
     };
 
     // Save new key and revoke old one
-    await this.adminDb.collection('api_keys').doc(newApiKey).set(newKeyData);
-    await this.adminDb.collection('api_keys').doc(oldApiKey).update({
+    await this.adminDb.collection('api_keys').doc(newKeyId).set(newKeyData);
+    await this.adminDb.collection('api_keys').doc(oldKeyId).update({
       status: 'revoked',
       updatedAt: now
     });
@@ -226,7 +268,8 @@ export class APIKeyManager {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const keyDoc = await this.adminDb.collection('api_keys').doc(apiKey).get();
+    const keyId = CryptoUtils.generateAPIKeyId(apiKey);
+    const keyDoc = await this.adminDb.collection('api_keys').doc(keyId).get();
     if (!keyDoc.exists) return;
 
     const keyData = keyDoc.data() as APIKey;
@@ -244,7 +287,7 @@ export class APIKeyManager {
       ? keyData.usage.requestsThisMonth + 1
       : 1;
 
-    await this.adminDb.collection('api_keys').doc(apiKey).update({
+    await this.adminDb.collection('api_keys').doc(keyId).update({
       'usage.requestsToday': requestsToday,
       'usage.requestsThisMonth': requestsThisMonth,
       'usage.lastUsed': now,

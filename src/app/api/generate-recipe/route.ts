@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCocktailRecipe } from '@/ai/flows/generate-cocktail-recipe';
+import { SecureErrorHandler } from '@/lib/error-handler';
 import { z } from 'zod';
 
 const requestSchema = z.object({
@@ -12,10 +13,7 @@ export async function POST(request: NextRequest) {
     const validatedFields = requestSchema.safeParse(body);
 
     if (!validatedFields.success) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: validatedFields.error.errors },
-        { status: 400 }
-      );
+      return SecureErrorHandler.handleValidationError(validatedFields.error);
     }
 
     const recipe = await generateCocktailRecipe(validatedFields.data);
@@ -40,12 +38,14 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ recipe: fixedRecipe, error: null });
   } catch (error: any) {
+    const secureResponse = SecureErrorHandler.createErrorResponse(error, undefined, 'Failed to generate recipe');
+    const responseBody = await secureResponse.json();
     return NextResponse.json(
       { 
-        error: `Failed to generate recipe: ${error.message || 'Unknown error'}`,
+        error: responseBody.error,
         recipe: null 
       },
-      { status: 500 }
+      { status: secureResponse.status }
     );
   }
 }

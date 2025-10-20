@@ -31,16 +31,10 @@ export async function verifyFirebaseToken(
   user: DecodedIdToken | null;
   error: string | null;
 }> {
-  console.log('=== Firebase Token Verification ===');
-  console.log('Auth header received:', authHeader ? 'present' : 'missing');
-  
   const bearerToken = extractBearerToken(authHeader);
   const token = bearerToken || options.fallbackToken || null;
-  
-  console.log('Token extracted:', token ? 'yes' : 'no');
 
   if (!token) {
-    console.log('No token found - returning error');
     return { user: null, error: 'No valid authorization header' };
   }
   
@@ -50,8 +44,7 @@ export async function verifyFirebaseToken(
     const decodedToken = await adminAuth.verifyIdToken(token);
     return { user: decodedToken, error: null };
   } catch (error) {
-    console.error('Token verification error:', error);
-    return { user: null, error: `Invalid token: ${error instanceof Error ? error.message : 'Unknown error'}` };
+    return { user: null, error: 'Invalid token' };
   }
 }
 
@@ -69,7 +62,6 @@ export async function getUserByUid(uid: string) {
       ...userDoc.data()
     };
   } catch (error) {
-    console.error('Error fetching user:', error);
     return null;
   }
 }
