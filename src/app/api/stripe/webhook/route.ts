@@ -15,10 +15,9 @@ export async function POST(request: NextRequest) {
     apiVersion: '2024-12-18.acacia',
   });
 
-  let firestore;
+  let firebase;
   try {
-    const firebase = initializeFirebaseServer();
-    firestore = firebase.firestore;
+    firebase = initializeFirebaseServer();
   } catch (error: any) {
     return NextResponse.json(
       { error: 'Firebase initialization failed' },
@@ -66,7 +65,7 @@ export async function POST(request: NextRequest) {
 
   // Idempotency check: Prevent processing duplicate events
   try {
-    const { adminDb } = initializeFirebaseServer();
+    const adminDb = firebase.adminDb;
     const eventId = `stripe_webhook_${event.id}`;
     const processedEventRef = adminDb.collection('processed_webhooks').doc(eventId);
     
@@ -91,37 +90,37 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(session, stripe, firestore);
+        await handleCheckoutCompleted(session, stripe, firebase.adminDb);
         break;
       }
 
       case 'customer.subscription.created': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCreated(subscription, stripe, firestore);
+        await handleSubscriptionCreated(subscription, stripe, firebase.adminDb);
         break;
       }
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(subscription, firestore);
+        await handleSubscriptionUpdated(subscription, firebase.adminDb);
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(subscription, firestore);
+        await handleSubscriptionDeleted(subscription, firebase.adminDb);
         break;
       }
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        await handlePaymentSucceeded(invoice, stripe, firestore);
+        await handlePaymentSucceeded(invoice, stripe, firebase.adminDb);
         break;
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        await handlePaymentFailed(invoice, stripe, firestore);
+        await handlePaymentFailed(invoice, stripe, firebase.adminDb);
         break;
       }
 
@@ -139,7 +138,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe: Stripe, firestore: any) {
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe: Stripe, adminDb: any) {
   const userId = session.metadata?.firebaseUID;
   const isEarlyBird = session.metadata?.isEarlyBird === 'true';
 
@@ -164,12 +163,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   const productType = price.recurring?.interval === 'year' ? 'annual' : 'monthly';
   const productName = `${product.name} (${productType})`;
 
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = adminDb.collection('users').doc(userId);
   
   // Get current early bird count if this is an early bird
   let earlyBirdNumber: number | undefined;
   if (isEarlyBird) {
-    const configRef = firestore.collection('config').doc('earlyBird');
+    const configRef = adminDb.collection('config').doc('earlyBird');
     const configSnap = await configRef.get();
     
     if (configSnap.exists) {
@@ -244,7 +243,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   }
 }
 
-async function handleSubscriptionCreated(subscription: Stripe.Subscription, stripe: Stripe, firestore: any) {
+async function handleSubscriptionCreated(subscription: Stripe.Subscription, stripe: Stripe, adminDb: any) {
   const userId = subscription.metadata?.firebaseUID;
   const isEarlyBird = subscription.metadata?.isEarlyBird === 'true';
 
@@ -260,12 +259,12 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, stri
   const productType = price.recurring?.interval === 'year' ? 'annual' : 'monthly';
   const productName = `${product.name} (${productType})`;
 
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = adminDb.collection('users').doc(userId);
   
   // Get current early bird count if this is an early bird
   let earlyBirdNumber: number | undefined;
   if (isEarlyBird) {
-    const configRef = firestore.collection('config').doc('earlyBird');
+    const configRef = adminDb.collection('config').doc('earlyBird');
     const configSnap = await configRef.get();
     
     if (configSnap.exists) {
@@ -326,14 +325,14 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, stri
   }
 }
 
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription, firestore: any) {
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription, adminDb: any) {
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
     return;
   }
 
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = adminDb.collection('users').doc(userId);
   const userDoc = await userRef.get();
 
   if (userDoc.exists) {
@@ -355,14 +354,14 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription, fire
   }
 }
 
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription, firestore: any) {
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription, adminDb: any) {
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
     return;
   }
 
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = adminDb.collection('users').doc(userId);
   const userDoc = await userRef.get();
 
   if (userDoc.exists) {
@@ -375,7 +374,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, fire
   }
 }
 
-async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, firestore: any) {
+async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, adminDb: any) {
   if (!invoice.subscription) {
     return;
   }
@@ -389,7 +388,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, f
     return;
   }
 
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = adminDb.collection('users').doc(userId);
   const userDoc = await userRef.get();
 
   if (userDoc.exists) {
@@ -401,7 +400,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, f
   }
 }
 
-async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, firestore: any) {
+async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, adminDb: any) {
   if (!invoice.subscription) {
     return;
   }
@@ -415,7 +414,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, fire
     return;
   }
 
-  const userRef = firestore.collection('users').doc(userId);
+  const userRef = adminDb.collection('users').doc(userId);
   const userDoc = await userRef.get();
 
   if (userDoc.exists) {
