@@ -38,7 +38,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(authenticator.createSuccessResponse(response, rateLimit));
     
   } catch (error: any) {
-    console.error('Error fetching user badges:', error);
     
     if (error instanceof APIError) {
       return NextResponse.json(

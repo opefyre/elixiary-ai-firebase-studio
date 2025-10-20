@@ -80,7 +80,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
+              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://lh3.googleusercontent.com https://images.unsplash.com https://picsum.photos https://placehold.co https://drive.google.com",
               "font-src 'self' https://fonts.gstatic.com",
@@ -88,7 +88,8 @@ const nextConfig: NextConfig = {
               "frame-src 'none'",
               "object-src 'none'",
               "base-uri 'self'",
-              "form-action 'self'"
+              "form-action 'self'",
+              "upgrade-insecure-requests"
             ].join('; ')
           },
           {

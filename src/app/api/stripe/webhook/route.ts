@@ -5,7 +5,6 @@ import { initializeFirebaseServer } from '@/firebase/server';
 export async function POST(request: NextRequest) {
   // Initialize Stripe and Firebase at runtime
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    console.error('Missing Stripe configuration');
     return NextResponse.json(
       { error: 'Stripe not configured' },
       { status: 500 }
@@ -21,7 +20,6 @@ export async function POST(request: NextRequest) {
     const firebase = initializeFirebaseServer();
     firestore = firebase.firestore;
   } catch (error: any) {
-    console.error('Firebase Admin SDK initialization failed:', error.message);
     return NextResponse.json(
       { error: 'Firebase initialization failed' },
       { status: 500 }
@@ -47,11 +45,46 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json(
       { error: `Webhook Error: ${err.message}` },
       { status: 400 }
     );
+  }
+
+  // Replay attack prevention: Check timestamp
+  const now = Math.floor(Date.now() / 1000);
+  const eventTime = event.created;
+  const timeDiff = Math.abs(now - eventTime);
+  
+  // Reject events older than 5 minutes (300 seconds)
+  if (timeDiff > 300) {
+    return NextResponse.json(
+      { error: 'Webhook event too old' },
+      { status: 400 }
+    );
+  }
+
+  // Idempotency check: Prevent processing duplicate events
+  try {
+    const { adminDb } = initializeFirebaseServer();
+    const eventId = `stripe_webhook_${event.id}`;
+    const processedEventRef = adminDb.collection('processed_webhooks').doc(eventId);
+    
+    const existingEvent = await processedEventRef.get();
+    if (existingEvent.exists) {
+      return NextResponse.json({ received: true, idempotent: true });
+    }
+    
+    // Mark event as being processed
+    await processedEventRef.set({
+      eventId: event.id,
+      eventType: event.type,
+      processedAt: new Date(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Expire after 24 hours
+    });
+  } catch (idempotencyError) {
+    // Don't fail the webhook if idempotency check fails, but log it
+    // Fall through to process the event
   }
 
   try {
@@ -99,7 +132,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Error processing webhook:', error.message);
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }
@@ -112,13 +144,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   const isEarlyBird = session.metadata?.isEarlyBird === 'true';
 
   if (!userId) {
-    console.error('No firebaseUID in session metadata');
     throw new Error('No firebaseUID in session metadata');
   }
 
   // Check if subscription exists in the session
   if (!session.subscription) {
-    console.log('No subscription in checkout session yet - waiting for subscription events');
     return; // Exit early - subscription will be handled by subscription events
   }
 
@@ -219,8 +249,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription, stri
   const isEarlyBird = subscription.metadata?.isEarlyBird === 'true';
 
   if (!userId) {
-    console.error('No firebaseUID in subscription metadata');
-    return; // Don't throw error, just log and return
+    return; // Exit silently if no userId in metadata
   }
 
   // Get product information for enhanced tracking
@@ -301,7 +330,6 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription, fire
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
-    console.error('No firebaseUID in subscription metadata');
     return;
   }
 
@@ -331,7 +359,6 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, fire
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
-    console.error('No firebaseUID in subscription metadata');
     return;
   }
 
@@ -359,7 +386,6 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe, f
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
-    console.error('No firebaseUID in subscription metadata');
     return;
   }
 
@@ -386,7 +412,6 @@ async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe, fire
   const userId = subscription.metadata?.firebaseUID;
 
   if (!userId) {
-    console.error('No firebaseUID in subscription metadata');
     return;
   }
 

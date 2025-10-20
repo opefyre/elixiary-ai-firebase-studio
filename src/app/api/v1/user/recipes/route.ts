@@ -107,8 +107,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(authenticator.createSuccessResponse(response, rateLimit));
     
   } catch (error: any) {
-    console.error('Error fetching user recipes:', error);
-    
     if (error instanceof APIError) {
       return NextResponse.json(
         { success: false, error: error.message },
@@ -195,8 +193,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(authenticator.createSuccessResponse(response, rateLimit));
     
   } catch (error: any) {
-    console.error('Error saving recipe:', error);
-    
     if (error instanceof APIError) {
       return NextResponse.json(
         { success: false, error: error.message },

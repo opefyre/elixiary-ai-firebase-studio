@@ -80,6 +80,16 @@ service cloud.firestore {
       allow write: if false; // Only server-side can write
     }
     
+    // Audit logs collection - server-side only for security
+    match /audit_logs/{logId} {
+      allow read, write: if false; // Only server-side can access audit logs
+    }
+    
+    // Processed webhooks collection - server-side only for idempotency
+    match /processed_webhooks/{webhookId} {
+      allow read, write: if false; // Only server-side can access processed webhooks
+    }
+    
     // Deny all other access
     match /{document=**} {
       allow read, write: if false;

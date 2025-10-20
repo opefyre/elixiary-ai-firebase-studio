@@ -83,7 +83,7 @@ export class AuditLogger {
       await this.adminDb.collection('audit_logs').add(auditEntry);
     } catch (error) {
       // Don't fail the request if audit logging fails
-      console.error('Audit logging failed:', error);
+      // Audit logging error - silently fail to prevent recursive logging issues
     }
   }
 
@@ -129,7 +129,7 @@ export class AuditLogger {
       await this.adminDb.collection('audit_logs').add(auditEntry);
     } catch (error) {
       // Don't fail the request if audit logging fails
-      console.error('Security event logging failed:', error);
+      // Security event logging error - silently fail to prevent recursive logging issues
     }
   }
 

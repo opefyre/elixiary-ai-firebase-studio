@@ -43,7 +43,6 @@ export async function DELETE(
     return NextResponse.json(authenticator.createSuccessResponse(response, rateLimit));
     
   } catch (error: any) {
-    console.error('Error deleting recipe:', error);
     
     if (error instanceof APIError) {
       return NextResponse.json(
