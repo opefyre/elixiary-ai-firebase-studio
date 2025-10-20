@@ -77,27 +77,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       priority = Math.min(priority, 0.8); // Cap at 0.8
 
+      // Properly handle different date formats
+      let lastModifiedDate = now;
+      if (createdAt) {
+        try {
+          // Check if it's a Firestore Timestamp
+          if (createdAt && typeof createdAt.toDate === 'function') {
+            lastModifiedDate = new Date(createdAt.toDate());
+          } else if (createdAt instanceof Date) {
+            lastModifiedDate = createdAt;
+          } else if (typeof createdAt === 'string' || typeof createdAt === 'number') {
+            lastModifiedDate = new Date(createdAt);
+          }
+        } catch (error) {
+          // Fallback to current date if date parsing fails
+          lastModifiedDate = now;
+        }
+      }
+
       return {
         url: `${baseUrl}/cocktails/recipe/${doc.id}`,
-        lastModified: createdAt ? new Date(createdAt.toDate()) : now,
+        lastModified: lastModifiedDate,
         changeFrequency: 'monthly',
         priority,
       };
     });
 
     const allPages = [...staticPages, ...recipePages];
-
-    console.log(`Generated sitemap with ${allPages.length} pages`);
-    console.log(`- Static pages: ${staticPages.length}`);
-    console.log(`- Recipe pages: ${recipePages.length}`);
-
     return allPages;
 
   } catch (error) {
-    console.error('Error generating sitemap:', error);
-    
     // Fallback to static pages only if database fetch fails
-    console.log(`Using fallback sitemap with ${staticPages.length} static pages`);
     return staticPages;
   }
 }

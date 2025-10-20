@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { APIError } from '@/types/api';
+import { APIError } from './api-auth';
 import { AuditLogger } from './audit-logger';
 
 export interface SecureErrorResponse {
