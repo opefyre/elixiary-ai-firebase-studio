@@ -30,10 +30,17 @@ export async function verifyFirebaseToken(
   user: DecodedIdToken | null;
   error: string | null;
 }> {
+  console.log('=== Firebase Token Verification ===');
+  console.log('Auth header received:', authHeader);
+  
   const bearerToken = extractBearerToken(authHeader);
   const token = bearerToken || options.fallbackToken || null;
+  
+  console.log('Extracted bearer token:', bearerToken ? bearerToken.substring(0, 20) + '...' : 'null');
+  console.log('Final token:', token ? token.substring(0, 20) + '...' : 'null');
 
   if (!token) {
+    console.log('No token found - returning error');
     return { user: null, error: 'No valid authorization header' };
   }
   

@@ -34,6 +34,11 @@ export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const serviceKeyHeader = request.headers.get('x-internal-service-key');
   const expectedServiceKey = process.env.INTERNAL_SERVICE_KEY;
+  
+  console.log('=== Authorization Headers ===');
+  console.log('Authorization header:', authHeader);
+  console.log('Service key header:', serviceKeyHeader ? 'present' : 'not present');
+  console.log('All headers:', Object.fromEntries(request.headers.entries()));
 
   let authenticatedUserId: string | null = null;
 
