@@ -1,6 +1,20 @@
-import { Martini } from "lucide-react";
-import type { SVGProps } from "react";
+import Image from "next/image";
 
-export function Logo(props: SVGProps<SVGSVGElement>) {
-  return <Martini {...props} />;
+interface LogoProps {
+  className?: string;
+  width?: number;
+  height?: number;
+}
+
+export function Logo({ className = "h-6 w-6", width, height }: LogoProps) {
+  return (
+    <Image
+      src="/logo.png"
+      alt="Elixiary AI Logo"
+      width={width || 24}
+      height={height || 24}
+      className={className}
+      priority
+    />
+  );
 }
