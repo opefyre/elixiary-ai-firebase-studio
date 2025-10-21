@@ -229,7 +229,7 @@ Source: ${recipe.source}
                 className="object-cover"
                 onError={(e) => {
                   // Fallback to placeholder if image fails to load
-                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.classList.add('hidden');
                 }}
               />
             ) : null}
@@ -385,7 +385,7 @@ Source: ${recipe.source}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.classList.add('hidden');
                           }}
                         />
                       ) : (

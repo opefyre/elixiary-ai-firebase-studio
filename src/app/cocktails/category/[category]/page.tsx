@@ -230,7 +230,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.classList.add('hidden');
                       }}
                     />
                   ) : (

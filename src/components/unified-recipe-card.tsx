@@ -311,7 +311,7 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
                   // Fallback to placeholder if image fails to load
-                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.classList.add('hidden');
                 }}
               />
             ) : (
@@ -443,7 +443,7 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                 fill
                 className="object-cover"
                 onError={(e) => {
-                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.classList.add('hidden');
                 }}
               />
             </div>

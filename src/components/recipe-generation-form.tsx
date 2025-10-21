@@ -288,11 +288,25 @@ ${window.location.origin}`.trim();
       }
     }
     
-    // Call API route instead of server action
+    // Get Firebase ID token for authentication
+    if (!user || !auth) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to generate recipes.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const token = await user.getIdToken();
+    
+    // Call API route with authentication
     const response = await fetch('/api/generate-recipe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ prompt: enhancedPrompt }),
     });
