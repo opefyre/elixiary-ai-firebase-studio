@@ -61,7 +61,7 @@ export async function DELETE(
     }
 
     const apiKeyManager = new APIKeyManager();
-    await apiKeyManager.revokeAPIKey(keyId, user.uid);
+    await apiKeyManager.revokeAPIKeyById(keyId, user.uid);
     
     return NextResponse.json({ 
       success: true, 
@@ -122,7 +122,7 @@ export async function POST(
     }
 
     const apiKeyManager = new APIKeyManager();
-    const newKey = await apiKeyManager.rotateAPIKey(keyId, user.uid);
+    const newKey = await apiKeyManager.rotateAPIKeyById(keyId, user.uid);
     
     return NextResponse.json({
       success: true,

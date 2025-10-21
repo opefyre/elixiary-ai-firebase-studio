@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Copy, Key, Plus, Trash2, RotateCcw, Eye, EyeOff, AlertTriangle } from 'lucide-react';
@@ -333,6 +333,9 @@ export function APIKeyManager() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create New API Key</DialogTitle>
+                  <DialogDescription>
+                    Create a new API key to access the Elixiary AI API programmatically.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
@@ -435,6 +438,9 @@ export function APIKeyManager() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>New API Key Created</DialogTitle>
+              <DialogDescription>
+                Your new API key has been generated. Copy it now as you won't be able to see it again.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
@@ -479,6 +485,9 @@ export function APIKeyManager() {
               <AlertTriangle className="h-5 w-5 text-destructive" />
               Delete API Key
             </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone and any applications using this key will stop working immediately.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">

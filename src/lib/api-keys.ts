@@ -256,6 +256,26 @@ export class APIKeyManager {
   }
 
   /**
+   * Revoke an API key by keyId (for API endpoint)
+   */
+  async revokeAPIKeyById(keyId: string, userId: string): Promise<void> {
+    const keyDoc = await this.adminDb.collection('api_keys').doc(keyId).get();
+    
+    if (!keyDoc.exists) {
+      throw new Error('API key not found');
+    }
+
+    const keyData = keyDoc.data() as APIKey;
+    
+    if (keyData.userId !== userId) {
+      throw new Error('Unauthorized');
+    }
+
+    // Actually delete the API key document
+    await this.adminDb.collection('api_keys').doc(keyId).delete();
+  }
+
+  /**
    * Rotate an API key by keyId (for API endpoint)
    */
   async rotateAPIKeyById(keyId: string, userId: string): Promise<string> {
