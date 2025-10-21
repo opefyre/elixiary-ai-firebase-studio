@@ -84,7 +84,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://lh3.googleusercontent.com https://images.unsplash.com https://picsum.photos https://placehold.co https://drive.google.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebase.com https://*.firebaseapp.com https://*.stripe.com https://api.stripe.com https://checkout.stripe.com wss://*.firebase.com https://www.google-analytics.com",
+              "connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebase.com https://*.firebaseapp.com https://*.stripe.com https://api.stripe.com https://checkout.stripe.com wss://*.firebase.com https://www.google-analytics.com https://*.google-analytics.com",
               "frame-src 'none'",
               "object-src 'none'",
               "base-uri 'self'",
