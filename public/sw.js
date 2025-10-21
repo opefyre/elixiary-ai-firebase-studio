@@ -1,7 +1,7 @@
 // Service Worker for Elixiary PWA
-const CACHE_NAME = 'elixiary-v1.0.0';
-const STATIC_CACHE = 'elixiary-static-v1.0.0';
-const DYNAMIC_CACHE = 'elixiary-dynamic-v1.0.0';
+const CACHE_NAME = 'elixiary-v1.1.0';
+const STATIC_CACHE = 'elixiary-static-v1.1.0';
+const DYNAMIC_CACHE = 'elixiary-dynamic-v1.1.0';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
