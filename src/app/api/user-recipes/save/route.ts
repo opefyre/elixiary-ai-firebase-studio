@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { verifyFirebaseToken } from '@/lib/firebase-auth-verify';
 
 export async function POST(request: NextRequest) {
   try {
-    const { adminDb } = initializeFirebaseServer();
-    const { recipeId, userId, recipeData } = await request.json();
+    // Authenticate the request
+    const authHeader = request.headers.get('authorization');
+    const { user, error: authError } = await verifyFirebaseToken(authHeader);
 
-    if (!recipeId || !userId || !recipeData) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!user) {
+      return NextResponse.json(
+        { error: authError || 'Authentication required' },
+        { status: 401 }
+      );
     }
+
+    const { adminDb } = initializeFirebaseServer();
+    const { recipeId, recipeData } = await request.json();
+
+    if (!recipeId || !recipeData) {
+      return NextResponse.json({ error: 'Missing required fields: recipeId and recipeData' }, { status: 400 });
+    }
+
+    // Use authenticated user's UID instead of client-supplied userId
+    const userId = user.uid;
 
     // Check if recipe is already saved
     const existingQuery = await adminDb

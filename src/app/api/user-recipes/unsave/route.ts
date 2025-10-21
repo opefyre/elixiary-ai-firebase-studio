@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { verifyFirebaseToken } from '@/lib/firebase-auth-verify';
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { adminDb } = initializeFirebaseServer();
-    const { recipeId, userId } = await request.json();
+    // Authenticate the request
+    const authHeader = request.headers.get('authorization');
+    const { user, error: authError } = await verifyFirebaseToken(authHeader);
 
-    if (!recipeId || !userId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!user) {
+      return NextResponse.json(
+        { error: authError || 'Authentication required' },
+        { status: 401 }
+      );
     }
+
+    const { adminDb } = initializeFirebaseServer();
+    const { recipeId } = await request.json();
+
+    if (!recipeId) {
+      return NextResponse.json({ error: 'Missing recipeId field' }, { status: 400 });
+    }
+
+    // Use authenticated user's UID instead of client-supplied userId
+    const userId = user.uid;
 
     // Find and delete the saved recipe
     const query = await adminDb

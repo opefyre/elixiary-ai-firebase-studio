@@ -1,17 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { verifyFirebaseToken } from '@/lib/firebase-auth-verify';
 
 export async function GET(request: NextRequest) {
   try {
+    // Authenticate the request
+    const authHeader = request.headers.get('authorization');
+    const { user, error: authError } = await verifyFirebaseToken(authHeader);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: authError || 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { adminDb } = initializeFirebaseServer();
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100); // Cap at 100 for performance
     const source = searchParams.get('source'); // 'curated' or 'ai'
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
-    }
+    
+    // Use authenticated user's UID instead of client-supplied userId
+    const userId = user.uid;
 
     // Build optimized query using indexes
     let query = adminDb

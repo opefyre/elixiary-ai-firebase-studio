@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@/firebase';
+import { useUser, useFirebase } from '@/firebase';
 import { useToast } from './use-toast';
 
 interface SavedRecipe {
@@ -14,6 +14,7 @@ interface SavedRecipe {
 
 export function useSavedRecipes() {
   const { user } = useUser();
+  const { auth } = useFirebase();
   const { toast } = useToast();
   const [savedRecipes, setSavedRecipes] = useState<SavedRecipe[]>([]);
   const [savedRecipeIds, setSavedRecipeIds] = useState<Set<string>>(new Set());
@@ -21,11 +22,16 @@ export function useSavedRecipes() {
 
   // Fetch user's saved recipes
   const fetchSavedRecipes = useCallback(async () => {
-    if (!user) return;
+    if (!user || !auth) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/user-recipes/saved?userId=${user.uid}`);
+      const token = await user.getIdToken();
+      const response = await fetch('/api/user-recipes/saved', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -37,7 +43,7 @@ export function useSavedRecipes() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, auth]);
 
   // Check if a specific recipe is saved
   const isRecipeSaved = useCallback((recipeId: string) => {
@@ -46,15 +52,18 @@ export function useSavedRecipes() {
 
   // Save a recipe
   const saveRecipe = useCallback(async (recipeId: string, recipeData: any) => {
-    if (!user) return false;
+    if (!user || !auth) return false;
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch('/api/user-recipes/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           recipeId,
-          userId: user.uid,
           recipeData
         })
       });
@@ -85,19 +94,22 @@ export function useSavedRecipes() {
       });
       return false;
     }
-  }, [user, toast]);
+  }, [user, auth, toast]);
 
   // Unsave a recipe
   const unsaveRecipe = useCallback(async (recipeId: string) => {
-    if (!user) return false;
+    if (!user || !auth) return false;
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch('/api/user-recipes/unsave', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          recipeId,
-          userId: user.uid
+          recipeId
         })
       });
 
@@ -132,7 +144,7 @@ export function useSavedRecipes() {
       });
       return false;
     }
-  }, [user, toast]);
+  }, [user, auth, toast]);
 
   // Load saved recipes on mount
   useEffect(() => {
