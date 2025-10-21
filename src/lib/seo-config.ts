@@ -5,7 +5,7 @@ export const seoConfig = {
     name: 'Elixiary AI',
     url: config.baseUrl,
     description: 'AI-Powered Cocktail Recipe Generator',
-    logo: `${config.baseUrl}/icon.png`,
+    logo: `${config.baseUrl}/logo.png`,
     twitter: '@elixiary_ai',
     email: 'hello@elixiary.com',
   },
@@ -138,7 +138,7 @@ export const seoConfig = {
       '@type': 'Organization',
       name: 'Elixiary AI',
       url: config.baseUrl,
-      logo: `${config.baseUrl}/icon.png`,
+      logo: `${config.baseUrl}/logo.png`,
       description: 'AI-Powered Cocktail Recipe Generator',
       sameAs: [
         'https://twitter.com/elixiary_ai',

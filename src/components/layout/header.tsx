@@ -16,7 +16,7 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md mobile-navbar-fix">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Logo className="h-6 w-6 text-primary" />
+          <Logo width={24} height={24} className="h-6 w-6" />
           <h1 className="text-lg font-bold leading-none font-headline">Elixiary</h1>
         </Link>
         

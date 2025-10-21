@@ -118,7 +118,7 @@ export function OrganizationStructuredData() {
       data={{
         name: 'Elixiary AI',
         url: process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com',
-        logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/icon.png`,
+        logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/logo.png`,
         description: 'AI-Powered Cocktail Recipe Generator',
         sameAs: [
           'https://twitter.com/elixiary_ai',
