@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/brevo';
+import { AuditLogger } from '@/lib/audit-logger';
 import { verifyFirebaseToken } from '@/lib/firebase-auth-verify';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 
@@ -99,13 +100,8 @@ export function __resetRateLimitStateForTests() {
 }
 
 function buildRateLimitKey(request: NextRequest, auth: AuthSuccess) {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
-  
-  // SECURITY: Extract IP address with proper validation
-  const ipAddress = forwarded ? 
-    forwarded.split(',')[0].trim() : 
-    (realIP || 'unknown');
+  // SECURITY: Use secure IP extraction to prevent spoofing
+  const ipAddress = AuditLogger.getClientIP(request);
 
   return `${auth.rateLimitKey}|ip:${ipAddress}`;
 }

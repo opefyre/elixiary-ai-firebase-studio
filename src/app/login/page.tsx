@@ -1,6 +1,5 @@
 'use client';
 
-import { Metadata } from 'next';
 import { AuthForm } from '@/components/auth-form';
 import { useUser } from '@/firebase';
 import { Loader2 } from 'lucide-react';

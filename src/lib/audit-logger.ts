@@ -142,19 +142,123 @@ export class AuditLogger {
   }
 
   /**
-   * Extract IP address from request
+   * Extract IP address from request - SECURITY: Prevents IP spoofing attacks
+   * Priority order: Next.js request.ip -> Vercel x-vercel-ip -> trusted proxies only
    */
   static getClientIP(request: Request): string {
-    const forwarded = request.headers.get('x-forwarded-for');
-    const realIP = request.headers.get('x-real-ip');
+    // 1. Next.js provides request.ip which is more trustworthy
+    const nextJsIP = (request as any).ip;
+    if (nextJsIP && this.isValidIP(nextJsIP)) {
+      return this.normalizeIP(nextJsIP);
+    }
 
+    // 2. Vercel-specific header (more trustworthy than X-Forwarded-For)
+    const vercelIP = request.headers.get('x-vercel-ip');
+    if (vercelIP && this.isValidIP(vercelIP)) {
+      return this.normalizeIP(vercelIP);
+    }
+
+    // 3. Only trust X-Forwarded-For from known trusted proxies
+    const forwarded = request.headers.get('x-forwarded-for');
     if (forwarded) {
-      return forwarded.split(',')[0].trim();
+      // Parse the forwarded chain and validate each IP
+      const ips = forwarded.split(',').map(ip => ip.trim());
+      for (const ip of ips) {
+        if (this.isValidIP(ip) && this.isTrustedProxy(ip)) {
+          return this.normalizeIP(ip);
+        }
+      }
     }
-    if (realIP) {
-      return realIP.trim();
+
+    // 4. X-Real-IP from trusted sources only
+    const realIP = request.headers.get('x-real-ip');
+    if (realIP && this.isValidIP(realIP) && this.isTrustedProxy(realIP)) {
+      return this.normalizeIP(realIP);
     }
+
+    // 5. Fallback to unknown if no trustworthy IP found
     return 'unknown';
+  }
+
+  /**
+   * Validate IP address format to prevent spoofing
+   */
+  private static isValidIP(ip: string): boolean {
+    if (!ip || typeof ip !== 'string') return false;
+
+    // IPv4 validation (strict)
+    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    
+    // IPv6 validation (comprehensive)
+    const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$|^(?:[0-9a-fA-F]{1,4}:)*::(?:[0-9a-fA-F]{1,4}:)*[0-9a-fA-F]{1,4}$|^::(?:[0-9a-fA-F]{1,4}:)*[0-9a-fA-F]{1,4}$/;
+    
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  /**
+   * Check if IP is from a trusted proxy (Vercel, Cloudflare, etc.)
+   */
+  private static isTrustedProxy(ip: string): boolean {
+    // Vercel IP ranges (simplified - in production, use their official IP ranges)
+    const vercelRanges = [
+      '76.76.19.0/24',  // Vercel example range
+      '76.76.20.0/24',  // Vercel example range
+    ];
+
+    // Cloudflare IP ranges (simplified)
+    const cloudflareRanges = [
+      '173.245.48.0/20',
+      '103.21.244.0/22',
+      '103.22.200.0/22',
+      '103.31.4.0/22',
+      '141.101.64.0/18',
+      '108.162.192.0/18',
+      '190.93.240.0/20',
+      '188.114.96.0/20',
+      '197.234.240.0/22',
+      '198.41.128.0/17',
+      '162.158.0.0/15',
+      '104.16.0.0/13',
+      '104.24.0.0/14',
+      '172.64.0.0/13',
+      '131.0.72.0/22',
+    ];
+
+    // For now, be conservative and only trust known infrastructure IPs
+    // In production, implement proper CIDR range checking
+    return this.isInCIDRRange(ip, vercelRanges) || this.isInCIDRRange(ip, cloudflareRanges);
+  }
+
+  /**
+   * Check if IP is within CIDR ranges (simplified implementation)
+   */
+  private static isInCIDRRange(ip: string, ranges: string[]): boolean {
+    // For now, be conservative and only trust specific known IPs
+    // In production, implement proper CIDR range checking with a library like ip-range-check
+    const knownTrustedIPs = [
+      '127.0.0.1',      // localhost
+      '::1',            // localhost IPv6
+      // Add known Vercel IPs when available
+    ];
+
+    return knownTrustedIPs.includes(ip);
+  }
+
+  /**
+   * Normalize IP address for consistent Firestore keys
+   */
+  private static normalizeIP(ip: string): string {
+    // Convert IPv6-mapped IPv4 addresses to IPv4
+    if (ip.startsWith('::ffff:')) {
+      return ip.substring(7);
+    }
+    
+    // Convert IPv6 localhost to IPv4 localhost for consistency
+    if (ip === '::1') {
+      return '127.0.0.1';
+    }
+    
+    return ip.toLowerCase();
   }
 
   /**

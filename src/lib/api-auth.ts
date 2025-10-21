@@ -257,35 +257,11 @@ export class APIAuthenticator {
   }
 
   /**
-   * Get client IP address - SECURITY: Validate IP format to prevent spoofing
+   * Get client IP address - SECURITY: Use secure IP extraction to prevent spoofing
    */
   private getClientIP(request: NextRequest): string {
-    const forwarded = request.headers.get('x-forwarded-for');
-    const realIP = request.headers.get('x-real-ip');
-    
-    // SECURITY: Validate IP format to prevent spoofing - strict validation
-    const isValidIP = (ip: string): boolean => {
-      // Strict IPv4 validation (each octet must be 0-255)
-      const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-      
-      // More comprehensive IPv6 validation
-      const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/;
-      
-      return ipv4Regex.test(ip) || ipv6Regex.test(ip);
-    };
-    
-    if (forwarded) {
-      const firstIP = forwarded.split(',')[0].trim();
-      if (isValidIP(firstIP)) {
-        return firstIP;
-      }
-    }
-    
-    if (realIP && isValidIP(realIP)) {
-      return realIP;
-    }
-    
-    return 'unknown';
+    // Use the secure IP extraction method from AuditLogger
+    return AuditLogger.getClientIP(request);
   }
 
   /**
