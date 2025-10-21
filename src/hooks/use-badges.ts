@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@/firebase';
+import { useUser, useFirebase } from '@/firebase';
 import { UserBadges, BadgeProgress } from '@/types/badges';
 import { getBadgeStats } from '@/lib/badges';
 
@@ -36,6 +36,7 @@ interface UseBadgesResult {
 
 export function useBadges(): UseBadgesResult {
   const { user } = useUser();
+  const { auth } = useFirebase();
   const [userBadges, setUserBadges] = useState<UserBadges | null>(null);
   const [stats, setStats] = useState<BadgeStats | null>(null);
   const [progress, setProgress] = useState<BadgeProgress[]>([]);
@@ -43,7 +44,7 @@ export function useBadges(): UseBadgesResult {
   const [error, setError] = useState<string | null>(null);
 
   const fetchBadges = useCallback(async () => {
-    if (!user) {
+    if (!user || !auth) {
       setUserBadges(null);
       setStats(null);
       setProgress([]);
@@ -55,7 +56,12 @@ export function useBadges(): UseBadgesResult {
     setError(null);
 
     try {
-      const response = await fetch(`/api/badges?userId=${user.uid}`);
+      const token = await user.getIdToken();
+      const response = await fetch('/api/badges', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -70,21 +76,25 @@ export function useBadges(): UseBadgesResult {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, auth]);
 
   const updateBadges = useCallback(async (
     action: 'recipe_generated' | 'recipe_saved' | 'category_explored',
     data?: any
   ): Promise<string[]> => {
-    if (!user) {
+    if (!user || !auth) {
       throw new Error('User must be authenticated');
     }
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch('/api/badges', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.uid, action, data }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ action, data }),
       });
 
       const result = await response.json();
@@ -106,7 +116,7 @@ export function useBadges(): UseBadgesResult {
       console.error('Error updating badges:', err);
       throw err;
     }
-  }, [user]);
+  }, [user, auth]);
 
   const refreshBadges = useCallback(async () => {
     await fetchBadges();

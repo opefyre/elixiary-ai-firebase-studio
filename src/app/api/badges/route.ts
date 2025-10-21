@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { verifyFirebaseToken } from '@/lib/firebase-auth-verify';
 import { UserBadges } from '@/types/badges';
 import { getBadgeStats, calculateBadgeProgress, updateAchievements } from '@/lib/badges';
 import { trackRecipeGeneration, trackRecipeSave } from '@/lib/daily-usage-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    const { adminDb } = initializeFirebaseServer();
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    // Authenticate the request
+    const authHeader = request.headers.get('authorization');
+    const { user, error: authError } = await verifyFirebaseToken(authHeader);
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
+    if (!user) {
+      return NextResponse.json(
+        { error: authError || 'Authentication required' },
+        { status: 401 }
+      );
     }
+
+    const { adminDb } = initializeFirebaseServer();
+    
+    // Use authenticated user's UID instead of client-supplied userId
+    const userId = user.uid;
 
     // Get user badges document
     const userBadgesRef = adminDb.collection('user-badges').doc(userId);
@@ -75,12 +84,26 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { adminDb } = initializeFirebaseServer();
-    const { userId, action, data } = await request.json();
+    // Authenticate the request
+    const authHeader = request.headers.get('authorization');
+    const { user, error: authError } = await verifyFirebaseToken(authHeader);
 
-    if (!userId || !action) {
-      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+    if (!user) {
+      return NextResponse.json(
+        { error: authError || 'Authentication required' },
+        { status: 401 }
+      );
     }
+
+    const { adminDb } = initializeFirebaseServer();
+    const { action, data } = await request.json();
+
+    if (!action) {
+      return NextResponse.json({ error: 'Missing required parameter: action' }, { status: 400 });
+    }
+
+    // Use authenticated user's UID instead of client-supplied userId
+    const userId = user.uid;
 
     const userBadgesRef = adminDb.collection('user-badges').doc(userId);
     const userBadgesDoc = await userBadgesRef.get();
