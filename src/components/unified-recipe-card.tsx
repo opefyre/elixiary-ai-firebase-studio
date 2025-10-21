@@ -83,6 +83,8 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   const recipeName = isAIRecipe ? recipe.recipeName : recipe.name;
   const recipeImage = recipe.imageUrl;
   const recipeGlassware = recipe.glassware;
+  const recipeDifficulty = isAIRecipe ? recipe.difficultyLevel : recipe.difficulty;
+  const recipeServingSize = recipe.servingSize;
 
   // Helper function to get Google Drive thumbnail
   const getGoogleDriveThumbnail = (url: string) => {
