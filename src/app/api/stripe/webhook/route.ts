@@ -140,9 +140,75 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * Validate early bird status by checking if the price matches early bird pricing
+ * and if the user is actually eligible for early bird (additional security layer)
+ */
+async function validateEarlyBirdStatusFromSession(session: Stripe.Checkout.Session, subscription: Stripe.Subscription, adminDb: any): Promise<boolean> {
+  try {
+    // First check if the session was marked as early bird
+    const sessionMarkedAsEarlyBird = session.metadata?.isEarlyBird === 'true';
+    
+    return await validateEarlyBirdStatusFromSubscription(subscription, sessionMarkedAsEarlyBird, adminDb);
+  } catch (error) {
+    console.error('Error validating early bird status from session:', error);
+    return false; // Fail safe - no early bird if validation error
+  }
+}
+
+async function validateEarlyBirdStatusFromSubscription(subscription: Stripe.Subscription, markedAsEarlyBird: boolean, adminDb: any): Promise<boolean> {
+  try {
+    // Get the actual price used in the subscription
+    const price = subscription.items.data[0].price;
+    
+    // Check if this is actually an early bird price by comparing with known early bird price IDs
+    const EARLY_BIRD_PRICES = [
+      process.env.STRIPE_EARLY_BIRD_MONTHLY_PRICE_ID,
+      process.env.STRIPE_EARLY_BIRD_ANNUAL_PRICE_ID
+    ].filter(Boolean); // Remove undefined values
+    
+    const isActuallyEarlyBirdPrice = EARLY_BIRD_PRICES.includes(price.id);
+    
+    // If marked as early bird but not using early bird price, reject
+    if (markedAsEarlyBird && !isActuallyEarlyBirdPrice) {
+      console.warn(`Mismatch: marked as early bird but using price ${price.id} which is not an early bird price`);
+      return false;
+    }
+    
+    // If using early bird price but not marked as early bird, also reject (shouldn't happen with fixed checkout)
+    if (isActuallyEarlyBirdPrice && !markedAsEarlyBird) {
+      console.warn(`Mismatch: using early bird price ${price.id} but not marked as early bird`);
+      return false;
+    }
+    
+    // Additional validation: check if early bird is still available (defense in depth)
+    if (markedAsEarlyBird && isActuallyEarlyBirdPrice) {
+      const configRef = adminDb.collection('config').doc('earlyBird');
+      const configSnap = await configRef.get();
+      
+      if (configSnap.exists) {
+        const config = configSnap.data();
+        const isActive = config?.isActive || false;
+        const currentCount = config?.count || 0;
+        const maxCount = config?.maxCount || 50;
+        
+        // Only allow if still active and under limit
+        return isActive && currentCount < maxCount;
+      }
+      
+      // If no config exists, reject early bird
+      return false;
+    }
+    
+    return markedAsEarlyBird;
+  } catch (error) {
+    console.error('Error validating early bird status from subscription:', error);
+    return false; // Fail safe - no early bird if validation error
+  }
+}
+
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe: Stripe, adminDb: any) {
   const userId = session.metadata?.firebaseUID;
-  const isEarlyBird = session.metadata?.isEarlyBird === 'true';
 
   if (!userId) {
     throw new Error('No firebaseUID in session metadata');
@@ -156,6 +222,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
   const subscription = await stripe.subscriptions.retrieve(
     session.subscription as string
   );
+
+  // Validate early bird status server-side instead of trusting metadata
+  const isEarlyBird = await validateEarlyBirdStatusFromSession(session, subscription, adminDb);
 
   // Get product information for enhanced tracking
   const price = subscription.items.data[0].price;
@@ -247,11 +316,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session, stripe:
 
 async function handleSubscriptionCreated(subscription: Stripe.Subscription, stripe: Stripe, adminDb: any) {
   const userId = subscription.metadata?.firebaseUID;
-  const isEarlyBird = subscription.metadata?.isEarlyBird === 'true';
 
   if (!userId) {
     return; // Exit silently if no userId in metadata
   }
+
+  // Validate early bird status server-side instead of trusting metadata
+  const markedAsEarlyBird = subscription.metadata?.isEarlyBird === 'true';
+  const isEarlyBird = await validateEarlyBirdStatusFromSubscription(subscription, markedAsEarlyBird, adminDb);
 
   // Get product information for enhanced tracking
   const price = subscription.items.data[0].price;

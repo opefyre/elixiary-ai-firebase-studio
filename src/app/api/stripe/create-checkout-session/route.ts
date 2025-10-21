@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { verifyFirebaseToken } from '@/lib/firebase-auth-verify';
+import { initializeFirebaseServer } from '@/firebase/server';
 
 const STRIPE_PRICES = {
   EARLY_BIRD_MONTHLY: process.env.STRIPE_EARLY_BIRD_MONTHLY_PRICE_ID || 'price_early_monthly',
@@ -8,8 +10,44 @@ const STRIPE_PRICES = {
   PRO_ANNUAL: process.env.STRIPE_PRO_ANNUAL_PRICE_ID || 'price_pro_annual',
 };
 
+/**
+ * Check if user is eligible for early bird pricing based on server-side rules
+ */
+async function checkEarlyBirdEligibility(adminDb: any): Promise<boolean> {
+  try {
+    const configRef = adminDb.collection('config').doc('earlyBird');
+    const configSnap = await configRef.get();
+    
+    if (!configSnap.exists) {
+      return false; // No early bird config exists
+    }
+    
+    const config = configSnap.data();
+    const isActive = config?.isActive || false;
+    const currentCount = config?.count || 0;
+    const maxCount = config?.maxCount || 50;
+    
+    // Only eligible if active and under the limit
+    return isActive && currentCount < maxCount;
+  } catch (error) {
+    console.error('Error checking early bird eligibility:', error);
+    return false; // Fail safe - no early bird if error
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate the request
+    const authHeader = request.headers.get('authorization');
+    const { user, error: authError } = await verifyFirebaseToken(authHeader);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: authError || 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     // Initialize Stripe at runtime
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY not configured');
@@ -19,11 +57,15 @@ export async function POST(request: NextRequest) {
       apiVersion: '2024-12-18.acacia',
     });
 
-    const { planType, userId, userEmail, isEarlyBird } = await request.json();
+    const { planType } = await request.json();
 
-    if (!userId || !userEmail) {
+    // Use authenticated user's data instead of client-provided values
+    const userId = user.uid;
+    const userEmail = user.email;
+
+    if (!userEmail) {
       return NextResponse.json(
-        { error: 'Missing required fields: userId or userEmail' },
+        { error: 'User email not found in authentication token' },
         { status: 400 }
       );
     }
@@ -35,9 +77,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine price ID based on plan type and early bird status
+    // Check early bird eligibility server-side
+    const { adminDb } = initializeFirebaseServer();
+    const isEarlyBirdEligible = await checkEarlyBirdEligibility(adminDb);
+
+    // Determine price ID based on plan type and server-validated early bird status
     let priceId: string;
-    if (isEarlyBird) {
+    if (isEarlyBirdEligible) {
       priceId = planType === 'monthly' 
         ? STRIPE_PRICES.EARLY_BIRD_MONTHLY 
         : STRIPE_PRICES.EARLY_BIRD_ANNUAL;
@@ -99,12 +145,12 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || request.headers.get('origin')}/pricing?canceled=true`,
       metadata: {
         firebaseUID: userId,
-        isEarlyBird: isEarlyBird ? 'true' : 'false',
+        isEarlyBird: isEarlyBirdEligible ? 'true' : 'false',
       },
       subscription_data: {
         metadata: {
           firebaseUID: userId,
-          isEarlyBird: isEarlyBird ? 'true' : 'false',
+          isEarlyBird: isEarlyBirdEligible ? 'true' : 'false',
         },
       },
     });

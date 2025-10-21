@@ -42,7 +42,7 @@ function PricingContent() {
 
 
   const handleCheckout = async () => {
-    if (!user) {
+    if (!user || !auth) {
       router.push('/login');
       return;
     }
@@ -58,16 +58,18 @@ function PricingContent() {
     setIsLoadingCheckout(true);
 
     try {
+      // Get Firebase ID token for authentication
+      const token = await user.getIdToken();
+      
       // Call API to create checkout session
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           planType: selectedPlan,
-          userId: user.uid,
-          userEmail: user.email,
         }),
       });
 
