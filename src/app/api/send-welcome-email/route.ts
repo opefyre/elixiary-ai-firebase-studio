@@ -95,8 +95,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Test helper function - only available in development
 export function __resetRateLimitStateForTests() {
-  rateLimitStore.clear();
+  if (process.env.NODE_ENV === 'development') {
+    rateLimitStore.clear();
+  }
 }
 
 function buildRateLimitKey(request: NextRequest, auth: AuthSuccess) {

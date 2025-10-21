@@ -50,33 +50,74 @@ export class RateLimiter {
       this.getRateLimitCount(ipKey)
     ]);
 
+    // Calculate reset times
+    const hourReset = new Date(Math.ceil(now / (60 * 60 * 1000)) * (60 * 60 * 1000));
+    const dayReset = new Date(Math.ceil(now / (24 * 60 * 60 * 1000)) * (24 * 60 * 60 * 1000));
+    const monthReset = new Date(Math.ceil(now / (30 * 24 * 60 * 60 * 1000)) * (30 * 24 * 60 * 60 * 1000));
+
     // Check if any limit is exceeded
     if (hourlyCount >= limits.requestsPerHour) {
       return {
         allowed: false,
         reason: 'Hourly rate limit exceeded',
-        retryAfter: Math.ceil((60 * 60 * 1000 - (now % (60 * 60 * 1000))) / 1000)
+        retryAfter: Math.ceil((60 * 60 * 1000 - (now % (60 * 60 * 1000))) / 1000),
+        requestsPerHour: limits.requestsPerHour,
+        requestsPerDay: limits.requestsPerDay,
+        requestsPerMonth: limits.requestsPerMonth,
+        remainingHourly: Math.max(0, limits.requestsPerHour - hourlyCount),
+        remainingDaily: Math.max(0, limits.requestsPerDay - dailyCount),
+        remainingMonthly: Math.max(0, limits.requestsPerMonth - monthlyCount),
+        resetTimeHourly: hourReset,
+        resetTimeDaily: dayReset,
+        resetTimeMonthly: monthReset
       };
     }
     if (dailyCount >= limits.requestsPerDay) {
       return {
         allowed: false,
         reason: 'Daily rate limit exceeded',
-        retryAfter: Math.ceil((24 * 60 * 60 * 1000 - (now % (24 * 60 * 60 * 1000))) / 1000)
+        retryAfter: Math.ceil((24 * 60 * 60 * 1000 - (now % (24 * 60 * 60 * 1000))) / 1000),
+        requestsPerHour: limits.requestsPerHour,
+        requestsPerDay: limits.requestsPerDay,
+        requestsPerMonth: limits.requestsPerMonth,
+        remainingHourly: Math.max(0, limits.requestsPerHour - hourlyCount),
+        remainingDaily: Math.max(0, limits.requestsPerDay - dailyCount),
+        remainingMonthly: Math.max(0, limits.requestsPerMonth - monthlyCount),
+        resetTimeHourly: hourReset,
+        resetTimeDaily: dayReset,
+        resetTimeMonthly: monthReset
       };
     }
     if (monthlyCount >= limits.requestsPerMonth) {
       return {
         allowed: false,
         reason: 'Monthly rate limit exceeded',
-        retryAfter: Math.ceil((30 * 24 * 60 * 60 * 1000 - (now % (30 * 24 * 60 * 60 * 1000))) / 1000)
+        retryAfter: Math.ceil((30 * 24 * 60 * 60 * 1000 - (now % (30 * 24 * 60 * 60 * 1000))) / 1000),
+        requestsPerHour: limits.requestsPerHour,
+        requestsPerDay: limits.requestsPerDay,
+        requestsPerMonth: limits.requestsPerMonth,
+        remainingHourly: Math.max(0, limits.requestsPerHour - hourlyCount),
+        remainingDaily: Math.max(0, limits.requestsPerDay - dailyCount),
+        remainingMonthly: Math.max(0, limits.requestsPerMonth - monthlyCount),
+        resetTimeHourly: hourReset,
+        resetTimeDaily: dayReset,
+        resetTimeMonthly: monthReset
       };
     }
     if (ipCount >= limits.requestsPerHour * 2) { // IP limit is 2x user limit
       return {
         allowed: false,
         reason: 'IP rate limit exceeded',
-        retryAfter: Math.ceil((60 * 60 * 1000 - (now % (60 * 60 * 1000))) / 1000)
+        retryAfter: Math.ceil((60 * 60 * 1000 - (now % (60 * 60 * 1000))) / 1000),
+        requestsPerHour: limits.requestsPerHour,
+        requestsPerDay: limits.requestsPerDay,
+        requestsPerMonth: limits.requestsPerMonth,
+        remainingHourly: Math.max(0, limits.requestsPerHour - hourlyCount),
+        remainingDaily: Math.max(0, limits.requestsPerDay - dailyCount),
+        remainingMonthly: Math.max(0, limits.requestsPerMonth - monthlyCount),
+        resetTimeHourly: hourReset,
+        resetTimeDaily: dayReset,
+        resetTimeMonthly: monthReset
       };
     }
 
@@ -88,16 +129,11 @@ export class RateLimiter {
       this.incrementRateLimit(ipKey, 60 * 60) // 1 hour TTL
     ]);
 
-    // Calculate reset times
-    const hourReset = new Date(Math.ceil(now / (60 * 60 * 1000)) * (60 * 60 * 1000));
-    const dayReset = new Date(Math.ceil(now / (24 * 60 * 60 * 1000)) * (24 * 60 * 60 * 1000));
-    const monthReset = new Date(Math.ceil(now / (30 * 24 * 60 * 60 * 1000)) * (30 * 24 * 60 * 60 * 1000));
-
     return {
       allowed: true,
-      requestsPerHour: hourlyCount + 1,
-      requestsPerDay: dailyCount + 1,
-      requestsPerMonth: monthlyCount + 1,
+      requestsPerHour: limits.requestsPerHour,
+      requestsPerDay: limits.requestsPerDay,
+      requestsPerMonth: limits.requestsPerMonth,
       remainingHourly: limits.requestsPerHour - (hourlyCount + 1),
       remainingDaily: limits.requestsPerDay - (dailyCount + 1),
       remainingMonthly: limits.requestsPerMonth - (monthlyCount + 1),

@@ -50,9 +50,9 @@ interface Category {
 }
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string;
-  };
+  }>;
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
@@ -61,10 +61,18 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [resolvedParams, setResolvedParams] = useState<{ category: string } | null>(null);
+
+  // Resolve params promise
+  useEffect(() => {
+    params.then(setResolvedParams);
+  }, [params]);
 
   useEffect(() => {
-    fetchCategoryAndRecipes();
-  }, [params.category]);
+    if (resolvedParams) {
+      fetchCategoryAndRecipes();
+    }
+  }, [resolvedParams?.category]);
 
   useEffect(() => {
     if (category) {
@@ -79,13 +87,13 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       const categoriesData = await categoriesResponse.json();
       
       const foundCategory = categoriesData.categories.find(
-        (cat: Category) => cat.id === params.category
+        (cat: Category) => cat.id === resolvedParams?.category
       );
       
       if (foundCategory) {
         setCategory(foundCategory);
       } else {
-        console.error('Category not found:', params.category);
+        console.error('Category not found:', resolvedParams?.category);
       }
     } catch (error) {
       console.error('Error fetching category:', error);
@@ -99,7 +107,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '20',
-        category: params.category
+        category: resolvedParams?.category
       });
 
       const response = await fetch(`/api/curated-recipes?${params}`);

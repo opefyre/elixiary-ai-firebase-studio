@@ -40,6 +40,9 @@ export interface APIUsage {
 }
 
 export interface RateLimitStatus {
+  allowed: boolean;
+  reason?: string;
+  retryAfter?: number;
   requestsPerHour: number;
   requestsPerDay: number;
   requestsPerMonth: number;
