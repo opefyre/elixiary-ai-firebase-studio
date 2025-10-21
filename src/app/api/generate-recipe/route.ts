@@ -112,7 +112,8 @@ export async function POST(request: NextRequest) {
 
     // Apply rate limiting tied to authenticated user/API key
     const rateLimiter = new RateLimiter();
-    const rateLimitCheck = await rateLimiter.checkRateLimit(rateLimitKey, 'ai_generation');
+    const clientIP = AuditLogger.getClientIP(request);
+    const rateLimitCheck = await rateLimiter.checkRateLimit(user.uid, clientIP);
     
     if (!rateLimitCheck.allowed) {
       return NextResponse.json(

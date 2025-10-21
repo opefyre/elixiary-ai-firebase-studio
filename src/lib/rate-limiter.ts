@@ -20,6 +20,28 @@ export class RateLimiter {
     const monthKey = `rate_limit:user:${userId}:month:${Math.floor(now / (30 * 24 * 60 * 60 * 1000))}`;
     const ipKey = `rate_limit:ip:${ipAddress}:hour:${Math.floor(now / (60 * 60 * 1000))}`;
 
+    // Get user subscription tier to determine rate limits
+    let userTier = 'free';
+    try {
+      const userDoc = await this.adminDb.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        userTier = userData.subscriptionTier || 'free';
+      }
+    } catch (error) {
+      console.error('Error fetching user tier:', error);
+      // Default to free tier if error
+    }
+
+    // Define rate limits based on subscription tier
+    const limits = userTier === 'pro' ? RATE_LIMITS.pro : {
+      requestsPerHour: 10,        // 10 requests/hour for free users
+      requestsPerDay: 50,         // 50 requests/day for free users
+      requestsPerMonth: 500,      // 500 requests/month for free users
+      burstLimit: 5,              // 5 requests in 1 minute burst
+      cooldownPeriod: 300000      // 5 minutes cooldown after burst
+    };
+
     // Check multiple rate limits
     const [hourlyCount, dailyCount, monthlyCount, ipCount] = await Promise.all([
       this.getRateLimitCount(hourKey),
@@ -29,17 +51,33 @@ export class RateLimiter {
     ]);
 
     // Check if any limit is exceeded
-    if (hourlyCount >= RATE_LIMITS.pro.requestsPerHour) {
-      throw new Error('Hourly rate limit exceeded');
+    if (hourlyCount >= limits.requestsPerHour) {
+      return {
+        allowed: false,
+        reason: 'Hourly rate limit exceeded',
+        retryAfter: Math.ceil((60 * 60 * 1000 - (now % (60 * 60 * 1000))) / 1000)
+      };
     }
-    if (dailyCount >= RATE_LIMITS.pro.requestsPerDay) {
-      throw new Error('Daily rate limit exceeded');
+    if (dailyCount >= limits.requestsPerDay) {
+      return {
+        allowed: false,
+        reason: 'Daily rate limit exceeded',
+        retryAfter: Math.ceil((24 * 60 * 60 * 1000 - (now % (24 * 60 * 60 * 1000))) / 1000)
+      };
     }
-    if (monthlyCount >= RATE_LIMITS.pro.requestsPerMonth) {
-      throw new Error('Monthly rate limit exceeded');
+    if (monthlyCount >= limits.requestsPerMonth) {
+      return {
+        allowed: false,
+        reason: 'Monthly rate limit exceeded',
+        retryAfter: Math.ceil((30 * 24 * 60 * 60 * 1000 - (now % (30 * 24 * 60 * 60 * 1000))) / 1000)
+      };
     }
-    if (ipCount >= RATE_LIMITS.pro.requestsPerHour * 2) { // IP limit is 2x user limit
-      throw new Error('IP rate limit exceeded');
+    if (ipCount >= limits.requestsPerHour * 2) { // IP limit is 2x user limit
+      return {
+        allowed: false,
+        reason: 'IP rate limit exceeded',
+        retryAfter: Math.ceil((60 * 60 * 1000 - (now % (60 * 60 * 1000))) / 1000)
+      };
     }
 
     // Increment counters
@@ -56,12 +94,13 @@ export class RateLimiter {
     const monthReset = new Date(Math.ceil(now / (30 * 24 * 60 * 60 * 1000)) * (30 * 24 * 60 * 60 * 1000));
 
     return {
+      allowed: true,
       requestsPerHour: hourlyCount + 1,
       requestsPerDay: dailyCount + 1,
       requestsPerMonth: monthlyCount + 1,
-      remainingHourly: RATE_LIMITS.pro.requestsPerHour - (hourlyCount + 1),
-      remainingDaily: RATE_LIMITS.pro.requestsPerDay - (dailyCount + 1),
-      remainingMonthly: RATE_LIMITS.pro.requestsPerMonth - (monthlyCount + 1),
+      remainingHourly: limits.requestsPerHour - (hourlyCount + 1),
+      remainingDaily: limits.requestsPerDay - (dailyCount + 1),
+      remainingMonthly: limits.requestsPerMonth - (monthlyCount + 1),
       resetTimeHourly: hourReset,
       resetTimeDaily: dayReset,
       resetTimeMonthly: monthReset
