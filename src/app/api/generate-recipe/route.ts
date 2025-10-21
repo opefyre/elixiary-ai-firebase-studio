@@ -86,7 +86,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Authenticate the request using proper authentication (Firebase token or API key)
-    const { user, authType, rateLimitKey } = await authenticateRequest(request);
+    let user, authType, rateLimitKey;
+    try {
+      const authResult = await authenticateRequest(request);
+      user = authResult.user;
+      authType = authResult.authType;
+      rateLimitKey = authResult.rateLimitKey;
+    } catch (authError: any) {
+      return NextResponse.json(
+        { error: authError.message || 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     // Additional CSRF protection only for Firebase auth (API keys don't need CSRF)
     if (authType === 'firebase') {
@@ -121,20 +132,29 @@ export async function POST(request: NextRequest) {
     // Log the AI generation request for audit purposes
     const auditLogger = new AuditLogger();
     const requestId = AuditLogger.getRequestId(request);
-    await auditLogger.logAPIRequest(
-      requestId,
-      'ai_recipe_generation',
-      {
-        userId: user.uid,
-        userEmail: user.email,
-        authType,
-        endpoint: '/api/generate-recipe',
-        method: 'POST',
-        ipAddress: AuditLogger.getClientIP(request),
-        userAgent: request.headers.get('user-agent') ?? undefined
-      },
-      { prompt: 'AI generation requested' }
-    );
+    const startTime = Date.now();
+    
+    try {
+      await auditLogger.logAPIRequest(
+        requestId,
+        {
+          userId: user.uid,
+          email: user.email,
+          endpoint: '/api/generate-recipe',
+          method: 'POST',
+          ipAddress: AuditLogger.getClientIP(request),
+          userAgent: request.headers.get('user-agent') ?? undefined
+        },
+        {
+          statusCode: 200,
+          responseTime: Date.now() - startTime
+        },
+        { prompt: 'AI generation requested', authType }
+      );
+    } catch (error) {
+      // Don't fail the request if audit logging fails
+      console.error('Audit logging failed:', error);
+    }
 
     const body = await request.json();
     const validatedFields = requestSchema.safeParse(body);
@@ -147,17 +167,27 @@ export async function POST(request: NextRequest) {
     
     if (!recipe) {
       // Log failed AI generation
-      await auditLogger.logSecurityEvent(
-        requestId,
-        'ai_generation_failed',
-        {
-          userId: user.uid,
-          userEmail: user.email,
-          authType,
-          endpoint: '/api/generate-recipe'
-        },
-        { error: 'AI did not return a recipe' }
-      );
+      try {
+        await auditLogger.logSecurityEvent(
+          requestId,
+          'authentication_failed', // Using existing event type
+          {
+            endpoint: '/api/generate-recipe',
+            method: 'POST',
+            ipAddress: AuditLogger.getClientIP(request),
+            userAgent: request.headers.get('user-agent') ?? undefined
+          },
+          {
+            userId: user.uid,
+            email: user.email,
+            errorMessage: 'AI did not return a recipe',
+            statusCode: 500,
+            metadata: { authType }
+          }
+        );
+      } catch (error) {
+        console.error('Audit logging failed:', error);
+      }
       
       return NextResponse.json(
         { error: 'The AI did not return a recipe. Please try a different prompt.' },
@@ -177,24 +207,31 @@ export async function POST(request: NextRequest) {
     };
 
     // Log successful AI generation
-    await auditLogger.logAPIRequest(
-      requestId,
-      'ai_recipe_generation_success',
-      {
-        userId: user.uid,
-        userEmail: user.email,
-        authType,
-        endpoint: '/api/generate-recipe',
-        method: 'POST',
-        ipAddress: AuditLogger.getClientIP(request),
-        userAgent: request.headers.get('user-agent') ?? undefined
-      },
-      { 
-        prompt: 'AI generation completed successfully',
-        recipeName: fixedRecipe.name || 'Unknown',
-        requestId
-      }
-    );
+    try {
+      await auditLogger.logAPIRequest(
+        requestId,
+        {
+          userId: user.uid,
+          email: user.email,
+          endpoint: '/api/generate-recipe',
+          method: 'POST',
+          ipAddress: AuditLogger.getClientIP(request),
+          userAgent: request.headers.get('user-agent') ?? undefined
+        },
+        {
+          statusCode: 200,
+          responseTime: Date.now() - startTime
+        },
+        { 
+          prompt: 'AI generation completed successfully',
+          recipeName: fixedRecipe.name || 'Unknown',
+          requestId,
+          authType
+        }
+      );
+    } catch (error) {
+      console.error('Audit logging failed:', error);
+    }
     
     const response = NextResponse.json({ 
       recipe: fixedRecipe, 
