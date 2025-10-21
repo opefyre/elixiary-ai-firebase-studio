@@ -585,7 +585,8 @@ ${window.location.origin}`.trim();
 
               {isAIRecipe && (
                 <>
-                  <Button
+                  {/* Generate Image button - commented out for now */}
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={handleGenerateImage}
@@ -598,7 +599,7 @@ ${window.location.origin}`.trim();
                       <ImageIcon className="h-4 w-4" />
                     )}
                     Generate Image
-                  </Button>
+                  </Button> */}
                   
                   <Button
                     variant="outline"
