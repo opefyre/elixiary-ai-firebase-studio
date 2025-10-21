@@ -51,6 +51,11 @@
     --input: 222 47% 15%;
     --ring: 0 0% 98%;
   }
+  
+  /* Mobile viewport height fix - will be set by JavaScript */
+  :root {
+    --vh: 1vh;
+  }
 }
 
 @layer base {

@@ -99,7 +99,7 @@ export function RecipeGenerationForm({
   const { toast } = useToast();
   const { saveRecipe } = useRecipes();
   const { user } = useUser();
-  const { firestore } = useFirebase();
+  const { firestore, auth } = useFirebase();
   const { canGenerateRecipe, canSaveRecipe, remainingGenerations, remainingSaves, isPro } = useSubscription();
   const { updateBadges } = useBadges();
 
@@ -253,17 +253,18 @@ ${window.location.origin}`.trim();
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    // Check if user can generate (usage limit)
-    if (!canGenerateRecipe) {
-      setShowUpgradeModal(true);
-      return;
-    }
+    try {
+      // Check if user can generate (usage limit)
+      if (!canGenerateRecipe) {
+        setShowUpgradeModal(true);
+        return;
+      }
 
-    setIsLoading(true);
-    setRecipe(null);
-    setError(null);
-    setIsSaved(false);
-    setCurrentPrompt(data.prompt);
+      setIsLoading(true);
+      setRecipe(null);
+      setError(null);
+      setIsSaved(false);
+      setCurrentPrompt(data.prompt);
     
     // Enhance prompt with customization if provided
     let enhancedPrompt = data.prompt;
@@ -310,6 +311,13 @@ ${window.location.origin}`.trim();
       },
       body: JSON.stringify({ prompt: enhancedPrompt }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      setError(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      setIsLoading(false);
+      return;
+    }
 
     const result = await response.json();
     setRecipe(result.recipe);
@@ -399,6 +407,11 @@ ${window.location.origin}`.trim();
           variant: "default",
         });
       }
+    }
+    } catch (error) {
+      console.error('Recipe generation error:', error);
+      setError('An unexpected error occurred. Please try again.');
+      setIsLoading(false);
     }
   };
 

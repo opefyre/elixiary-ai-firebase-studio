@@ -254,8 +254,9 @@ export default async function RootLayout({
               // Fix for mobile viewport height issues (especially iOS)
               function setViewportHeight() {
                 const vh = window.innerHeight * 0.01;
-                // Use a CSS class approach instead of inline styles
+                // Create a style element with nonce to set CSS custom property
                 const style = document.createElement('style');
+                style.setAttribute('nonce', '${nonce}');
                 style.textContent = ':root { --vh: ' + vh + 'px; }';
                 style.className = 'viewport-height-fix';
                 // Remove existing style if any
