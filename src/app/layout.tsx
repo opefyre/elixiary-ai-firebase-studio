@@ -17,7 +17,7 @@ import { getNonce } from "@/lib/nonce";
 export const metadata: Metadata = {
   metadataBase: new URL(config.baseUrl),
   title: {
-    default: 'Elixiary AI - AI-Powered Cocktail Recipe Generator | Free Mixology Tool',
+    default: 'Elixiary AI - Free AI Cocktail Generator',
     template: '%s | Elixiary AI',
   },
   description: 'Generate unique cocktail recipes with AI! Tell our AI mixologist what you\'re in the mood for, and it will create a custom cocktail recipe just for you. Free cocktail recipe generator powered by Google Gemini. Discover 500+ curated recipes and create unlimited AI cocktails.',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: config.baseUrl,
-    title: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
+    title: 'Elixiary AI - Free AI Cocktail Generator',
     description: 'Generate unique cocktail recipes with AI! Free cocktail recipe generator powered by Google Gemini. Discover 500+ curated recipes and create unlimited AI cocktails.',
     siteName: 'Elixiary AI',
     images: [
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Elixiary AI - AI-Powered Cocktail Recipe Generator',
+    title: 'Elixiary AI - Free AI Cocktail Generator',
     description: 'Generate unique cocktail recipes with AI! Free cocktail recipe generator powered by Google Gemini.',
     creator: '@elixiary_ai',
     images: ['/opengraph-image.png'],

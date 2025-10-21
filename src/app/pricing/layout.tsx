@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pricing | Elixiary AI Pro - Unlimited Cocktail Recipes',
+  title: 'Pricing | Elixiary AI Pro',
   description: 'Upgrade to Elixiary AI Pro for unlimited AI-generated cocktail recipes, advanced features, and premium mixology tools. Start your free trial today!',
   keywords: [
     'elixiary ai pro',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'cocktail generator premium',
   ],
   openGraph: {
-    title: 'Pricing | Elixiary AI Pro - Unlimited Cocktail Recipes',
+    title: 'Pricing | Elixiary AI Pro',
     description: 'Upgrade to Elixiary AI Pro for unlimited AI-generated cocktail recipes and advanced features.',
     type: 'website',
     images: [
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pricing | Elixiary AI Pro - Unlimited Cocktail Recipes',
+    title: 'Pricing | Elixiary AI Pro',
     description: 'Upgrade to Elixiary AI Pro for unlimited AI-generated cocktail recipes and advanced features.',
   },
   alternates: {

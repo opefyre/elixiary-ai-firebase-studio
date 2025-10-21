@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'My Recipes | AI Generated & Saved Cocktail Recipes',
+  title: 'My Recipes | Elixiary AI',
   description: 'View and manage your AI-generated cocktail recipes and saved curated recipes. Organize your personal cocktail collection with advanced filtering and search.',
   keywords: [
     'my recipes',
@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     'cocktail favorites',
   ],
   openGraph: {
-    title: 'My Recipes | AI Generated & Saved Cocktail Recipes',
+    title: 'My Recipes | Elixiary AI',
     description: 'View and manage your AI-generated cocktail recipes and saved curated recipes.',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'My Recipes | AI Generated & Saved Cocktail Recipes',
+    title: 'My Recipes | Elixiary AI',
     description: 'View and manage your AI-generated cocktail recipes and saved curated recipes.',
   },
   alternates: {

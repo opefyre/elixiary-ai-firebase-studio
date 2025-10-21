@@ -15,13 +15,22 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     }
 
     const recipe = recipeDoc.data()!;
-    const title = `${recipe.name} Recipe | Elixiary AI`;
     
-    // Ensure title is under 60 characters for SEO
-    const shortTitle = title.length > 60 ? `${recipe.name} | Elixiary AI` : title;
+    // Create concise, SEO-friendly title
+    let title = `${recipe.name} | Elixiary AI`;
+    
+    // If still too long, just use recipe name with shorter suffix
+    if (title.length > 50) {
+      title = `${recipe.name} Cocktail | Elixiary AI`;
+    }
+    
+    // Final fallback for very long recipe names
+    if (title.length > 55) {
+      title = `${recipe.name} | Elixiary AI`;
+    }
     
     return {
-      title: shortTitle,
+      title: title,
       description: `Learn how to make ${recipe.name} cocktail. ${recipe.instructions || 'Professional recipe with ingredients and instructions.'}`,
       keywords: [
         recipe.name.toLowerCase(),
@@ -32,7 +41,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         ...(recipe.tags || []).map((tag: string) => tag.toLowerCase()),
       ],
       openGraph: {
-        title: shortTitle,
+        title: title,
         description: `Learn how to make ${recipe.name} cocktail with our professional recipe.`,
         type: 'article',
         images: recipe.imageUrl ? [
@@ -46,7 +55,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       },
       twitter: {
         card: 'summary_large_image',
-        title: shortTitle,
+        title: title,
         description: `Learn how to make ${recipe.name} cocktail.`,
       },
       alternates: {

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Cocktail Recipes Database | 500+ Curated Cocktail Recipes',
+  title: 'Cocktail Recipes | 500+ Curated Drinks',
   description: 'Discover 500+ expertly curated cocktail recipes from around the world. Browse by category, difficulty, and ingredients. Find your perfect cocktail recipe today!',
   keywords: [
     'cocktail recipes',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     'cocktail ingredients',
   ],
   openGraph: {
-    title: 'Cocktail Recipes Database | 500+ Curated Cocktail Recipes',
+    title: 'Cocktail Recipes | 500+ Curated Drinks',
     description: 'Discover 500+ expertly curated cocktail recipes from around the world. Browse by category, difficulty, and ingredients.',
     type: 'website',
     images: [
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cocktail Recipes Database | 500+ Curated Cocktail Recipes',
+    title: 'Cocktail Recipes | 500+ Curated Drinks',
     description: 'Discover 500+ expertly curated cocktail recipes from around the world.',
   },
   alternates: {

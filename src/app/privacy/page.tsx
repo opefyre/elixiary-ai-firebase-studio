@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Lock, Eye, Database, Users, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy & Terms",
-  description: "Privacy Policy and Terms of Service for Elixiary AI",
+  title: "Privacy Policy | Elixiary AI",
+  description: "Privacy Policy and Terms of Service for Elixiary AI. Learn how we protect your data and respect your privacy.",
 };
 
 export default function PrivacyPage() {
