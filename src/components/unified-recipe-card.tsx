@@ -62,7 +62,8 @@ interface UnifiedRecipeCardProps {
 export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [recipeCopied, setRecipeCopied] = useState(false);
   const [isEditingTags, setIsEditingTags] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -192,13 +193,15 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
 
     try {
       await exportRecipeToPDF({
-        recipeName: recipeName || '',
+        name: recipeName || '',
+        description: recipe.tips || '',
         ingredients: recipe.ingredients || '',
         instructions: recipe.instructions || '',
         garnish: recipe.garnish || '',
-        tips: recipe.tips || '',
         glassware: recipeGlassware || '',
-        imageUrl: recipeImage
+        difficultyLevel: '',
+        servingSize: '1 serving',
+        tips: recipe.tips || ''
       });
       toast({
         title: "PDF Exported",
@@ -216,8 +219,8 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   const handleShare = async () => {
     const url = `${window.location.origin}/recipes/${recipe.id}`;
     await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
     toast({
       title: "Link Copied",
       description: "Recipe link has been copied to clipboard.",
@@ -227,8 +230,8 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   const handleCopyRecipe = async () => {
     const recipeText = `${recipeName}\n\nIngredients:\n${recipe.ingredients}\n\nInstructions:\n${recipe.instructions}`;
     await navigator.clipboard.writeText(recipeText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setRecipeCopied(true);
+    setTimeout(() => setRecipeCopied(false), 2000);
     toast({
       title: "Recipe Copied",
       description: "Recipe has been copied to clipboard.",
@@ -507,8 +510,8 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                 onClick={handleShare}
                 className="gap-2"
               >
-                {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-                {copied ? 'Copied!' : 'Share'}
+                {shareCopied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+                {shareCopied ? 'Copied!' : 'Share'}
               </Button>
               
               <Button
@@ -517,8 +520,8 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
                 onClick={handleCopyRecipe}
                 className="gap-2"
               >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? 'Copied!' : 'Copy Recipe'}
+                {recipeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {recipeCopied ? 'Copied!' : 'Copy Recipe'}
               </Button>
 
               {isAIRecipe && (
