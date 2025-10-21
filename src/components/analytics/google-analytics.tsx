@@ -2,7 +2,11 @@
 
 import Script from 'next/script';
 
-export function GoogleAnalytics() {
+interface GoogleAnalyticsProps {
+  nonce?: string;
+}
+
+export function GoogleAnalytics({ nonce }: GoogleAnalyticsProps) {
   const GA_MEASUREMENT_ID = 'G-SNBQ629KYP';
 
   return (
@@ -10,10 +14,12 @@ export function GoogleAnalytics() {
       <Script
         strategy="afterInteractive"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        nonce={nonce}
       />
       <Script
         id="google-analytics"
         strategy="afterInteractive"
+        nonce={nonce}
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];

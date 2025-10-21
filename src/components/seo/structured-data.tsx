@@ -1,9 +1,10 @@
 interface StructuredDataProps {
   type: 'WebApplication' | 'Recipe' | 'BreadcrumbList' | 'Organization';
   data: any;
+  nonce?: string;
 }
 
-export function StructuredData({ type, data }: StructuredDataProps) {
+export function StructuredData({ type, data, nonce }: StructuredDataProps) {
   const getStructuredData = () => {
     const baseData = {
       '@context': 'https://schema.org',
@@ -17,6 +18,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
   return (
     <script
       type="application/ld+json"
+      nonce={nonce}
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(getStructuredData()),
       }}
@@ -25,10 +27,11 @@ export function StructuredData({ type, data }: StructuredDataProps) {
 }
 
 // Predefined structured data components
-export function WebApplicationStructuredData() {
+export function WebApplicationStructuredData({ nonce }: { nonce?: string }) {
   return (
     <StructuredData
       type="WebApplication"
+      nonce={nonce}
       data={{
         name: 'Elixiary AI',
         description: 'AI-Powered Cocktail Recipe Generator',
@@ -59,10 +62,11 @@ export function WebApplicationStructuredData() {
   );
 }
 
-export function RecipeStructuredData({ recipe }: { recipe: any }) {
+export function RecipeStructuredData({ recipe, nonce }: { recipe: any; nonce?: string }) {
   return (
     <StructuredData
       type="Recipe"
+      nonce={nonce}
       data={{
         name: recipe.name,
         description: `Learn how to make ${recipe.name} with this detailed cocktail recipe`,
@@ -95,10 +99,11 @@ export function RecipeStructuredData({ recipe }: { recipe: any }) {
   );
 }
 
-export function BreadcrumbStructuredData({ items }: { items: Array<{ name: string; url: string }> }) {
+export function BreadcrumbStructuredData({ items, nonce }: { items: Array<{ name: string; url: string }>; nonce?: string }) {
   return (
     <StructuredData
       type="BreadcrumbList"
+      nonce={nonce}
       data={{
         itemListElement: items.map((item, index) => ({
           '@type': 'ListItem',
@@ -111,10 +116,11 @@ export function BreadcrumbStructuredData({ items }: { items: Array<{ name: strin
   );
 }
 
-export function OrganizationStructuredData() {
+export function OrganizationStructuredData({ nonce }: { nonce?: string }) {
   return (
     <StructuredData
       type="Organization"
+      nonce={nonce}
       data={{
         name: 'Elixiary AI',
         url: process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com',

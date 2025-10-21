@@ -12,6 +12,7 @@ import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analyti
 import { AuthGuard } from "@/components/auth-guard";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 import { config, getCanonicalUrl } from "@/lib/config";
+import { getNonce } from "@/lib/nonce";
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.baseUrl),
@@ -119,14 +120,18 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = await getNonce();
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Nonce for CSP */}
+        <meta name="nonce" content={nonce} />
+        
         {/* Favicon and Icons */}
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
@@ -163,6 +168,7 @@ export default function RootLayout({
         {/* Structured Data */}
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -194,11 +200,11 @@ export default function RootLayout({
             })
           }}
         />
-        <GoogleTagManager />
+        <GoogleTagManager nonce={nonce} />
       </head>
       <body className="font-body antialiased">
         <GoogleTagManagerNoScript />
-        <GoogleAnalytics />
+        <GoogleAnalytics nonce={nonce} />
         <FirebaseClientProvider>
           <a href="#main-content" className="skip-link">
             Skip to main content
@@ -242,6 +248,7 @@ export default function RootLayout({
         
         {/* Mobile Viewport Height Fix */}
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               // Fix for mobile viewport height issues (especially iOS)
@@ -274,6 +281,7 @@ export default function RootLayout({
         
         {/* Service Worker Registration */}
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
