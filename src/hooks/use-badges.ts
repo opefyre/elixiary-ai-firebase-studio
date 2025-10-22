@@ -56,22 +56,43 @@ export function useBadges(): UseBadgesResult {
     setError(null);
 
     try {
-      const token = await user.getIdToken();
+      // Force refresh the token to ensure it's valid
+      const token = await user.getIdToken(true);
       const response = await fetch('/api/badges', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      const data = await response.json();
-
-      if (response.ok) {
+      
+      if (response.status === 401) {
+        // Token is invalid, try to refresh
+        console.log('Token expired, refreshing...');
+        const newToken = await user.getIdToken(true);
+        const retryResponse = await fetch('/api/badges', {
+          headers: {
+            'Authorization': `Bearer ${newToken}`
+          }
+        });
+        
+        if (retryResponse.ok) {
+          const data = await retryResponse.json();
+          setUserBadges(data.userBadges);
+          setStats(data.stats);
+          setProgress(data.progress);
+        } else {
+          setError('Failed to fetch badges after token refresh');
+        }
+      } else if (response.ok) {
+        const data = await response.json();
         setUserBadges(data.userBadges);
         setStats(data.stats);
         setProgress(data.progress);
       } else {
+        const data = await response.json();
         setError(data.error || 'Failed to fetch badges');
       }
     } catch (err: any) {
+      console.error('Error fetching badges:', err);
       setError(err.message || 'Failed to fetch badges');
     } finally {
       setLoading(false);

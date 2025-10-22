@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://apis.google.com`,
     `style-src 'self' 'nonce-${nonce}' 'unsafe-hashes' 'sha256-zlqnbDt84zf1iSefLU/ImC54isoprH/MRiVZGskwexk=' 'sha256-1OjyRYLAOH1vhXLUN4bBHal0rWxuwBDBP220NNc0CNU=' 'sha256-nzTgYzXYDNe6BAHiiI7NNlfK8n/auuOAhh2t92YvuXo=' https://fonts.googleapis.com`,
-    "img-src 'self' data: blob: https://lh3.googleusercontent.com https://images.unsplash.com https://picsum.photos https://placehold.co https://drive.google.com https://www.googletagmanager.com",
+    "img-src 'self' data: blob: https://lh3.googleusercontent.com https://images.unsplash.com https://picsum.photos https://placehold.co https://drive.google.com https://www.googletagmanager.com https://www.google-analytics.com",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebase.com https://*.firebaseapp.com https://*.stripe.com https://api.stripe.com https://checkout.stripe.com wss://*.firebase.com https://www.google-analytics.com https://*.google-analytics.com https://accounts.google.com",
     "frame-src https://accounts.google.com https://*.firebaseapp.com https://*.firebase.com",
