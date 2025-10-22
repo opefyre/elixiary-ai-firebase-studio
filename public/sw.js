@@ -1,7 +1,7 @@
 // Service Worker for Elixiary PWA
-const CACHE_NAME = 'elixiary-v1.1.0';
-const STATIC_CACHE = 'elixiary-static-v1.1.0';
-const DYNAMIC_CACHE = 'elixiary-dynamic-v1.1.0';
+const CACHE_NAME = 'elixiary-v1.2.0';
+const STATIC_CACHE = 'elixiary-static-v1.2.0';
+const DYNAMIC_CACHE = 'elixiary-dynamic-v1.2.0';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
@@ -37,11 +37,20 @@ self.addEventListener('activate', (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
+            // Clear all old caches to force fresh JavaScript
             if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
               return caches.delete(cacheName);
             }
           })
         );
+      })
+      .then(() => {
+        // Force all clients to reload to get fresh JavaScript
+        return self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({ type: 'FORCE_RELOAD' });
+          });
+        });
       })
       .then(() => {
         return self.clients.claim();

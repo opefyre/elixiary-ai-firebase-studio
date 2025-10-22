@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
+import { ServiceWorkerHandler } from "@/components/service-worker-handler";
 import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
@@ -205,6 +206,7 @@ export default async function RootLayout({
       <body className="font-body antialiased">
         <GoogleTagManagerNoScript />
         <GoogleAnalytics nonce={nonce} />
+        <ServiceWorkerHandler />
         <FirebaseClientProvider>
           <a href="#main-content" className="skip-link">
             Skip to main content
