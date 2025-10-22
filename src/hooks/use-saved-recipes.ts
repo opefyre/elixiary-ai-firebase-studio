@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useUser, useFirebase } from '@/firebase';
 import { useToast } from './use-toast';
+import { authenticatedFetch } from '@/lib/firebase-token-manager';
 
 interface SavedRecipe {
   id: string;
@@ -26,18 +27,16 @@ export function useSavedRecipes() {
 
     setLoading(true);
     try {
-      // Get token (don't force refresh to avoid quota issues)
-      const token = await user.getIdToken();
-      const response = await fetch('/api/user-recipes/saved', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await authenticatedFetch(user, '/api/user-recipes/saved');
       
       if (response.ok) {
         const data = await response.json();
         setSavedRecipes(data.savedRecipes || []);
         setSavedRecipeIds(new Set(data.savedRecipes?.map((r: SavedRecipe) => r.recipeId) || []));
+      } else {
+        const data = await response.json();
+        console.error('Error fetching saved recipes:', data.error);
+        // Silent error handling for fetching saved recipes
       }
     } catch (error) {
       console.error('Error fetching saved recipes:', error);
@@ -57,12 +56,10 @@ export function useSavedRecipes() {
     if (!user || !auth) return false;
 
     try {
-      const token = await user.getIdToken();
-      const response = await fetch('/api/user-recipes/save', {
+      const response = await authenticatedFetch(user, '/api/user-recipes/save', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           recipeId,
@@ -103,12 +100,10 @@ export function useSavedRecipes() {
     if (!user || !auth) return false;
 
     try {
-      const token = await user.getIdToken();
-      const response = await fetch('/api/user-recipes/unsave', {
+      const response = await authenticatedFetch(user, '/api/user-recipes/unsave', {
         method: 'DELETE',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           recipeId

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser, useFirebase } from '@/firebase';
 import { UserBadges, BadgeProgress } from '@/types/badges';
 import { getBadgeStats } from '@/lib/badges';
+import { authenticatedFetch } from '@/lib/firebase-token-manager';
 
 interface BadgeStats {
   totalBadges: number;
@@ -56,13 +57,7 @@ export function useBadges(): UseBadgesResult {
     setError(null);
 
     try {
-      // Get token (don't force refresh to avoid quota issues)
-      const token = await user.getIdToken();
-      const response = await fetch('/api/badges', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await authenticatedFetch(user, '/api/badges');
       
       if (response.ok) {
         const data = await response.json();
@@ -90,12 +85,10 @@ export function useBadges(): UseBadgesResult {
     }
 
     try {
-      const token = await user.getIdToken();
-      const response = await fetch('/api/badges', {
+      const response = await authenticatedFetch(user, '/api/badges', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ action, data }),
       });
