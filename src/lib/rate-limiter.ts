@@ -3,11 +3,17 @@ import { RATE_LIMITS, SECURITY_LIMITS, RateLimitStatus } from '@/types/api';
 
 export class RateLimiter {
   private adminDb: any;
-  private rateLimitCache: Map<string, { count: number; resetTime: number }> = new Map();
+  private rateLimitCache: Map<string, { count: number; resetTime: number; lastSync: number }> = new Map();
+  private userTierCache: Map<string, { tier: string; lastSync: number }> = new Map();
+  private syncInterval: number = 60000; // 1 minute sync interval
+  private lastSync: number = 0;
 
   constructor() {
     const { adminDb } = initializeFirebaseServer();
     this.adminDb = adminDb;
+    
+    // Start background sync
+    this.startBackgroundSync();
   }
 
   /**
@@ -20,18 +26,8 @@ export class RateLimiter {
     const monthKey = `rate_limit:user:${userId}:month:${Math.floor(now / (30 * 24 * 60 * 60 * 1000))}`;
     const ipKey = `rate_limit:ip:${ipAddress}:hour:${Math.floor(now / (60 * 60 * 1000))}`;
 
-    // Get user subscription tier to determine rate limits
-    let userTier = 'free';
-    try {
-      const userDoc = await this.adminDb.collection('users').doc(userId).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        userTier = userData.subscriptionTier || 'free';
-      }
-    } catch (error) {
-      console.error('Error fetching user tier:', error);
-      // Default to free tier if error
-    }
+    // Get user subscription tier to determine rate limits (with caching)
+    const userTier = await this.getUserTier(userId);
 
     // Define rate limits based on subscription tier
     const limits = userTier === 'pro' ? RATE_LIMITS.pro : {
@@ -144,33 +140,40 @@ export class RateLimiter {
   }
 
   /**
-   * Get current rate limit count
+   * Get current rate limit count with enhanced caching
    */
   private async getRateLimitCount(key: string): Promise<number> {
+    const now = Date.now();
+    
     // Check cache first
     const cached = this.rateLimitCache.get(key);
-    if (cached && cached.resetTime > Date.now()) {
+    if (cached && cached.resetTime > now && (now - cached.lastSync) < this.syncInterval) {
       return cached.count;
     }
 
-    // Check database
-    try {
-      const doc = await this.adminDb.collection('rate_limits').doc(key).get();
-      if (doc.exists) {
-        const data = doc.data();
-        const count = data.count || 0;
-        const resetTime = data.resetTime || 0;
-        
-        // Cache the result
-        this.rateLimitCache.set(key, { count, resetTime });
-        
-        return count;
+    // Only sync with Firestore if cache is stale or missing
+    if (!cached || (now - cached.lastSync) >= this.syncInterval) {
+      try {
+        const doc = await this.adminDb.collection('rate_limits').doc(key).get();
+        if (doc.exists) {
+          const data = doc.data();
+          const count = data.count || 0;
+          const resetTime = data.resetTime || 0;
+          
+          // Update cache with fresh data
+          this.rateLimitCache.set(key, { count, resetTime, lastSync: now });
+          
+          return count;
+        }
+      } catch (error) {
+        // If Firestore fails, return cached value if available
+        if (cached) {
+          return cached.count;
+        }
       }
-    } catch (error) {
-      // Silently handle error to avoid breaking the API
     }
 
-    return 0;
+    return cached?.count || 0;
   }
 
   /**
@@ -203,7 +206,7 @@ export class RateLimiter {
       });
 
       // Update cache with actual count
-      this.rateLimitCache.set(key, { count: newCount, resetTime });
+      this.rateLimitCache.set(key, { count: newCount, resetTime, lastSync: Date.now() });
     } catch (error) {
       // Don't throw error to avoid breaking the API
     }
@@ -313,9 +316,61 @@ export class RateLimiter {
   }
 
   /**
+   * Get user tier with caching
+   */
+  private async getUserTier(userId: string): Promise<string> {
+    const now = Date.now();
+    const cached = this.userTierCache.get(userId);
+    
+    // Return cached tier if still fresh
+    if (cached && (now - cached.lastSync) < this.syncInterval) {
+      return cached.tier;
+    }
+    
+    try {
+      const userDoc = await this.adminDb.collection('users').doc(userId).get();
+      const tier = userDoc.exists ? (userDoc.data().subscriptionTier || 'free') : 'free';
+      
+      // Cache the result
+      this.userTierCache.set(userId, { tier, lastSync: now });
+      
+      return tier;
+    } catch (error) {
+      console.error('Error fetching user tier:', error);
+      return cached?.tier || 'free';
+    }
+  }
+
+  /**
+   * Start background sync to keep cache fresh
+   */
+  private startBackgroundSync(): void {
+    setInterval(() => {
+      const now = Date.now();
+      
+      // Clean up expired cache entries
+      for (const [key, value] of this.rateLimitCache.entries()) {
+        if (value.resetTime <= now) {
+          this.rateLimitCache.delete(key);
+        }
+      }
+      
+      // Clean up stale user tier cache
+      for (const [key, value] of this.userTierCache.entries()) {
+        if ((now - value.lastSync) > this.syncInterval * 2) {
+          this.userTierCache.delete(key);
+        }
+      }
+      
+      this.lastSync = now;
+    }, this.syncInterval);
+  }
+
+  /**
    * Clear rate limit cache
    */
   clearCache(): void {
     this.rateLimitCache.clear();
+    this.userTierCache.clear();
   }
 }

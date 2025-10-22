@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { CacheManager } from '@/lib/redis';
+import RequestDeduplicator from '@/lib/request-deduplicator';
 
 export async function GET(request: NextRequest) {
   try {
-    const { adminDb } = await initializeFirebaseServer();
     const { searchParams } = new URL(request.url);
     
     // Parse query parameters
@@ -13,6 +14,36 @@ export async function GET(request: NextRequest) {
     const difficulty = searchParams.get('difficulty');
     const search = searchParams.get('search');
     const tags = searchParams.get('tags')?.split(',').filter(Boolean);
+
+    // Create cache key
+    const cacheKey = `curated-recipes:${JSON.stringify({
+      page,
+      limit,
+      category,
+      difficulty,
+      search,
+      tags
+    })}`;
+
+    // Check cache first
+    const cached = await CacheManager.get(cacheKey);
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached));
+    }
+
+    // Use request deduplication to prevent duplicate processing
+    const deduplicator = RequestDeduplicator.getInstance();
+    const dedupKey = RequestDeduplicator.createCacheKey('curated-recipes', {
+      page,
+      limit,
+      category,
+      difficulty,
+      search,
+      tags
+    });
+
+    const response = await deduplicator.deduplicate(dedupKey, async () => {
+      const { adminDb } = await initializeFirebaseServer();
 
     // Build query based on available filters
     let query = adminDb.collection('curated-recipes');
@@ -39,7 +70,11 @@ export async function GET(request: NextRequest) {
       query = query.orderBy('name', 'asc');
     }
 
-    // Get all matching documents (we'll paginate client-side for now)
+    // Apply pagination BEFORE fetching (server-side pagination)
+    const offset = (page - 1) * limit;
+    query = query.offset(offset).limit(limit);
+    
+    // Get only the documents we need
     const snapshot = await query.get();
     let recipes = snapshot.docs.map(doc => ({
       id: doc.id,
@@ -47,6 +82,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // Apply client-side filters for complex queries (tags, search)
+    // Note: This now only filters the small paginated result set
     if (tags && tags.length > 0) {
       recipes = recipes.filter(recipe => 
         tags.some(tag => recipe.tags && recipe.tags.includes(tag))
@@ -66,22 +102,38 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Apply pagination
-    const total = recipes.length;
-    const offset = (page - 1) * limit;
-    const paginatedRecipes = recipes.slice(offset, offset + limit);
+    // For pagination info, we need to get total count separately
+    // This is a limitation of server-side pagination with client-side filtering
+    const totalQuery = adminDb.collection('curated-recipes');
+    if (category && difficulty) {
+      totalQuery.where('category', '==', category).where('difficulty', '==', difficulty);
+    } else if (category) {
+      totalQuery.where('category', '==', category);
+    } else if (difficulty) {
+      totalQuery.where('difficulty', '==', difficulty);
+    }
+    const totalSnapshot = await totalQuery.get();
+    const total = totalSnapshot.size;
 
-    return NextResponse.json({
-      recipes: paginatedRecipes,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        hasNext: page * limit < total,
-        hasPrev: page > 1
-      }
+      const response = {
+        recipes: recipes,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasNext: page * limit < total,
+          hasPrev: page > 1
+        }
+      };
+
+      // Cache the response for 5 minutes
+      await CacheManager.set(cacheKey, JSON.stringify(response), 300);
+
+      return response;
     });
+
+    return NextResponse.json(response);
 
   } catch (error: any) {
     return NextResponse.json(
