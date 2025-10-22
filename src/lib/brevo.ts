@@ -92,7 +92,7 @@ export async function sendWelcomeEmail(email: string, displayName?: string) {
 
   try {
     await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log(`Welcome email sent to ${email}`);
+    // Welcome email sent successfully
     return { success: true };
   } catch (error) {
     console.error('Error sending welcome email:', error);

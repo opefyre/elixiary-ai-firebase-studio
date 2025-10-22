@@ -265,13 +265,7 @@ export class SitemapGenerator {
       ...difficultyPages,
     ];
 
-    console.log(`Generated sitemap with ${allPages.length} pages`);
-    console.log(`- Static pages: ${staticPages.length}`);
-    console.log(`- Category pages: ${categoryPages.length}`);
-    console.log(`- Recipe pages: ${recipePages.length}`);
-    console.log(`- Tag pages: ${tagPages.length}`);
-    console.log(`- Search pages: ${searchPages.length}`);
-    console.log(`- Difficulty pages: ${difficultyPages.length}`);
+    // Sitemap generation completed
 
     return allPages;
   }

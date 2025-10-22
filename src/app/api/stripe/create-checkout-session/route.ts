@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (existingSubscriptions.data.length > 0) {
-        console.log('User already has active subscription:', existingSubscriptions.data[0].id);
+        // User already has active subscription
         return NextResponse.json(
           { 
             error: 'You already have an active subscription',
