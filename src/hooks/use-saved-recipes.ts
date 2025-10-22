@@ -26,30 +26,15 @@ export function useSavedRecipes() {
 
     setLoading(true);
     try {
-      // Force refresh the token to ensure it's valid
-      const token = await user.getIdToken(true);
+      // Get token (don't force refresh to avoid quota issues)
+      const token = await user.getIdToken();
       const response = await fetch('/api/user-recipes/saved', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (response.status === 401) {
-        // Token is invalid, try to refresh
-        console.log('Token expired, refreshing...');
-        const newToken = await user.getIdToken(true);
-        const retryResponse = await fetch('/api/user-recipes/saved', {
-          headers: {
-            'Authorization': `Bearer ${newToken}`
-          }
-        });
-        
-        if (retryResponse.ok) {
-          const data = await retryResponse.json();
-          setSavedRecipes(data.savedRecipes || []);
-          setSavedRecipeIds(new Set(data.savedRecipes?.map((r: SavedRecipe) => r.recipeId) || []));
-        }
-      } else if (response.ok) {
+      if (response.ok) {
         const data = await response.json();
         setSavedRecipes(data.savedRecipes || []);
         setSavedRecipeIds(new Set(data.savedRecipes?.map((r: SavedRecipe) => r.recipeId) || []));
