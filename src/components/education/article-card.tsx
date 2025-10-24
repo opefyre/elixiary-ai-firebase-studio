@@ -62,7 +62,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
                   <Badge className={`text-xs ${getDifficultyColor(article.difficulty)}`}>
                     {article.difficulty}
                   </Badge>
-                  <div className="flex items-center text-xs text-gray-500">
+                  <div className="flex items-center text-xs text-muted-foreground">
                     <Clock className="w-3 h-3 mr-1" />
                     {article.readingTime}m
                   </div>
@@ -78,7 +78,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
   if (variant === 'featured') {
     return (
       <Link href={`/education/${article.category}/${article.slug}`}>
-        <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-2 border-transparent hover:border-blue-200">
+        <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-0 bg-card/50 backdrop-blur-sm">
           <div className="relative">
             {article.featuredImage && (
               <div className="aspect-video bg-gradient-to-r from-blue-400 to-purple-500 rounded-t-lg overflow-hidden">
@@ -105,7 +105,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
                 {article.difficulty}
               </Badge>
             </div>
-            <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+            <CardTitle className="text-lg group-hover:text-primary transition-colors">
               {article.title}
             </CardTitle>
             <CardDescription className="line-clamp-2">

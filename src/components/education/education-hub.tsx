@@ -103,140 +103,170 @@ export function EducationHub() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-primary via-purple-600 to-indigo-600 text-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl font-bold mb-6 font-headline">
-              Master the Art of Mixology
-            </h1>
-            <p className="text-xl mb-8 opacity-90">
-              Learn from expert mixologists with our comprehensive education center. 
-              From cocktail fundamentals to advanced techniques, we've got you covered.
-            </p>
-            
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
-              <SearchInterface onSearch={handleSearch} />
-            </div>
-          </div>
+    <div className="container mx-auto px-4 py-8 pt-24">
+      {/* Header */}
+      <section className="mb-12 text-center">
+        <h1 className="font-headline text-4xl font-bold md:text-5xl mb-4">
+          Master the Art of Mixology
+        </h1>
+        <p className="mx-auto mt-3 max-w-2xl text-lg text-muted-foreground">
+          Learn from expert mixologists with our comprehensive education center. 
+          From cocktail fundamentals to advanced techniques, we've got you covered.
+        </p>
+      </section>
+
+      {/* Search Bar */}
+      <section className="mb-12">
+        <div className="max-w-2xl mx-auto">
+          <SearchInterface onSearch={handleSearch} />
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">50+</div>
-              <div className="text-muted-foreground">Expert Articles</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-600 mb-2">6</div>
-              <div className="text-muted-foreground">Categories</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-indigo-600 mb-2">10k+</div>
-              <div className="text-muted-foreground">Students</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">4.9</div>
-              <div className="text-muted-foreground">Average Rating</div>
-            </div>
+      <section className="mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <div className="text-3xl font-bold text-primary mb-2">50+</div>
+            <div className="text-sm text-muted-foreground">Expert Articles</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-primary mb-2">6</div>
+            <div className="text-sm text-muted-foreground">Categories</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-primary mb-2">10k+</div>
+            <div className="text-sm text-muted-foreground">Students</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-primary mb-2">4.9</div>
+            <div className="text-sm text-muted-foreground">Average Rating</div>
           </div>
         </div>
       </section>
 
       {/* Categories Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Explore by Category
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Browse our carefully curated categories to find content that matches your learning goals and experience level.
-            </p>
-          </div>
-          <CategoryGrid categories={categories} />
+      <section className="mb-16">
+        <div className="text-center mb-12">
+          <h2 className="font-headline text-3xl font-bold mb-4">
+            Explore by Category
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Browse our carefully curated categories to find content that matches your learning goals and experience level.
+          </p>
         </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-8 bg-muted rounded mb-2"></div>
+                  <div className="h-4 bg-muted rounded"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-16 bg-muted rounded"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <CategoryGrid categories={categories} />
+        )}
       </section>
 
       {/* Featured Articles */}
       {featuredArticles.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Featured Articles
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Most popular and highly-rated articles from our community.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} variant="featured" />
-              ))}
-            </div>
+        <section className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="font-headline text-3xl font-bold mb-4">
+              Featured Articles
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Most popular and highly-rated articles from our community.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} variant="featured" />
+            ))}
           </div>
         </section>
       )}
 
       {/* Recent Articles */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-12">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                {searchQuery ? `Search Results for "${searchQuery}"` : 'Latest Articles'}
-              </h2>
-              <p className="text-gray-600">
-                {searchQuery ? `Found ${articles.length} articles` : 'Stay up to date with the latest mixology insights and techniques.'}
-              </p>
-            </div>
-            {!searchQuery && (
-              <Button variant="outline" asChild>
-                <a href="/education/articles">View All Articles</a>
-              </Button>
-            )}
+      <section className="mb-16">
+        <div className="flex justify-between items-center mb-12">
+          <div>
+            <h2 className="font-headline text-3xl font-bold mb-4">
+              {searchQuery ? `Search Results for "${searchQuery}"` : 'Latest Articles'}
+            </h2>
+            <p className="text-muted-foreground">
+              {searchQuery ? `Found ${articles.length} articles` : 'Stay up to date with the latest mixology insights and techniques.'}
+            </p>
           </div>
-          
-          {articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {articles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
-              <p className="text-gray-600">Try adjusting your search or browse our categories.</p>
-            </div>
+          {!searchQuery && (
+            <Button variant="outline" asChild>
+              <a href="/education/articles">View All Articles</a>
+            </Button>
           )}
         </div>
+        
+        {articles.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {articles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No articles found</h3>
+            <p className="text-muted-foreground">Try adjusting your search or browse our categories.</p>
+          </div>
+        )}
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to Start Your Mixology Journey?
+      <section className="text-center py-12">
+        <div className="space-y-4">
+          <h2 className="font-headline text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Ready to Start Your Mixology Journey? 🎯
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p className="text-muted-foreground text-base leading-relaxed max-w-md mx-auto">
             Join thousands of aspiring mixologists who are already learning with us.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild>
-              <a href="/education/categories/fundamentals">Start with Basics</a>
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600" asChild>
-              <a href="/education/search">Browse All Content</a>
-            </Button>
-          </div>
         </div>
+
+        {/* Feature highlights */}
+        <div className="flex flex-wrap justify-center gap-2 mt-6 text-xs">
+          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+            📚 Expert guides
+          </span>
+          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+            🎓 All skill levels
+          </span>
+          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+            💡 Pro tips
+          </span>
+        </div>
+
+        {/* CTA Button */}
+        <div className="pt-6">
+          <Button 
+            asChild 
+            size="lg"
+            className="rounded-full px-10 py-6 text-base font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105"
+          >
+            <a href="/education/categories/fundamentals" className="gap-2">
+              Start Learning
+              <span className="text-lg">→</span>
+            </a>
+          </Button>
+        </div>
+
+        {/* Trust signal */}
+        <p className="text-xs text-muted-foreground/60 mt-4">
+          Free access • Expert content • No sign-up required
+        </p>
       </section>
     </div>
   );

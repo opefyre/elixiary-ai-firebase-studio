@@ -51,13 +51,13 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={`skeleton-${i}`} className="animate-pulse">
             <CardHeader>
-              <div className="h-8 bg-gray-200 rounded mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-8 bg-muted rounded mb-2"></div>
+              <div className="h-4 bg-muted rounded"></div>
             </CardHeader>
             <CardContent>
-              <div className="h-16 bg-gray-200 rounded"></div>
+              <div className="h-16 bg-muted rounded"></div>
             </CardContent>
           </Card>
         ))}
@@ -68,8 +68,8 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {categories.map((category) => (
-        <Link key={category.id} href={`/education/${category.slug}`}>
-          <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-2 border-transparent hover:border-primary/20">
+        <Link key={`category-${category.id}`} href={`/education/${category.slug}`}>
+          <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-card/50 backdrop-blur-sm h-full">
             <CardHeader className="text-center pb-4">
               <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
                 {getCategoryIcon(category.slug)}
