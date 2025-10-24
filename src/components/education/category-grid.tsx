@@ -69,12 +69,12 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {categories.map((category) => (
         <Link key={category.id} href={`/education/${category.slug}`}>
-          <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-2 border-transparent hover:border-blue-200">
+          <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-2 border-transparent hover:border-primary/20">
             <CardHeader className="text-center pb-4">
               <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
                 {getCategoryIcon(category.slug)}
               </div>
-              <CardTitle className="text-xl group-hover:text-blue-600 transition-colors">
+              <CardTitle className="text-xl group-hover:text-primary transition-colors">
                 {category.name}
               </CardTitle>
               <CardDescription className="text-sm">
@@ -82,7 +82,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
                 <span>{category.articleCount} articles</span>
                 <span>•</span>
                 <span>All levels</span>

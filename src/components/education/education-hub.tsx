@@ -103,12 +103,12 @@ export function EducationHub() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white">
+      <section className="relative py-20 bg-gradient-to-r from-primary via-purple-600 to-indigo-600 text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl font-bold mb-6">
+            <h1 className="text-5xl font-bold mb-6 font-headline">
               Master the Art of Mixology
             </h1>
             <p className="text-xl mb-8 opacity-90">
@@ -125,24 +125,24 @@ export function EducationHub() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">50+</div>
-              <div className="text-gray-600">Expert Articles</div>
+              <div className="text-4xl font-bold text-primary mb-2">50+</div>
+              <div className="text-muted-foreground">Expert Articles</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-purple-600 mb-2">6</div>
-              <div className="text-gray-600">Categories</div>
+              <div className="text-muted-foreground">Categories</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-indigo-600 mb-2">10k+</div>
-              <div className="text-gray-600">Students</div>
+              <div className="text-muted-foreground">Students</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-green-600 mb-2">4.9</div>
-              <div className="text-gray-600">Average Rating</div>
+              <div className="text-muted-foreground">Average Rating</div>
             </div>
           </div>
         </div>

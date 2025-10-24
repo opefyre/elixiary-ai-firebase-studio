@@ -4,10 +4,10 @@ import { EducationArticle, PaginatedResponse } from '@/types/education';
 import { z } from 'zod';
 
 const querySchema = z.object({
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).nullable().optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(10),
-  sort: z.enum(['newest', 'oldest', 'popular', 'readingTime']).default('newest'),
+  sort: z.enum(['newest', 'oldest', 'popular', 'readingTime']).nullable().default('newest'),
 });
 
 export async function GET(
@@ -20,9 +20,9 @@ export async function GET(
     
     const query = querySchema.parse({
       difficulty: searchParams.get('difficulty'),
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      sort: searchParams.get('sort'),
+      page: searchParams.get('page') || '1',
+      limit: searchParams.get('limit') || '10',
+      sort: searchParams.get('sort') || 'newest',
     });
 
     if (!slug) {
@@ -44,25 +44,8 @@ export async function GET(
       queryBuilder = queryBuilder.where('difficulty', '==', query.difficulty);
     }
 
-    // Apply sorting
-    switch (query.sort) {
-      case 'newest':
-        queryBuilder = queryBuilder.orderBy('publishedAt', 'desc');
-        break;
-      case 'oldest':
-        queryBuilder = queryBuilder.orderBy('publishedAt', 'asc');
-        break;
-      case 'popular':
-        queryBuilder = queryBuilder.orderBy('stats.views', 'desc');
-        break;
-      case 'readingTime':
-        queryBuilder = queryBuilder.orderBy('readingTime', 'asc');
-        break;
-    }
-
     // Apply pagination
-    const offset = (query.page - 1) * query.limit;
-    queryBuilder = queryBuilder.offset(offset).limit(query.limit);
+    queryBuilder = queryBuilder.limit(query.limit);
 
     const snapshot = await queryBuilder.get();
     const articles: EducationArticle[] = [];
@@ -81,8 +64,8 @@ export async function GET(
         readingTime: data.readingTime,
         tags: data.tags || [],
         author: data.author,
-        publishedAt: data.publishedAt.toDate(),
-        updatedAt: data.updatedAt.toDate(),
+        publishedAt: data.publishedAt?.toDate ? data.publishedAt.toDate() : data.publishedAt,
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
         status: data.status,
         seo: data.seo,
         stats: data.stats || { views: 0, likes: 0, shares: 0 },
