@@ -21,7 +21,8 @@ export function ArticleReader({ article }: ArticleReaderProps) {
   const [readingProgress, setReadingProgress] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const [showTOC, setShowTOC] = useState(false);
-  const [tocItems, setTocItems] = useState<Array<{ id: string; text: string; level: number }>>([]);
+  const [tocItems, setTocItems] = useState<Array<{ id: string; text: string; level: number; children?: Array<{ id: string; text: string; level: number }> }>>([]);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchRelatedArticles();
@@ -34,7 +35,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
         const element = contentRef.current;
         const scrollTop = element.scrollTop;
         const scrollHeight = element.scrollHeight - element.clientHeight;
-        const progress = (scrollTop / scrollHeight) * 100;
+        const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
         setReadingProgress(Math.min(100, Math.max(0, progress)));
       }
     };
@@ -74,11 +75,25 @@ export function ArticleReader({ article }: ArticleReaderProps) {
   const generateTOC = () => {
     const headings = contentRef.current?.querySelectorAll('h2, h3, h4');
     if (headings) {
-      const toc = Array.from(headings).map((heading, index) => ({
-        id: `heading-${index}`,
-        text: heading.textContent || '',
-        level: parseInt(heading.tagName.charAt(1)),
-      }));
+      const toc: Array<{ id: string; text: string; level: number; children?: Array<{ id: string; text: string; level: number }> }> = [];
+      
+      Array.from(headings).forEach((heading, index) => {
+        const level = parseInt(heading.tagName.charAt(1));
+        const text = heading.textContent || '';
+        const id = `heading-${index}`;
+        
+        heading.id = id;
+        
+        if (level === 2) {
+          toc.push({ id, text, level, children: [] });
+        } else if (level === 3 && toc.length > 0) {
+          const lastParent = toc[toc.length - 1];
+          if (lastParent.children) {
+            lastParent.children.push({ id, text, level });
+          }
+        }
+      });
+      
       setTocItems(toc);
     }
   };
@@ -132,6 +147,16 @@ export function ArticleReader({ article }: ArticleReaderProps) {
       // Fallback to copying to clipboard
       navigator.clipboard.writeText(window.location.href);
     }
+  };
+
+  const toggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -259,7 +284,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 <CardContent className="p-8">
                   <div
                     ref={contentRef}
-                    className="prose prose-lg max-w-none"
+                    className="prose prose-lg max-w-none max-h-[600px] overflow-y-auto"
                   >
                     <ReactMarkdown>{article.content}</ReactMarkdown>
                   </div>
@@ -274,23 +299,57 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 {tocItems.length > 0 && (
                   <Card>
                     <CardContent className="p-4">
-                      <h3 className="font-semibold mb-3">Table of Contents</h3>
-                      <div className="space-y-2">
+                      <h3 className="font-semibold mb-3 text-sm text-foreground">Table of Contents</h3>
+                      <div className="space-y-1">
                         {tocItems.map((item, index) => (
-                          <button
-                            key={index}
-                            className={`block text-left text-sm text-primary hover:text-primary/80 ${
-                              item.level === 3 ? 'ml-4' : item.level === 4 ? 'ml-8' : ''
-                            }`}
-                            onClick={() => {
-                              const element = document.getElementById(`heading-${index}`);
-                              if (element) {
-                                element.scrollIntoView({ behavior: 'smooth' });
-                              }
-                            }}
-                          >
-                            {item.text}
-                          </button>
+                          <div key={item.id}>
+                            <button
+                              className={`flex items-center justify-between w-full text-left text-xs text-muted-foreground hover:text-primary transition-colors py-1 px-2 rounded ${
+                                item.children && item.children.length > 0 ? 'font-medium' : ''
+                              }`}
+                              onClick={() => {
+                                const element = document.getElementById(item.id);
+                                if (element) {
+                                  element.scrollIntoView({ behavior: 'smooth' });
+                                }
+                              }}
+                            >
+                              <span className="truncate">{item.text}</span>
+                              {item.children && item.children.length > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleSection(item.id);
+                                  }}
+                                  className="ml-2 p-1 hover:bg-muted rounded"
+                                >
+                                  {expandedSections.has(item.id) ? (
+                                    <ChevronDown className="w-3 h-3" />
+                                  ) : (
+                                    <ChevronRight className="w-3 h-3" />
+                                  )}
+                                </button>
+                              )}
+                            </button>
+                            {item.children && item.children.length > 0 && expandedSections.has(item.id) && (
+                              <div className="ml-4 space-y-1 mt-1">
+                                {item.children.map((child) => (
+                                  <button
+                                    key={child.id}
+                                    className="block text-left text-xs text-muted-foreground hover:text-primary transition-colors py-1 px-2 rounded truncate"
+                                    onClick={() => {
+                                      const element = document.getElementById(child.id);
+                                      if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth' });
+                                      }
+                                    }}
+                                  >
+                                    {child.text}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </CardContent>
@@ -300,14 +359,14 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 {/* Reading Progress */}
                 <Card>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold mb-3">Reading Progress</h3>
+                    <h3 className="font-semibold mb-3 text-sm text-foreground">Reading Progress</h3>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
                         className="bg-primary h-2 rounded-full transition-all duration-300"
                         style={{ width: `${readingProgress}%` }}
                       ></div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                       {Math.round(readingProgress)}% complete
                     </p>
                   </CardContent>
@@ -317,8 +376,8 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 {article.tags.length > 0 && (
                   <Card>
                     <CardContent className="p-4">
-                      <h3 className="font-semibold mb-3">Tags</h3>
-                      <div className="flex flex-wrap gap-2">
+                      <h3 className="font-semibold mb-3 text-sm text-foreground">Tags</h3>
+                      <div className="flex flex-wrap gap-1">
                         {article.tags.map((tag) => (
                           <Badge key={tag} variant="secondary" className="text-xs">
                             {tag}
