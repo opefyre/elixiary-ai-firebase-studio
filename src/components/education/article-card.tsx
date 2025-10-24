@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, User, Eye, Heart, Share2, BookOpen } from 'lucide-react';
+import { Clock, User, Eye, Heart, Share2, BookOpen, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
