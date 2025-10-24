@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
       category: searchParams.get('category'),
       difficulty: searchParams.get('difficulty'),
       search: searchParams.get('search'),
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      sort: searchParams.get('sort'),
+      page: searchParams.get('page') || '1',
+      limit: searchParams.get('limit') || '10',
+      sort: searchParams.get('sort') || 'newest',
     });
 
     const { adminDb } = initializeFirebaseServer();
