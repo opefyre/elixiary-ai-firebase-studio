@@ -30,22 +30,6 @@ export async function GET(request: NextRequest) {
     // Build query based on filters
     let queryBuilder = articlesRef.where('status', '==', 'published');
 
-    // Apply sorting
-    switch (query.sort) {
-      case 'newest':
-        queryBuilder = queryBuilder.orderBy('publishedAt', 'desc');
-        break;
-      case 'oldest':
-        queryBuilder = queryBuilder.orderBy('publishedAt', 'asc');
-        break;
-      case 'popular':
-        queryBuilder = queryBuilder.orderBy('stats.views', 'desc');
-        break;
-      case 'readingTime':
-        queryBuilder = queryBuilder.orderBy('readingTime', 'asc');
-        break;
-    }
-
     // Apply pagination
     queryBuilder = queryBuilder.limit(query.limit);
 
