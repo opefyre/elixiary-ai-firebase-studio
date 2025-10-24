@@ -20,6 +20,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const [showTOC, setShowTOC] = useState(false);
   const [tocItems, setTocItems] = useState<Array<{ id: string; text: string; level: number; children?: Array<{ id: string; text: string; level: number }> }>>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -46,6 +47,23 @@ export function ArticleReader({ article }: ArticleReaderProps) {
       return () => contentElement.removeEventListener('scroll', handleScroll);
     }
   }, [article]);
+
+  // Match parent container height to sidebar
+  useEffect(() => {
+    const matchHeights = () => {
+      if (sidebarRef.current && contentRef.current) {
+        const sidebarHeight = sidebarRef.current.offsetHeight;
+        const parentContainer = contentRef.current.closest('.grid');
+        if (parentContainer) {
+          (parentContainer as HTMLElement).style.height = `${sidebarHeight}px`;
+        }
+      }
+    };
+
+    // Match heights after content loads
+    const timer = setTimeout(matchHeights, 100);
+    return () => clearTimeout(timer);
+  }, [tocItems, expandedSections]);
 
   const fetchRelatedArticles = async () => {
     try {
@@ -278,13 +296,13 @@ export function ArticleReader({ article }: ArticleReaderProps) {
           )}
 
           {/* Article Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 min-h-[600px]">
-            <div className="lg:col-span-3 flex">
-              <Card className="flex-1">
-                <CardContent className="p-8 flex-1">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-3">
+              <Card className="h-full">
+                <CardContent className="p-8 h-full">
                   <div
                     ref={contentRef}
-                    className="prose prose-lg max-w-none"
+                    className="prose prose-lg max-w-none h-full overflow-y-auto"
                   >
                     <ReactMarkdown>{article.content}</ReactMarkdown>
                   </div>
@@ -293,8 +311,8 @@ export function ArticleReader({ article }: ArticleReaderProps) {
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1 flex">
-              <div className="space-y-6 flex-1">
+            <div className="lg:col-span-1">
+              <div ref={sidebarRef} className="space-y-6 h-fit">
                 {/* Table of Contents */}
                 {tocItems.length > 0 && (
                   <Card className="h-fit">
