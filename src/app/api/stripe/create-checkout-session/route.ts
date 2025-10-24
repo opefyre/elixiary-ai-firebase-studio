@@ -143,6 +143,11 @@ export async function POST(request: NextRequest) {
       mode: 'subscription',
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || request.headers.get('origin')}/account?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || request.headers.get('origin')}/pricing?canceled=true`,
+      custom_text: {
+        submit: {
+          message: 'Welcome to Elixiary AI Pro! Get unlimited cocktail recipes with AI 🍸✨'
+        }
+      },
       metadata: {
         firebaseUID: userId,
         isEarlyBird: isEarlyBirdEligible ? 'true' : 'false',
@@ -152,6 +157,12 @@ export async function POST(request: NextRequest) {
           firebaseUID: userId,
           isEarlyBird: isEarlyBirdEligible ? 'true' : 'false',
         },
+      },
+      allow_promotion_codes: true,
+      billing_address_collection: 'auto',
+      customer_update: {
+        address: 'auto',
+        name: 'auto',
       },
     });
 

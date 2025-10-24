@@ -124,10 +124,23 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Create the billing portal session
+    // Create the billing portal session with customization
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/account`,
+      configuration: {
+        features: {
+          payment_method_update: { enabled: true },
+          invoice_history: { enabled: true },
+          subscription_cancel: { enabled: true },
+          subscription_pause: { enabled: false },
+        },
+        business_profile: {
+          headline: 'Elixiary AI - Cocktail Recipe Generator',
+          privacy_policy_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/privacy`,
+          terms_of_service_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/privacy`,
+        }
+      }
     });
 
     return NextResponse.json({ url: session.url });
