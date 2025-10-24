@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Logo } from "@/components/icons/logo";
 import { AuthButton } from "@/components/auth-button";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Wine, Code } from "lucide-react";
+import { BookOpen, Wine, Code, GraduationCap } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useSubscription } from "@/firebase/firestore/use-subscription";
 
@@ -26,6 +26,12 @@ export function Header() {
             <Link href="/cocktails">
               <Wine className="mr-2 h-4 w-4" />
               Cocktails
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/education">
+              <GraduationCap className="mr-2 h-4 w-4" />
+              Education
             </Link>
           </Button>
           {user && (
@@ -52,6 +58,11 @@ export function Header() {
           <Button variant="ghost" size="sm" asChild>
             <Link href="/cocktails">
               <Wine className="h-4 w-4" />
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/education">
+              <GraduationCap className="h-4 w-4" />
             </Link>
           </Button>
           {user && (

@@ -26,11 +26,16 @@ export function Footer() {
                   Generate Recipes
                 </Link>
               </li>
-          <li>
-            <Link href="/cocktails" className="hover:text-primary transition-colors">
-              Cocktails
-            </Link>
-          </li>
+              <li>
+                <Link href="/cocktails" className="hover:text-primary transition-colors">
+                  Cocktails
+                </Link>
+              </li>
+              <li>
+                <Link href="/education" className="hover:text-primary transition-colors">
+                  Education Center
+                </Link>
+              </li>
               <li>
                 <Link href="/recipes" className="hover:text-primary transition-colors">
                   My Recipes

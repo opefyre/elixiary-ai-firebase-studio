@@ -224,50 +224,6 @@ export function EducationHub() {
           </div>
         )}
       </section>
-
-      {/* CTA Section */}
-      <section className="text-center py-12">
-        <div className="space-y-4">
-          <h2 className="font-headline text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Ready to Start Your Mixology Journey? 🎯
-          </h2>
-          <p className="text-muted-foreground text-base leading-relaxed max-w-md mx-auto">
-            Join thousands of aspiring mixologists who are already learning with us.
-          </p>
-        </div>
-
-        {/* Feature highlights */}
-        <div className="flex flex-wrap justify-center gap-2 mt-6 text-xs">
-          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
-            📚 Expert guides
-          </span>
-          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
-            🎓 All skill levels
-          </span>
-          <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
-            💡 Pro tips
-          </span>
-        </div>
-
-        {/* CTA Button */}
-        <div className="pt-6">
-          <Button 
-            asChild 
-            size="lg"
-            className="rounded-full px-10 py-6 text-base font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105"
-          >
-            <a href="/education/categories/fundamentals" className="gap-2">
-              Start Learning
-              <span className="text-lg">→</span>
-            </a>
-          </Button>
-        </div>
-
-        {/* Trust signal */}
-        <p className="text-xs text-muted-foreground/60 mt-4">
-          Free access • Expert content • No sign-up required
-        </p>
-      </section>
     </div>
   );
 }
