@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
         color: data.color,
         order: data.order,
         articleCount: data.articleCount || 0,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(),
       });
     });
 

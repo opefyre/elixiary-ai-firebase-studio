@@ -32,22 +32,22 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       };
     }
 
-    const category = querySnapshot.docs[0].data();
+    const categoryData = querySnapshot.docs[0].data();
 
     return {
-      title: `${category.name} | Elixiary Education`,
-      description: category.description,
-      keywords: [category.name, 'mixology', 'cocktails', 'education'],
+      title: `${categoryData.name} | Elixiary Education`,
+      description: categoryData.description,
+      keywords: [categoryData.name, 'mixology', 'cocktails', 'education'],
       openGraph: {
-        title: `${category.name} | Elixiary Education`,
-        description: category.description,
+        title: `${categoryData.name} | Elixiary Education`,
+        description: categoryData.description,
         type: 'website',
         url: `https://elixiary.com/education/${params.category}`,
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${category.name} | Elixiary Education`,
-        description: category.description,
+        title: `${categoryData.name} | Elixiary Education`,
+        description: categoryData.description,
       },
       alternates: {
         canonical: `https://elixiary.com/education/${params.category}`,
@@ -76,7 +76,14 @@ export default async function CategoryPageRoute({ params, searchParams }: Catego
       notFound();
     }
 
-    const category = querySnapshot.docs[0].data();
+    const categoryData = querySnapshot.docs[0].data();
+    
+    // Convert Firestore Timestamps to plain objects
+    const category = {
+      ...categoryData,
+      createdAt: categoryData.createdAt?.toDate ? categoryData.createdAt.toDate() : new Date(),
+      updatedAt: categoryData.updatedAt?.toDate ? categoryData.updatedAt.toDate() : new Date(),
+    };
 
     return (
       <>

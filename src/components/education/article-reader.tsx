@@ -269,7 +269,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="sticky top-8 space-y-6">
+              <div className="sticky top-24 space-y-6">
                 {/* Table of Contents */}
                 {tocItems.length > 0 && (
                   <Card>
