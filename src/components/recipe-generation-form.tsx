@@ -115,6 +115,79 @@ export function RecipeGenerationForm({
     form.setValue("prompt", randomPrompt);
   };
 
+  // Function to format customization options into text
+  const formatCustomizationText = (customization: CustomizationOptions) => {
+    const parts = [];
+    
+    if (customization.complexity) {
+      parts.push(`${customization.complexity} complexity`);
+    }
+    if (customization.alcoholLevel) {
+      parts.push(`${customization.alcoholLevel} alcohol level`);
+    }
+    if (customization.sweetness) {
+      parts.push(`${customization.sweetness} sweetness`);
+    }
+    if (customization.flavorProfile && customization.flavorProfile.length > 0) {
+      parts.push(`${customization.flavorProfile.join(' & ')} flavors`);
+    }
+    if (customization.occasion && customization.occasion !== '') {
+      const occasionLabels = {
+        'date-night': 'date night',
+        'party': 'party',
+        'relaxation': 'relaxation',
+        'celebration': 'celebration',
+        'business': 'business meeting',
+        'brunch': 'brunch',
+        'afternoon': 'afternoon tea',
+        'nightcap': 'nightcap',
+        'casual': 'casual gathering'
+      };
+      parts.push(`${occasionLabels[customization.occasion as keyof typeof occasionLabels] || customization.occasion} occasion`);
+    }
+    if (customization.season && customization.season !== '') {
+      parts.push(`${customization.season} season`);
+    }
+    if (customization.dietary && customization.dietary.length > 0) {
+      parts.push(`${customization.dietary.join(', ')}`);
+    }
+    if (customization.restrictions && customization.restrictions.trim() !== '') {
+      parts.push(`Restrictions: ${customization.restrictions}`);
+    }
+    
+    return parts.length > 0 ? ` [${parts.join(', ')}]` : '';
+  };
+
+  // Function to handle customization application
+  const handleCustomizationApply = (newCustomization: CustomizationOptions) => {
+    setCustomization(newCustomization);
+    
+    // Get current prompt value
+    const currentPrompt = form.getValues("prompt");
+    
+    // Remove any existing customization text (anything in brackets at the end)
+    const basePrompt = currentPrompt.replace(/\s*\[.*?\]\s*$/, '');
+    
+    // Add new customization text
+    const customizationText = formatCustomizationText(newCustomization);
+    const newPrompt = basePrompt + customizationText;
+    
+    // Update the form
+    form.setValue("prompt", newPrompt);
+  };
+
+  // Function to clear customization
+  const handleClearCustomization = () => {
+    setCustomization(null);
+    
+    // Get current prompt value and remove customization text
+    const currentPrompt = form.getValues("prompt");
+    const basePrompt = currentPrompt.replace(/\s*\[.*?\]\s*$/, '');
+    
+    // Update the form with just the base prompt
+    form.setValue("prompt", basePrompt);
+  };
+
   const handleCopyRecipe = async () => {
     if (!recipe) return;
     
@@ -455,15 +528,11 @@ ${window.location.origin}`.trim();
               </Button>
             </div>
             <CustomizationDialog 
-              onApply={setCustomization}
+              onApply={handleCustomizationApply}
+              onClear={handleClearCustomization}
               isPro={isPro}
             />
           </div>
-          {customization && (
-            <div className="text-center text-sm text-muted-foreground mt-2">
-              ✨ Customization active: {customization.complexity} complexity, {customization.alcoholLevel} alcohol, {customization.sweetness} sweetness
-            </div>
-          )}
         </form>
       </Form>
 

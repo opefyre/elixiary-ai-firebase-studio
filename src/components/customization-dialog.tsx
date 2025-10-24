@@ -31,10 +31,11 @@ export interface CustomizationOptions {
 
 interface CustomizationDialogProps {
   onApply: (options: CustomizationOptions) => void;
+  onClear?: () => void;
   isPro: boolean;
 }
 
-export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps) {
+export function CustomizationDialog({ onApply, onClear, isPro }: CustomizationDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [complexity, setComplexity] = useState<'simple' | 'moderate' | 'complex'>('moderate');
   const [alcoholLevel, setAlcoholLevel] = useState<'low' | 'medium' | 'strong'>('medium');
@@ -343,6 +344,19 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
           >
             Reset to Default
           </Button>
+          {onClear && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                handleReset();
+                onClear();
+                setIsOpen(false);
+              }}
+              className="flex-1"
+            >
+              Clear All
+            </Button>
+          )}
           <Button
             onClick={handleApply}
             className="flex-1"
