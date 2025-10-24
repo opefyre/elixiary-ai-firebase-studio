@@ -5,7 +5,7 @@ export interface EducationArticle {
   excerpt: string;
   content: string; // Markdown or rich text
   featuredImage: string;
-  category: 'fundamentals' | 'equipment' | 'techniques' | 'ingredients' | 'classics' | 'trends';
+  category: 'mixology-techniques' | 'bar-equipment' | 'cocktail-ingredients' | 'home-bar-setup' | 'classic-cocktails' | 'cocktail-presentation' | 'cocktail-techniques' | 'cocktail-history' | 'cocktail-pairing';
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   readingTime: number; // in minutes
   tags: string[];
@@ -39,30 +39,6 @@ export interface EducationCategory {
   articleCount: number;
 }
 
-export interface EducationVideo {
-  id: string;
-  title: string;
-  description: string;
-  videoUrl: string; // YouTube or Vimeo
-  thumbnail: string;
-  duration: number; // in seconds
-  category: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  tags: string[];
-  relatedArticles: string[]; // Article IDs
-  publishedAt: Date;
-}
-
-export interface InteractiveContent {
-  id: string;
-  type: 'quiz' | 'tool' | 'calculator' | 'challenge';
-  title: string;
-  description: string;
-  content: any; // JSON structure for different types
-  category: string;
-  difficulty: string;
-  publishedAt: Date;
-}
 
 export interface EducationAnalytics {
   articleViews: {

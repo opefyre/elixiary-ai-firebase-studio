@@ -16,6 +16,7 @@ Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist w
 - Recipe search and filtering
 - Share recipes via copy/share API
 - Basic recipe customization
+- **Education Center** - Access to comprehensive mixology guides and tutorials
 
 ### 👑 **Pro Tier** ($2.49/month or $1.99/month billed annually)
 - **Unlimited** recipe generation
@@ -25,6 +26,31 @@ Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist w
 - **Shopping List Generator** - Smart ingredient lists with quantity summing
 - **Customer Portal** - Self-service billing management
 - **Gamified Badge System** - Earn achievements for your cocktail journey
+- **Education Center** - Full access to all mixology guides, techniques, and tutorials
+
+---
+
+## 📚 Education Center
+
+### **Comprehensive Mixology Learning Platform**
+- **9 Categories** of educational content covering all aspects of mixology
+- **28+ High-Quality Articles** with detailed guides and tutorials
+- **SEO-Optimized Content** for better discoverability and organic traffic
+- **Professional Techniques** from basic to advanced mixology skills
+- **Equipment Guides** for building the perfect home bar
+- **Classic Cocktail Recipes** with history and variations
+- **Interactive Features** including search, filtering, and reading progress
+
+### **Content Categories**
+- **Mixology Techniques** - Shaking, stirring, muddling, and advanced methods
+- **Bar Equipment** - Essential tools, glassware, and professional setup
+- **Cocktail Ingredients** - Spirits, liqueurs, bitters, and flavor profiles
+- **Home Bar Setup** - Budget-friendly to premium bar configurations
+- **Classic Cocktails** - Timeless recipes with history and techniques
+- **Cocktail Presentation** - Garnishing, glassware, and visual appeal
+- **Cocktail Techniques** - Advanced mixing methods and professional skills
+- **Cocktail History** - Cultural background and evolution of drinks
+- **Cocktail Pairing** - Food and drink combinations
 
 ---
 
