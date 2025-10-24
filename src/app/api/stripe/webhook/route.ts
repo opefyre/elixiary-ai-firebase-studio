@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-01-27',
+    apiVersion: '2024-06-20',
   });
 
   let firebase;
