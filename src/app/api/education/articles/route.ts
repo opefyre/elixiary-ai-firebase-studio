@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Error fetching education articles:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch articles' },
+      { error: 'Failed to fetch articles', details: error.message },
       { status: 500 }
     );
   }
