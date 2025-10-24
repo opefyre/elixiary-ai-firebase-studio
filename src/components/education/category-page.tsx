@@ -135,7 +135,7 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
             </Link>
           </div>
           <div className="text-6xl mb-4">{getCategoryIcon(category.slug)}</div>
-          <h1 className="font-headline text-4xl font-bold mb-4 text-white">
+          <h1 className="font-headline text-4xl font-bold mb-4 text-blue-400">
             {category.name}
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

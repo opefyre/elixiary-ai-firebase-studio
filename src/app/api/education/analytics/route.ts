@@ -1,37 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
-import { z } from 'zod';
-
-const analyticsSchema = z.object({
-  type: z.enum(['view', 'interaction']),
-  articleId: z.string().optional(),
-  userId: z.string().optional(),
-  data: z.record(z.any()).optional(),
-});
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validatedData = analyticsSchema.parse(body);
+    const { type, articleId, userId, data } = body;
+
+    if (!type || !['view', 'interaction'].includes(type)) {
+      return NextResponse.json(
+        { error: 'Invalid type' },
+        { status: 400 }
+      );
+    }
 
     const { adminDb } = initializeFirebaseServer();
     const analyticsRef = adminDb.collection('education_analytics');
 
     const analyticsData = {
-      type: validatedData.type,
-      articleId: validatedData.articleId,
-      userId: validatedData.userId,
+      type,
+      articleId: articleId || null,
+      userId: userId || null,
       timestamp: new Date(),
-      data: validatedData.data || {},
-      userAgent: request.headers.get('user-agent'),
-      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+      data: data || {},
+      userAgent: request.headers.get('user-agent') || '',
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '',
     };
 
     await analyticsRef.add(analyticsData);
 
     // If it's a view, update the article's view count
-    if (validatedData.type === 'view' && validatedData.articleId) {
-      const articleRef = adminDb.collection('education_articles').doc(validatedData.articleId);
+    if (type === 'view' && articleId) {
+      const articleRef = adminDb.collection('education_articles').doc(articleId);
       const articleDoc = await articleRef.get();
       if (articleDoc.exists) {
         const currentData = articleDoc.data();
@@ -56,7 +55,6 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Add authentication check for admin users
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const articleId = searchParams.get('articleId');
@@ -81,11 +79,14 @@ export async function GET(request: NextRequest) {
     query = query.where('timestamp', '>=', startDate);
 
     const snapshot = await query.get();
-    const analytics = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      timestamp: doc.data().timestamp.toDate(),
-    }));
+    const analytics = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(),
+      };
+    });
 
     return NextResponse.json(analytics);
   } catch (error: any) {

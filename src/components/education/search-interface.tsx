@@ -56,9 +56,14 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
       setLoading(true);
       try {
         const response = await fetch(`/api/education/search?q=${encodeURIComponent(value)}&limit=5`);
-        const data = await response.json();
-        setSuggestions(data.data || []);
-        setShowSuggestions(true);
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data.data || []);
+          setShowSuggestions(true);
+        } else {
+          console.error('Search API error:', response.status);
+          setSuggestions([]);
+        }
       } catch (error) {
         console.error('Error fetching suggestions:', error);
         setSuggestions([]);

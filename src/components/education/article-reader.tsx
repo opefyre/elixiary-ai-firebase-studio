@@ -211,7 +211,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
               </Badge>
             </div>
             
-            <h1 className="font-headline text-4xl font-bold mb-4 text-white">
+            <h1 className="font-headline text-4xl font-bold mb-4 text-blue-400">
               {article.title}
             </h1>
             
@@ -335,7 +335,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
           {/* Related Articles */}
           {relatedArticles.length > 0 && (
             <div className="mt-16">
-              <h2 className="font-headline text-2xl font-bold mb-8 text-white">Related Articles</h2>
+              <h2 className="font-headline text-2xl font-bold mb-8 text-blue-400">Related Articles</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedArticles.map((relatedArticle) => (
                   <ArticleCard key={relatedArticle.id} article={relatedArticle} variant="compact" />
