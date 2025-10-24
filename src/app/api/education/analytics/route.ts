@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     startDate.setDate(startDate.getDate() - days);
     query = query.where('timestamp', '>=', startDate);
 
-    const snapshot = await query.orderBy('timestamp', 'desc').get();
+    const snapshot = await query.get();
     const analytics = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),

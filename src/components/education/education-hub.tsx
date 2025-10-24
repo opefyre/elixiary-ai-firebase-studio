@@ -106,7 +106,7 @@ export function EducationHub() {
     <div className="container mx-auto px-4 py-8 pt-24">
       {/* Header */}
       <section className="mb-12 text-center">
-        <h1 className="font-headline text-4xl font-bold md:text-5xl mb-4">
+        <h1 className="font-headline text-4xl font-bold md:text-5xl mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
           Master the Art of Mixology
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-lg text-muted-foreground">
@@ -147,7 +147,7 @@ export function EducationHub() {
       {/* Categories Section */}
       <section className="mb-16">
         <div className="text-center mb-12">
-          <h2 className="font-headline text-3xl font-bold mb-4">
+          <h2 className="font-headline text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Explore by Category
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -177,7 +177,7 @@ export function EducationHub() {
       {featuredArticles.length > 0 && (
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="font-headline text-3xl font-bold mb-4">
+            <h2 className="font-headline text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Featured Articles
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -196,7 +196,7 @@ export function EducationHub() {
       <section className="mb-16">
         <div className="flex justify-between items-center mb-12">
           <div>
-            <h2 className="font-headline text-3xl font-bold mb-4">
+            <h2 className="font-headline text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               {searchQuery ? `Search Results for "${searchQuery}"` : 'Latest Articles'}
             </h2>
             <p className="text-muted-foreground">

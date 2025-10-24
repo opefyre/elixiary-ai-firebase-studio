@@ -34,20 +34,8 @@ export async function GET(request: NextRequest) {
     const { adminDb } = initializeFirebaseServer();
     const articlesRef = adminDb.collection('education_articles');
 
-    // Start with published articles
+    // Start with published articles - remove filters and ordering for now to avoid index issues
     let queryBuilder = articlesRef.where('status', '==', 'published');
-
-    // Apply filters
-    if (query.category) {
-      queryBuilder = queryBuilder.where('category', '==', query.category);
-    }
-
-    if (query.difficulty) {
-      queryBuilder = queryBuilder.where('difficulty', '==', query.difficulty);
-    }
-
-    // Order by relevance (we'll implement basic text search for now)
-    queryBuilder = queryBuilder.orderBy('publishedAt', 'desc');
 
     // Apply pagination - Firestore doesn't support offset, so we'll get all results and paginate on the client
     queryBuilder = queryBuilder.limit(100); // Get more results for client-side pagination
