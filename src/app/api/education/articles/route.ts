@@ -4,9 +4,9 @@ import { z } from 'zod';
 import { EducationArticle, PaginatedResponse } from '@/types/education';
 
 const querySchema = z.object({
-  category: z.string().optional(),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  search: z.string().optional(),
+  category: z.string().nullable().optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).nullable().optional(),
+  search: z.string().nullable().optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(10),
   sort: z.enum(['newest', 'oldest', 'popular', 'readingTime']).default('newest'),
