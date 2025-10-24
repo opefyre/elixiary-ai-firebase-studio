@@ -30,14 +30,6 @@ export async function GET(request: NextRequest) {
     // Build query based on filters
     let queryBuilder = articlesRef.where('status', '==', 'published');
 
-    if (query.category) {
-      queryBuilder = queryBuilder.where('category', '==', query.category);
-    }
-
-    if (query.difficulty) {
-      queryBuilder = queryBuilder.where('difficulty', '==', query.difficulty);
-    }
-
     // Apply sorting
     switch (query.sort) {
       case 'newest':
