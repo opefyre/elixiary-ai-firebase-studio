@@ -192,15 +192,6 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
         </Card>
       )}
 
-      {/* Search Button */}
-      <Button
-        onClick={() => handleSearch()}
-        className="mt-4 w-full h-12 font-semibold"
-        disabled={!query.trim()}
-      >
-        <Search className="w-5 h-5 mr-2" />
-        Search Articles
-      </Button>
     </div>
   );
 }
