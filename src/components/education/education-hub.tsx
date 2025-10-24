@@ -29,20 +29,24 @@ export function EducationHub() {
       // Fetch categories
       const categoriesResponse = await fetch('/api/education/categories');
       const categoriesData = await categoriesResponse.json();
-      setCategories(categoriesData);
+      setCategories(categoriesData || []);
 
       // Fetch recent articles
       const articlesResponse = await fetch('/api/education/articles?limit=6&sort=newest');
       const articlesData = await articlesResponse.json();
-      setArticles(articlesData.data);
+      setArticles(articlesData.data || []);
 
       // Fetch featured articles (most popular)
       const featuredResponse = await fetch('/api/education/articles?limit=3&sort=popular');
       const featuredData = await featuredResponse.json();
-      setFeaturedArticles(featuredData.data);
+      setFeaturedArticles(featuredData.data || []);
 
     } catch (error) {
       console.error('Error fetching education data:', error);
+      // Set empty arrays to prevent crashes
+      setCategories([]);
+      setArticles([]);
+      setFeaturedArticles([]);
     } finally {
       setLoading(false);
     }
