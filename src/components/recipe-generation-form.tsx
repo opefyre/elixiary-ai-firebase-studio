@@ -188,6 +188,22 @@ export function RecipeGenerationForm({
     form.setValue("prompt", basePrompt);
   };
 
+  // Helper function to format text with newlines into proper markdown
+  const formatTextWithNewlines = (text: string) => {
+    if (!text) return '';
+    
+    // Split by newlines and format as bullet points
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    
+    if (lines.length <= 1) {
+      // If only one line, return as is
+      return text;
+    }
+    
+    // Format as bullet points
+    return lines.map(line => `- ${line.trim()}`).join('\n');
+  };
+
   const handleCopyRecipe = async () => {
     if (!recipe) return;
     
@@ -675,7 +691,7 @@ ${window.location.origin}`.trim();
                 </h4>
                 <div className="bg-muted/30 rounded-lg p-4">
                   <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
-                    <ReactMarkdown>{recipe.garnish}</ReactMarkdown>
+                    <ReactMarkdown>{formatTextWithNewlines(recipe.garnish || '')}</ReactMarkdown>
                   </div>
                 </div>
               </div>
@@ -687,7 +703,7 @@ ${window.location.origin}`.trim();
                 </h4>
                 <div className="bg-muted/30 rounded-lg p-4">
                   <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
-                    <ReactMarkdown>{recipe.equipment}</ReactMarkdown>
+                    <ReactMarkdown>{formatTextWithNewlines(recipe.equipment || '')}</ReactMarkdown>
                   </div>
                 </div>
               </div>
