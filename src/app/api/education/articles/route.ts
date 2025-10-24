@@ -9,7 +9,7 @@ const querySchema = z.object({
   search: z.string().nullable().optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(10),
-  sort: z.enum(['newest', 'oldest', 'popular', 'readingTime']).default('newest'),
+  sort: z.enum(['newest', 'oldest', 'popular', 'readingTime']).nullable().default('newest'),
 });
 
 export async function GET(request: NextRequest) {
