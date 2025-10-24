@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Clock, User, Eye, Heart, Share2, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Clock, User, Eye, Heart, Share2, Bookmark, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -284,7 +284,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 <CardContent className="p-8">
                   <div
                     ref={contentRef}
-                    className="prose prose-lg max-w-none max-h-[600px] overflow-y-auto"
+                    className="prose prose-lg max-w-none"
                   >
                     <ReactMarkdown>{article.content}</ReactMarkdown>
                   </div>
@@ -294,10 +294,10 @@ export function ArticleReader({ article }: ArticleReaderProps) {
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
+              <div className="space-y-6">
                 {/* Table of Contents */}
                 {tocItems.length > 0 && (
-                  <Card>
+                  <Card className="h-fit">
                     <CardContent className="p-4">
                       <h3 className="font-semibold mb-3 text-sm text-foreground">Table of Contents</h3>
                       <div className="space-y-1">
@@ -357,7 +357,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 )}
 
                 {/* Reading Progress */}
-                <Card>
+                <Card className="h-fit">
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-3 text-sm text-foreground">Reading Progress</h3>
                     <div className="w-full bg-muted rounded-full h-2">
@@ -374,7 +374,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
 
                 {/* Tags */}
                 {article.tags.length > 0 && (
-                  <Card>
+                  <Card className="h-fit">
                     <CardContent className="p-4">
                       <h3 className="font-semibold mb-3 text-sm text-foreground">Tags</h3>
                       <div className="flex flex-wrap gap-1">
