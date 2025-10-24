@@ -116,7 +116,7 @@ export function RecipeGenerationForm({
   };
 
   // Function to format customization options into natural prompt text
-  const formatCustomizationText = (customization: CustomizationOptions) => {
+  const formatCustomizationText = (customization: CustomizationOptions, hasBasePrompt: boolean = false) => {
     const parts = [];
     
     // Start with a natural flow
@@ -182,7 +182,15 @@ export function RecipeGenerationForm({
       parts.push(`keeping in mind: ${customization.restrictions}`);
     }
     
-    return parts.length > 0 ? `, ${parts.join(', ')}` : '';
+    if (parts.length === 0) return '';
+    
+    // If no base prompt, create a complete prompt
+    if (!hasBasePrompt) {
+      return `Create a cocktail ${parts.join(', ')}.`;
+    }
+    
+    // If there's a base prompt, append with comma
+    return `, ${parts.join(', ')}`;
   };
 
   // Function to handle customization application
@@ -195,9 +203,12 @@ export function RecipeGenerationForm({
     // Remove any existing customization text (look for the pattern we create)
     const basePrompt = currentPrompt.replace(/,\s*(perfect for|great for|ideal for|suitable for|using|with|that is|keeping in mind).*$/, '').trim();
     
+    // Check if there's a meaningful base prompt (not just "Create a cocktail")
+    const hasBasePrompt = basePrompt.trim() !== '' && !basePrompt.startsWith('Create a cocktail');
+    
     // Add new customization text
-    const customizationText = formatCustomizationText(newCustomization);
-    const newPrompt = basePrompt + customizationText;
+    const customizationText = formatCustomizationText(newCustomization, hasBasePrompt);
+    const newPrompt = hasBasePrompt ? basePrompt + customizationText : customizationText;
     
     // Update the form
     form.setValue("prompt", newPrompt);
@@ -209,7 +220,14 @@ export function RecipeGenerationForm({
     
     // Get current prompt value and remove customization text
     const currentPrompt = form.getValues("prompt");
-    const basePrompt = currentPrompt.replace(/,\s*(perfect for|great for|ideal for|suitable for|using|with|that is|keeping in mind).*$/, '').trim();
+    
+    // Remove customization text (either the full "Create a cocktail" or just the appended part)
+    let basePrompt = currentPrompt.replace(/,\s*(perfect for|great for|ideal for|suitable for|using|with|that is|keeping in mind).*$/, '').trim();
+    
+    // If the prompt starts with "Create a cocktail" and that's all, clear it completely
+    if (basePrompt === 'Create a cocktail') {
+      basePrompt = '';
+    }
     
     // Update the form with just the base prompt
     form.setValue("prompt", basePrompt);
