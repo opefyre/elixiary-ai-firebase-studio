@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Clock, User, Eye, Heart, Share2, Bookmark, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Clock, User, Eye, Share2, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,8 +16,6 @@ interface ArticleReaderProps {
 
 export function ArticleReader({ article }: ArticleReaderProps) {
   const [relatedArticles, setRelatedArticles] = useState<EducationArticle[]>([]);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const [showTOC, setShowTOC] = useState(false);
@@ -98,39 +96,6 @@ export function ArticleReader({ article }: ArticleReaderProps) {
     }
   };
 
-  const handleLike = async () => {
-    setIsLiked(!isLiked);
-    try {
-      await fetch('/api/education/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'interaction',
-          articleId: article.id,
-          data: { action: 'like', value: !isLiked },
-        }),
-      });
-    } catch (error) {
-      console.error('Error tracking like:', error);
-    }
-  };
-
-  const handleBookmark = async () => {
-    setIsBookmarked(!isBookmarked);
-    try {
-      await fetch('/api/education/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'interaction',
-          articleId: article.id,
-          data: { action: 'bookmark', value: !isBookmarked },
-        }),
-      });
-    } catch (error) {
-      console.error('Error tracking bookmark:', error);
-    }
-  };
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -205,22 +170,6 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 </Button>
               </Link>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLike}
-                  className={isLiked ? 'text-destructive' : ''}
-                >
-                  <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleBookmark}
-                  className={isBookmarked ? 'text-primary' : ''}
-                >
-                  <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-                </Button>
                 <Button variant="ghost" size="sm" onClick={handleShare}>
                   <Share2 className="w-4 h-4" />
                 </Button>
