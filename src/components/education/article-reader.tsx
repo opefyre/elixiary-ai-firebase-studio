@@ -278,10 +278,10 @@ export function ArticleReader({ article }: ArticleReaderProps) {
           )}
 
           {/* Article Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-3">
-              <Card>
-                <CardContent className="p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 min-h-[600px]">
+            <div className="lg:col-span-3 flex">
+              <Card className="flex-1">
+                <CardContent className="p-8 flex-1">
                   <div
                     ref={contentRef}
                     className="prose prose-lg max-w-none"
@@ -293,8 +293,8 @@ export function ArticleReader({ article }: ArticleReaderProps) {
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="space-y-6">
+            <div className="lg:col-span-1 flex">
+              <div className="space-y-6 flex-1">
                 {/* Table of Contents */}
                 {tocItems.length > 0 && (
                   <Card className="h-fit">
