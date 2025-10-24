@@ -32,9 +32,14 @@ export async function POST(request: NextRequest) {
     // If it's a view, update the article's view count
     if (validatedData.type === 'view' && validatedData.articleId) {
       const articleRef = adminDb.collection('education_articles').doc(validatedData.articleId);
-      await articleRef.update({
-        'stats.views': adminDb.FieldValue.increment(1),
-      });
+      const articleDoc = await articleRef.get();
+      if (articleDoc.exists) {
+        const currentData = articleDoc.data();
+        const currentViews = currentData?.stats?.views || 0;
+        await articleRef.update({
+          'stats.views': currentViews + 1,
+        });
+      }
     }
 
     return NextResponse.json({

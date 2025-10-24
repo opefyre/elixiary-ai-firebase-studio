@@ -164,22 +164,18 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/education">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Education
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8 pt-32">
+      <div className="container mx-auto px-4 py-8 pt-24">
         {/* Search Header */}
         <div className="text-center mb-12">
-          <h1 className="font-headline text-4xl font-bold mb-4">
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/education">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Education
+              </Button>
+            </Link>
+          </div>
+          <h1 className="font-headline text-4xl font-bold mb-4 text-foreground">
             Search Articles
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">

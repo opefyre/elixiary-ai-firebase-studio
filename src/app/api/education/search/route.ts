@@ -49,9 +49,8 @@ export async function GET(request: NextRequest) {
     // Order by relevance (we'll implement basic text search for now)
     queryBuilder = queryBuilder.orderBy('publishedAt', 'desc');
 
-    // Apply pagination
-    const offset = (query.page - 1) * query.limit;
-    queryBuilder = queryBuilder.offset(offset).limit(query.limit);
+    // Apply pagination - Firestore doesn't support offset, so we'll get all results and paginate on the client
+    queryBuilder = queryBuilder.limit(100); // Get more results for client-side pagination
 
     const snapshot = await queryBuilder.get();
     const articles: EducationArticle[] = [];

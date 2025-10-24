@@ -168,45 +168,40 @@ export function ArticleReader({ article }: ArticleReaderProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/education">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Education
-              </Button>
-            </Link>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLike}
-                className={isLiked ? 'text-destructive' : ''}
-              >
-                <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBookmark}
-                className={isBookmarked ? 'text-primary' : ''}
-              >
-                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleShare}>
-                <Share2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8 pt-32">
+      <div className="container mx-auto px-4 py-8 pt-24">
         <div className="max-w-4xl mx-auto">
           {/* Article Header */}
           <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <Link href="/education">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Education
+                </Button>
+              </Link>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLike}
+                  className={isLiked ? 'text-destructive' : ''}
+                >
+                  <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBookmark}
+                  className={isBookmarked ? 'text-primary' : ''}
+                >
+                  <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleShare}>
+                  <Share2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
             <div className="flex items-center space-x-2 mb-4">
               <Badge className={getCategoryColor(article.category)}>
                 {article.category}
@@ -216,7 +211,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
               </Badge>
             </div>
             
-            <h1 className="font-headline text-4xl font-bold mb-4">
+            <h1 className="font-headline text-4xl font-bold mb-4 text-foreground">
               {article.title}
             </h1>
             
@@ -265,7 +260,6 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                   <div
                     ref={contentRef}
                     className="prose prose-lg max-w-none"
-                    style={{ maxHeight: '70vh', overflowY: 'auto' }}
                   >
                     <ReactMarkdown>{article.content}</ReactMarkdown>
                   </div>
@@ -275,7 +269,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="sticky top-8 space-y-6">
+              <div className="space-y-6">
                 {/* Table of Contents */}
                 {tocItems.length > 0 && (
                   <Card>

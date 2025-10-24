@@ -123,23 +123,19 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/education">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Education
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8 pt-32">
+      <div className="container mx-auto px-4 py-8 pt-24">
         {/* Category Header */}
         <div className="text-center mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/education">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Education
+              </Button>
+            </Link>
+          </div>
           <div className="text-6xl mb-4">{getCategoryIcon(category.slug)}</div>
-          <h1 className="font-headline text-4xl font-bold mb-4">
+          <h1 className="font-headline text-4xl font-bold mb-4 text-foreground">
             {category.name}
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
