@@ -213,194 +213,194 @@ export default function AccountPage() {
           
           <div className="border-t pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-muted-foreground">Member since:</span>
-              <p className="font-medium">{formatDate(subscription?.createdAt)}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Account status:</span>
-              <p className="font-medium capitalize">
-                {subscription?.subscriptionStatus || 'Active'}
-              </p>
+              <div>
+                <span className="text-muted-foreground">Member since:</span>
+                <p className="font-medium">{formatDate(subscription?.createdAt)}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Account status:</span>
+                <p className="font-medium capitalize">
+                  {subscription?.subscriptionStatus || 'Active'}
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* Subscription Management - Integrated */}
+          <div className="border-t pt-4">
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Subscription</h4>
+              {isPro ? (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Pro Plan</p>
+                    <p className="text-xs text-muted-foreground">
+                      Next billing: {formatDate(subscription?.currentPeriodEnd)}
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleManageBilling}
+                    disabled={isLoadingPortal}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {isLoadingPortal ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    ) : (
+                      <Settings className="h-4 w-4 mr-1" />
+                    )}
+                    Manage
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Free Plan</p>
+                    <p className="text-xs text-muted-foreground">Upgrade for unlimited access</p>
+                  </div>
+                  <Button asChild variant="default" size="sm">
+                    <Link href="/pricing">
+                      <Crown className="h-4 w-4 mr-1" />
+                      Upgrade
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Usage Overview */}
+      {/* Account Actions */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Account Actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/recipes">
+                <BookOpen className="h-4 w-4 mr-2" />
+                View My Recipes
+              </Link>
+            </Button>
+            
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/cocktails">
+                <Star className="h-4 w-4 mr-2" />
+                Browse Cocktails
+              </Link>
+            </Button>
+            
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/privacy">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Privacy & Terms
+              </Link>
+            </Button>
+            
+            <Button 
+              onClick={handleSignOut}
+              variant="outline" 
+              className="justify-start text-destructive hover:text-destructive"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Usage Overview - Optimized Single Box */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
             Usage Overview
           </CardTitle>
-          <CardDescription>
-            Your current usage and limits for this month
-          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Recipe Generations */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* AI Generated Recipes */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                <span className="font-medium">Recipe Generations</span>
+                <span className="font-medium">AI Generated</span>
               </div>
-              <span className="text-sm text-muted-foreground">
-                {isPro ? '∞' : `${subscription?.recipesGeneratedThisMonth || 0} / ${limits.generationsPerMonth}`}
-              </span>
+              <p className="text-2xl font-bold">{aiRecipes.length}</p>
+              <p className="text-xs text-muted-foreground">Total recipes</p>
             </div>
-            {!isPro && (
-              <div className="space-y-1">
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${generationPercentage}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {remainingGenerations} generations remaining this month
-                </p>
+
+            {/* Saved Recipes */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Star className="h-4 w-4 text-primary" />
+                <span className="font-medium">Favorites</span>
               </div>
-            )}
+              <p className="text-2xl font-bold">{savedRecipes.length}</p>
+              <p className="text-xs text-muted-foreground">Saved recipes</p>
+            </div>
+
+            {/* Monthly Usage */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-primary" />
+                <span className="font-medium">This Month</span>
+              </div>
+              <p className="text-2xl font-bold">{subscription?.recipesGeneratedThisMonth || 0}</p>
+              <p className="text-xs text-muted-foreground">
+                {isPro ? 'Unlimited' : `${remainingGenerations} remaining`}
+              </p>
+            </div>
           </div>
 
-          {/* Saved Recipes */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-primary" />
-                <span className="font-medium">Saved Recipes</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {isPro ? '∞' : `${subscription?.recipeCount || 0} / ${limits.maxSavedRecipes}`}
-              </span>
-            </div>
-            {!isPro && (
-              <div className="space-y-1">
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${savePercentage}%` }}
-                  />
+          {/* Usage Limits for Free Users */}
+          {!isPro && (
+            <div className="mt-6 pt-6 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Recipe Generations</span>
+                    <span className="text-sm text-muted-foreground">
+                      {subscription?.recipesGeneratedThisMonth || 0} / {limits.generationsPerMonth}
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full transition-all"
+                      style={{ width: `${generationPercentage}%` }}
+                    />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {limits.maxSavedRecipes - (subscription?.recipeCount || 0)} saves remaining
-                </p>
-              </div>
-            )}
-          </div>
 
-          {/* Reset Date */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>Usage resets on {formatDate(nextResetDate)}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">AI Generated</span>
-            </div>
-            <p className="text-2xl font-bold mt-1">{aiRecipes.length}</p>
-            <p className="text-xs text-muted-foreground">Total recipes</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Favorites</span>
-            </div>
-            <p className="text-2xl font-bold mt-1">{savedRecipes.length}</p>
-            <p className="text-xs text-muted-foreground">Curated recipes</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">This Month</span>
-            </div>
-            <p className="text-2xl font-bold mt-1">{subscription?.recipesGeneratedThisMonth || 0}</p>
-            <p className="text-xs text-muted-foreground">Generated</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Subscription Management */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Subscription Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isPro ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Pro Subscription</p>
-                  <p className="text-sm text-muted-foreground">
-                    Next billing: {formatDate(subscription?.currentPeriodEnd)}
-                  </p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Saved Recipes</span>
+                    <span className="text-sm text-muted-foreground">
+                      {subscription?.recipeCount || 0} / {limits.maxSavedRecipes}
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full transition-all"
+                      style={{ width: `${savePercentage}%` }}
+                    />
+                  </div>
                 </div>
-                <Badge variant="default">
-                  <Crown className="h-3 w-3 mr-1" />
-                  Active
-                </Badge>
               </div>
               
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleManageBilling}
-                  disabled={isLoadingPortal}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {isLoadingPortal ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Settings className="h-4 w-4 mr-2" />
-                  )}
-                  Manage Billing
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href="/pricing">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Plans
-                  </Link>
-                </Button>
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>Usage resets on {formatDate(nextResetDate)}</span>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <p className="font-medium">Free Plan</p>
-                <p className="text-sm text-muted-foreground">
-                  Upgrade to Pro for unlimited access
-                </p>
-              </div>
-              
-              <Button asChild className="w-full">
-                <Link href="/pricing">
-                  <Crown className="h-4 w-4 mr-2" />
-                  Upgrade to Pro
-                </Link>
-              </Button>
             </div>
           )}
         </CardContent>
       </Card>
+
 
       {/* Achievements Section - Only for Pro users */}
       {isPro && stats && (
@@ -445,86 +445,41 @@ export default function AccountPage() {
         </Card>
       )}
 
-      {/* API Keys - Pro Users Only */}
+      {/* API Management - Pro Users Only */}
       {isPro && (
-        <div className="mb-6">
-          <APIKeyManager />
-        </div>
-      )}
-
-      {/* API Documentation - Pro Users Only */}
-      {isPro && (
-        <div className="mb-6">
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ExternalLink className="h-5 w-5" />
-                API Documentation
-              </CardTitle>
-              <CardDescription>
-                Interactive API documentation with live examples and code snippets
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-4">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              API Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* API Keys Section */}
+            <div>
+              <h4 className="font-medium text-sm mb-3">API Keys</h4>
+              <APIKeyManager />
+            </div>
+            
+            {/* API Documentation Section */}
+            <div className="border-t pt-4">
+              <h4 className="font-medium text-sm mb-3">API Documentation</h4>
+              <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Access our comprehensive API documentation with interactive examples, 
-                  code snippets in multiple languages, and live testing capabilities.
+                  Interactive API documentation with live examples and code snippets
                 </p>
-                <Button asChild className="w-full">
+                <Button asChild variant="outline" className="w-full">
                   <Link href="/api/docs">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Open API Documentation
                   </Link>
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Account Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Account Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/recipes">
-                <BookOpen className="h-4 w-4 mr-2" />
-                View My Recipes
-              </Link>
-            </Button>
-            
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/cocktails">
-                <Star className="h-4 w-4 mr-2" />
-                Browse Cocktails
-              </Link>
-            </Button>
-            
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/privacy">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Privacy & Terms
-              </Link>
-            </Button>
-            
-            <Button 
-              onClick={handleSignOut}
-              variant="outline" 
-              className="justify-start text-destructive hover:text-destructive"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Badge Celebration Modal */}
       {showBadgeCelebration && newBadgeIds.length > 0 && (
