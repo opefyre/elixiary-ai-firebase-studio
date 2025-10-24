@@ -16,32 +16,32 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-accent/10 text-accent-foreground border-accent/20';
       case 'advanced':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-destructive/10 text-destructive border-destructive/20';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'fundamentals':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'equipment':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
       case 'techniques':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return 'bg-accent/10 text-accent-foreground border-accent/20';
       case 'ingredients':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'classics':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-destructive/10 text-destructive border-destructive/20';
       case 'trends':
-        return 'bg-pink-100 text-pink-800 border-pink-200';
+        return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -52,10 +52,10 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm text-gray-900 truncate">
+                <h3 className="font-semibold text-sm text-foreground truncate">
                   {article.title}
                 </h3>
-                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                   {article.excerpt}
                 </p>
                 <div className="flex items-center space-x-2 mt-2">
@@ -90,7 +90,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               </div>
             )}
             <div className="absolute top-4 left-4">
-              <Badge className="bg-white text-gray-900 border-0 shadow-sm">
+              <Badge className="bg-background text-foreground border-0 shadow-sm">
                 <Star className="w-3 h-3 mr-1" />
                 Featured
               </Badge>
@@ -113,7 +113,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
               <div className="flex items-center space-x-4">
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
@@ -162,7 +162,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               {article.difficulty}
             </Badge>
           </div>
-          <CardTitle className="text-lg group-hover:text-blue-600 transition-colors line-clamp-2">
+          <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-2">
             {article.title}
           </CardTitle>
           <CardDescription className="line-clamp-2">
@@ -170,7 +170,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="flex items-center justify-between text-sm text-gray-600">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-1" />

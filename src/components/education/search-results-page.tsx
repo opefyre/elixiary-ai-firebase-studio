@@ -133,39 +133,39 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-accent/10 text-accent-foreground border-accent/20';
       case 'advanced':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-destructive/10 text-destructive border-destructive/20';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'fundamentals':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'equipment':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
       case 'techniques':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return 'bg-accent/10 text-accent-foreground border-accent/20';
       case 'ingredients':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'classics':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-destructive/10 text-destructive border-destructive/20';
       case 'trends':
-        return 'bg-pink-100 text-pink-800 border-pink-200';
+        return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-background border-b border-border">
+      <div className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <Link href="/education">
             <Button variant="ghost" size="sm">
@@ -176,7 +176,7 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="container mx-auto px-4 py-8 pt-32">
         {/* Search Header */}
         <div className="text-center mb-12">
           <h1 className="font-headline text-4xl font-bold mb-4">
@@ -288,7 +288,7 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div key={i} className="h-64 bg-muted rounded-lg animate-pulse"></div>
                 ))}
               </div>
             ) : articles.length > 0 ? (
