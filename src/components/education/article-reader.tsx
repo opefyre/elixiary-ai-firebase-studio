@@ -278,13 +278,13 @@ export function ArticleReader({ article }: ArticleReaderProps) {
           )}
 
           {/* Article Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-fit">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-3">
-              <Card className="h-full">
-                <CardContent className="p-8 h-full">
+              <Card className="h-fit">
+                <CardContent className="p-8">
                   <div
                     ref={contentRef}
-                    className="prose prose-lg max-w-none h-full overflow-y-auto"
+                    className="prose prose-lg max-w-none max-h-[600px] overflow-y-auto"
                   >
                     <ReactMarkdown>{article.content}</ReactMarkdown>
                   </div>
@@ -294,7 +294,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="space-y-6 h-fit">
+              <div className="space-y-6">
                 {/* Table of Contents */}
                 {tocItems.length > 0 && (
                   <Card className="h-fit">
