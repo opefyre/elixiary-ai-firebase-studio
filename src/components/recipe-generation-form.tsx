@@ -266,27 +266,10 @@ ${window.location.origin}`.trim();
       setIsSaved(false);
       setCurrentPrompt(data.prompt);
     
-    // Enhance prompt with customization if provided
-    let enhancedPrompt = data.prompt;
+    // Prepare request body with customization options
+    const requestBody: any = { prompt: data.prompt };
     if (customization) {
-      const customDetails = [];
-      
-      if (customization.complexity) {
-        customDetails.push(`${customization.complexity} complexity`);
-      }
-      if (customization.alcoholLevel) {
-        customDetails.push(`${customization.alcoholLevel} alcohol level`);
-      }
-      if (customization.sweetness) {
-        customDetails.push(`${customization.sweetness} sweetness`);
-      }
-      if (customization.dietary && customization.dietary.length > 0) {
-        customDetails.push(customization.dietary.join(', '));
-      }
-      
-      if (customDetails.length > 0) {
-        enhancedPrompt += ` [Preferences: ${customDetails.join(', ')}]`;
-      }
+      requestBody.customization = customization;
     }
     
     // Get Firebase ID token for authentication
@@ -309,7 +292,7 @@ ${window.location.origin}`.trim();
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ prompt: enhancedPrompt }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -624,6 +607,18 @@ ${window.location.origin}`.trim();
                 <div className="bg-muted/30 rounded-lg p-4">
                   <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
                     <ReactMarkdown>{recipe.garnish}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            )}
+            {recipe.equipment && (
+              <div>
+                <h4 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                  <span className="text-xl">🔧</span> Equipment Needed
+                </h4>
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
+                    <ReactMarkdown>{recipe.equipment}</ReactMarkdown>
                   </div>
                 </div>
               </div>

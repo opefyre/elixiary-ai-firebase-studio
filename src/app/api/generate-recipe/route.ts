@@ -23,6 +23,16 @@ const requestSchema = z.object({
       ];
       return !suspiciousPatterns.some(pattern => pattern.test(val));
     }, 'Invalid characters in prompt'),
+  customization: z.object({
+    complexity: z.enum(['simple', 'moderate', 'complex']).optional(),
+    dietary: z.array(z.string()).optional(),
+    alcoholLevel: z.enum(['low', 'medium', 'strong']).optional(),
+    sweetness: z.enum(['dry', 'balanced', 'sweet']).optional(),
+    flavorProfile: z.array(z.string()).optional(),
+    occasion: z.string().optional(),
+    season: z.string().optional(),
+    restrictions: z.string().optional(),
+  }).optional(),
 });
 
 /**

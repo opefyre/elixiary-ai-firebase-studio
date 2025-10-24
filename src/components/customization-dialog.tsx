@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { Settings2, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
@@ -22,6 +23,10 @@ export interface CustomizationOptions {
   dietary?: string[];
   alcoholLevel?: 'low' | 'medium' | 'strong';
   sweetness?: 'dry' | 'balanced' | 'sweet';
+  flavorProfile?: string[];
+  occasion?: string;
+  season?: string;
+  restrictions?: string;
 }
 
 interface CustomizationDialogProps {
@@ -35,6 +40,10 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
   const [alcoholLevel, setAlcoholLevel] = useState<'low' | 'medium' | 'strong'>('medium');
   const [sweetness, setSweetness] = useState<'dry' | 'balanced' | 'sweet'>('balanced');
   const [dietary, setDietary] = useState<string[]>([]);
+  const [flavorProfile, setFlavorProfile] = useState<string[]>([]);
+  const [occasion, setOccasion] = useState<string>('');
+  const [season, setSeason] = useState<string>('');
+  const [restrictions, setRestrictions] = useState<string>('');
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const dietaryOptions = [
@@ -44,12 +53,50 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
     { id: 'gluten-free', label: 'Gluten-Free' },
   ];
 
+  const flavorProfileOptions = [
+    { id: 'citrus', label: 'Citrus' },
+    { id: 'berry', label: 'Berry' },
+    { id: 'tropical', label: 'Tropical' },
+    { id: 'spicy', label: 'Spicy' },
+    { id: 'herbal', label: 'Herbal' },
+    { id: 'floral', label: 'Floral' },
+    { id: 'smoky', label: 'Smoky' },
+    { id: 'bitter', label: 'Bitter' },
+    { id: 'sweet', label: 'Sweet' },
+    { id: 'savory', label: 'Savory' },
+  ];
+
+  const occasionOptions = [
+    { id: '', label: 'Any Occasion' },
+    { id: 'date-night', label: 'Date Night' },
+    { id: 'party', label: 'Party' },
+    { id: 'relaxation', label: 'Relaxation' },
+    { id: 'celebration', label: 'Celebration' },
+    { id: 'business', label: 'Business Meeting' },
+    { id: 'brunch', label: 'Brunch' },
+    { id: 'afternoon', label: 'Afternoon Tea' },
+    { id: 'nightcap', label: 'Nightcap' },
+    { id: 'casual', label: 'Casual Gathering' },
+  ];
+
+  const seasonOptions = [
+    { id: '', label: 'Any Season' },
+    { id: 'spring', label: 'Spring' },
+    { id: 'summer', label: 'Summer' },
+    { id: 'fall', label: 'Fall' },
+    { id: 'winter', label: 'Winter' },
+  ];
+
   const handleApply = () => {
     onApply({
       complexity,
       dietary,
       alcoholLevel,
       sweetness,
+      flavorProfile,
+      occasion,
+      season,
+      restrictions,
     });
     setIsOpen(false);
   };
@@ -59,10 +106,22 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
     setAlcoholLevel('medium');
     setSweetness('balanced');
     setDietary([]);
+    setFlavorProfile([]);
+    setOccasion('');
+    setSeason('');
+    setRestrictions('');
   };
 
   const toggleDietary = (option: string) => {
     setDietary(prev =>
+      prev.includes(option)
+        ? prev.filter(item => item !== option)
+        : [...prev, option]
+    );
+  };
+
+  const toggleFlavorProfile = (option: string) => {
+    setFlavorProfile(prev =>
       prev.includes(option)
         ? prev.filter(item => item !== option)
         : [...prev, option]
@@ -206,6 +265,73 @@ export function CustomizationDialog({ onApply, isPro }: CustomizationDialogProps
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Flavor Profile */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Flavor Profile</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {flavorProfileOptions.map((option) => (
+                <div key={option.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={option.id}
+                    checked={flavorProfile.includes(option.id)}
+                    onCheckedChange={() => toggleFlavorProfile(option.id)}
+                  />
+                  <Label
+                    htmlFor={option.id}
+                    className="cursor-pointer font-normal text-sm"
+                  >
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Occasion */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Occasion</Label>
+            <RadioGroup value={occasion} onValueChange={setOccasion}>
+              <div className="grid grid-cols-2 gap-2">
+                {occasionOptions.map((option) => (
+                  <div key={option.id} className="flex items-center space-x-2">
+                    <RadioGroupItem value={option.id} id={option.id} />
+                    <Label htmlFor={option.id} className="cursor-pointer font-normal text-sm">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Season */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Season</Label>
+            <RadioGroup value={season} onValueChange={setSeason}>
+              <div className="flex flex-wrap gap-4">
+                {seasonOptions.map((option) => (
+                  <div key={option.id} className="flex items-center space-x-2">
+                    <RadioGroupItem value={option.id} id={option.id} />
+                    <Label htmlFor={option.id} className="cursor-pointer font-normal">
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Restrictions */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Additional Restrictions</Label>
+            <Textarea
+              placeholder="Enter any allergies, dietary restrictions, or ingredient preferences (e.g., 'no nuts', 'prefer organic ingredients', 'avoid artificial colors')"
+              value={restrictions}
+              onChange={(e) => setRestrictions(e.target.value)}
+              className="min-h-[80px] resize-none"
+            />
           </div>
         </div>
 

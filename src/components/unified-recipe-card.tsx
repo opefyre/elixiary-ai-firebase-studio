@@ -45,6 +45,7 @@ interface UnifiedRecipeCardProps {
     garnish?: string;
     tips?: string;
     glassware?: string;
+    equipment?: string;
     isFavorite?: boolean;
     imageUrl?: string;
     imagePrompt?: string;
@@ -543,6 +544,19 @@ ${window.location.origin}`.trim();
                 <div className="bg-muted/30 rounded-lg p-4">
                   <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
                     <ReactMarkdown>{recipe.garnish}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {recipe.equipment && (
+              <div>
+                <h4 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                  <span className="text-xl">🔧</span> Equipment Needed
+                </h4>
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <div className="prose prose-sm prose-invert max-w-none text-muted-foreground leading-relaxed">
+                    <ReactMarkdown>{recipe.equipment}</ReactMarkdown>
                   </div>
                 </div>
               </div>
