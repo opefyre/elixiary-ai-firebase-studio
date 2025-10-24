@@ -175,7 +175,7 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
               </Button>
             </Link>
           </div>
-          <h1 className="font-headline text-4xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 className="font-headline text-4xl font-bold mb-4 text-white">
             Search Articles
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -194,7 +194,7 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
             {/* Results Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0">
               <div>
-                     <h2 className="font-headline text-2xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                     <h2 className="font-headline text-2xl font-bold mb-2 text-white">
                        Search Results for "{currentQuery}"
                      </h2>
                 <p className="text-muted-foreground">

@@ -5,9 +5,9 @@ import { z } from 'zod';
 
 const querySchema = z.object({
   q: z.string().min(1),
-  category: z.string().optional(),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  tags: z.string().optional(),
+  category: z.string().nullable().optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).nullable().optional(),
+  tags: z.string().nullable().optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(10),
 });
