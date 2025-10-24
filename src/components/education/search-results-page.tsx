@@ -163,9 +163,9 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <Link href="/education">
             <Button variant="ghost" size="sm">
@@ -176,13 +176,13 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-24">
         {/* Search Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="font-headline text-4xl font-bold mb-4">
             Search Articles
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Find the perfect mixology content for your learning journey
           </p>
           
@@ -198,10 +198,10 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
             {/* Results Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="font-headline text-2xl font-bold mb-2">
                   Search Results for "{currentQuery}"
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   {pagination ? `${pagination.total} articles found` : 'Searching...'}
                 </p>
               </div>
@@ -210,11 +210,11 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
               <div className="flex items-center space-x-4">
                 {/* Sort */}
                 <div className="flex items-center space-x-2">
-                  <SortAsc className="w-4 h-4 text-gray-500" />
+                  <SortAsc className="w-4 h-4 text-muted-foreground" />
                   <select
                     value={currentSort}
                     onChange={(e) => handleSortChange(e.target.value)}
-                    className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="border border-border rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -224,7 +224,7 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
                 </div>
 
                 {/* View Mode */}
-                <div className="flex items-center space-x-1 border border-gray-300 rounded-md">
+                <div className="flex items-center space-x-1 border border-border rounded-md">
                   <Button
                     variant={viewMode === 'grid' ? 'default' : 'ghost'}
                     size="sm"
@@ -249,7 +249,7 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
             <div className="flex flex-wrap gap-4 mb-8">
               {/* Category Filter */}
               <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Category:</span>
+                <span className="text-sm font-medium">Category:</span>
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category) => (
                     <Button
@@ -267,7 +267,7 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
 
               {/* Difficulty Filter */}
               <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Difficulty:</span>
+                <span className="text-sm font-medium">Difficulty:</span>
                 <div className="flex space-x-2">
                   {['beginner', 'intermediate', 'advanced'].map((difficulty) => (
                     <Button
@@ -308,8 +308,8 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
             ) : (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-medium text-gray-900 mb-2">No articles found</h3>
-                <p className="text-gray-600">
+                <h3 className="text-xl font-medium mb-2">No articles found</h3>
+                <p className="text-muted-foreground">
                   Try adjusting your search terms or filters to find what you're looking for.
                 </p>
               </div>
@@ -358,8 +358,8 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
         {!currentQuery && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-medium text-gray-900 mb-2">Start Your Search</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-medium mb-2">Start Your Search</h3>
+            <p className="text-muted-foreground">
               Enter a search term above to find articles, techniques, and guides.
             </p>
           </div>

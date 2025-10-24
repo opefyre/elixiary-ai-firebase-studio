@@ -122,9 +122,9 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <Link href="/education">
             <Button variant="ghost" size="sm">
@@ -135,14 +135,14 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-24">
         {/* Category Header */}
         <div className="text-center mb-12">
           <div className="text-6xl mb-4">{getCategoryIcon(category.slug)}</div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="font-headline text-4xl font-bold mb-4">
             {category.name}
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {category.description}
           </p>
           <div className="mt-4">
@@ -156,7 +156,7 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0">
           {/* Difficulty Filter */}
           <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-gray-700">Difficulty:</span>
+            <span className="text-sm font-medium">Difficulty:</span>
             <div className="flex space-x-2">
               {['beginner', 'intermediate', 'advanced'].map((difficulty) => (
                 <Button
@@ -176,11 +176,11 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
           <div className="flex items-center space-x-4">
             {/* Sort */}
             <div className="flex items-center space-x-2">
-              <SortAsc className="w-4 h-4 text-gray-500" />
+              <SortAsc className="w-4 h-4 text-muted-foreground" />
               <select
                 value={currentSort}
                 onChange={(e) => handleSortChange(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-border rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -190,7 +190,7 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
             </div>
 
             {/* View Mode */}
-            <div className="flex items-center space-x-1 border border-gray-300 rounded-md">
+            <div className="flex items-center space-x-1 border border-border rounded-md">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
@@ -229,8 +229,8 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
         ) : (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📚</div>
-            <h3 className="text-xl font-medium text-gray-900 mb-2">No articles found</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-medium mb-2">No articles found</h3>
+            <p className="text-muted-foreground">
               {currentDifficulty 
                 ? `No ${currentDifficulty} articles found in this category.`
                 : 'No articles found in this category yet.'

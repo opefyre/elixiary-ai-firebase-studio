@@ -167,9 +167,9 @@ export function ArticleReader({ article }: ArticleReaderProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/education">
@@ -203,7 +203,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-24">
         <div className="max-w-4xl mx-auto">
           {/* Article Header */}
           <div className="mb-8">
@@ -216,16 +216,16 @@ export function ArticleReader({ article }: ArticleReaderProps) {
               </Badge>
             </div>
             
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="font-headline text-4xl font-bold mb-4">
               {article.title}
             </h1>
             
-            <p className="text-xl text-gray-600 mb-6">
+            <p className="text-xl text-muted-foreground mb-6">
               {article.excerpt}
             </p>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-6 text-sm text-muted-foreground">
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-2" />
                   {article.author.name}
@@ -240,7 +240,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 </div>
               </div>
               
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 {article.publishedAt.toLocaleDateString()}
               </div>
             </div>
@@ -285,7 +285,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                         {tocItems.map((item, index) => (
                           <button
                             key={index}
-                            className={`block text-left text-sm text-blue-600 hover:text-blue-800 ${
+                            className={`block text-left text-sm text-primary hover:text-primary/80 ${
                               item.level === 3 ? 'ml-4' : item.level === 4 ? 'ml-8' : ''
                             }`}
                             onClick={() => {
@@ -307,13 +307,13 @@ export function ArticleReader({ article }: ArticleReaderProps) {
                 <Card>
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-3">Reading Progress</h3>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-primary h-2 rounded-full transition-all duration-300"
                         style={{ width: `${readingProgress}%` }}
                       ></div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       {Math.round(readingProgress)}% complete
                     </p>
                   </CardContent>
@@ -341,7 +341,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
           {/* Related Articles */}
           {relatedArticles.length > 0 && (
             <div className="mt-16">
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Articles</h2>
+              <h2 className="font-headline text-2xl font-bold mb-8">Related Articles</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedArticles.map((relatedArticle) => (
                   <ArticleCard key={relatedArticle.id} article={relatedArticle} variant="compact" />

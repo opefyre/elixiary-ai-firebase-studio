@@ -105,7 +105,7 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
   return (
     <div className="relative w-full">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
         <Input
           ref={inputRef}
           type="text"
@@ -118,14 +118,14 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
               setShowSuggestions(true);
             }
           }}
-          className="pl-10 pr-10 h-12 text-lg border-2 border-white/20 bg-white/10 backdrop-blur-sm placeholder:text-white/70 text-white focus:border-white/40 focus:bg-white/20"
+          className="pl-10 pr-10 h-12 text-lg"
         />
         {query && (
           <Button
             variant="ghost"
             size="sm"
             onClick={clearSearch}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/20"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -134,11 +134,11 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
 
       {/* Suggestions Dropdown */}
       {showSuggestions && (
-        <Card ref={suggestionsRef} className="absolute top-full left-0 right-0 mt-2 z-50 shadow-lg border-0 bg-white">
+        <Card ref={suggestionsRef} className="absolute top-full left-0 right-0 mt-2 z-50 shadow-lg border-0 bg-background">
           <CardContent className="p-0">
             {loading ? (
-              <div className="p-4 text-center text-gray-500">
-                <div className="animate-spin w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+              <div className="p-4 text-center text-muted-foreground">
+                <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
                 Searching...
               </div>
             ) : suggestions.length > 0 ? (
@@ -147,10 +147,10 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
                   <button
                     key={article.id}
                     onClick={() => handleSuggestionClick(article)}
-                    className="w-full text-left p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                    className="w-full text-left p-4 hover:bg-muted border-b border-border last:border-b-0"
                   >
-                    <div className="font-medium text-gray-900 mb-1">{article.title}</div>
-                    <div className="text-sm text-gray-600 line-clamp-2">{article.excerpt}</div>
+                    <div className="font-medium mb-1">{article.title}</div>
+                    <div className="text-sm text-muted-foreground line-clamp-2">{article.excerpt}</div>
                     <div className="flex items-center space-x-2 mt-2">
                       <Badge variant="secondary" className="text-xs">
                         {article.category}
@@ -163,18 +163,18 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
                 ))}
               </div>
             ) : query.length >= 2 ? (
-              <div className="p-4 text-center text-gray-500">
+              <div className="p-4 text-center text-muted-foreground">
                 No articles found for "{query}"
               </div>
             ) : (
               <div className="p-4">
-                <div className="text-sm text-gray-600 mb-3">Popular searches:</div>
+                <div className="text-sm text-muted-foreground mb-3">Popular searches:</div>
                 <div className="flex flex-wrap gap-2">
                   {popularSearches.map((term) => (
                     <Badge
                       key={term}
                       variant="outline"
-                      className="cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                      className="cursor-pointer hover:bg-primary/10 hover:border-primary/20 transition-colors"
                       onClick={() => handlePopularSearchClick(term)}
                     >
                       {term}
@@ -190,7 +190,7 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
       {/* Search Button */}
       <Button
         onClick={() => handleSearch()}
-        className="mt-4 w-full h-12 bg-white text-blue-600 hover:bg-gray-50 font-semibold"
+        className="mt-4 w-full h-12 font-semibold"
         disabled={!query.trim()}
       >
         <Search className="w-5 h-5 mr-2" />
