@@ -55,8 +55,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply pagination
-    const offset = (query.page - 1) * query.limit;
-    queryBuilder = queryBuilder.offset(offset).limit(query.limit);
+    queryBuilder = queryBuilder.limit(query.limit);
 
     const snapshot = await queryBuilder.get();
     const articles: EducationArticle[] = [];
