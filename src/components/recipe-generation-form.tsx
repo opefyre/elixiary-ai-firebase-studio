@@ -115,47 +115,74 @@ export function RecipeGenerationForm({
     form.setValue("prompt", randomPrompt);
   };
 
-  // Function to format customization options into text
+  // Function to format customization options into natural prompt text
   const formatCustomizationText = (customization: CustomizationOptions) => {
     const parts = [];
     
-    if (customization.complexity) {
-      parts.push(`${customization.complexity} complexity`);
-    }
-    if (customization.alcoholLevel) {
-      parts.push(`${customization.alcoholLevel} alcohol level`);
-    }
-    if (customization.sweetness) {
-      parts.push(`${customization.sweetness} sweetness`);
-    }
-    if (customization.flavorProfile && customization.flavorProfile.length > 0) {
-      parts.push(`${customization.flavorProfile.join(' & ')} flavors`);
-    }
+    // Start with a natural flow
     if (customization.occasion && customization.occasion !== '') {
       const occasionLabels = {
-        'date-night': 'date night',
-        'party': 'party',
-        'relaxation': 'relaxation',
-        'celebration': 'celebration',
-        'business': 'business meeting',
-        'brunch': 'brunch',
-        'afternoon': 'afternoon tea',
-        'nightcap': 'nightcap',
-        'casual': 'casual gathering'
+        'date-night': 'perfect for a romantic date night',
+        'party': 'great for a party',
+        'relaxation': 'ideal for relaxation',
+        'celebration': 'perfect for celebrations',
+        'business': 'suitable for business meetings',
+        'brunch': 'perfect for brunch',
+        'afternoon': 'ideal for afternoon tea time',
+        'nightcap': 'perfect as a nightcap',
+        'casual': 'great for casual gatherings'
       };
-      parts.push(`${occasionLabels[customization.occasion as keyof typeof occasionLabels] || customization.occasion} occasion`);
-    }
-    if (customization.season && customization.season !== '') {
-      parts.push(`${customization.season} season`);
-    }
-    if (customization.dietary && customization.dietary.length > 0) {
-      parts.push(`${customization.dietary.join(', ')}`);
-    }
-    if (customization.restrictions && customization.restrictions.trim() !== '') {
-      parts.push(`Restrictions: ${customization.restrictions}`);
+      parts.push(occasionLabels[customization.occasion as keyof typeof occasionLabels] || `perfect for ${customization.occasion}`);
     }
     
-    return parts.length > 0 ? ` [${parts.join(', ')}]` : '';
+    if (customization.season && customization.season !== '') {
+      parts.push(`using ${customization.season} ingredients`);
+    }
+    
+    if (customization.flavorProfile && customization.flavorProfile.length > 0) {
+      const flavorText = customization.flavorProfile.length === 1 
+        ? `${customization.flavorProfile[0]} flavors`
+        : `${customization.flavorProfile.slice(0, -1).join(', ')} and ${customization.flavorProfile.slice(-1)[0]} flavors`;
+      parts.push(`with ${flavorText}`);
+    }
+    
+    if (customization.complexity) {
+      const complexityLabels = {
+        'simple': 'simple and easy to make',
+        'moderate': 'moderately complex',
+        'complex': 'complex and sophisticated'
+      };
+      parts.push(`that is ${complexityLabels[customization.complexity]}`);
+    }
+    
+    if (customization.alcoholLevel) {
+      const alcoholLabels = {
+        'low': 'light and refreshing',
+        'medium': 'balanced strength',
+        'strong': 'spirit-forward and bold'
+      };
+      parts.push(`with ${alcoholLabels[customization.alcoholLevel]} alcohol content`);
+    }
+    
+    if (customization.sweetness) {
+      const sweetnessLabels = {
+        'dry': 'dry with minimal sweetness',
+        'balanced': 'balanced sweetness',
+        'sweet': 'sweet and dessert-like'
+      };
+      parts.push(`that is ${sweetnessLabels[customization.sweetness]}`);
+    }
+    
+    if (customization.dietary && customization.dietary.length > 0) {
+      const dietaryText = customization.dietary.join(' and ');
+      parts.push(`that is ${dietaryText}`);
+    }
+    
+    if (customization.restrictions && customization.restrictions.trim() !== '') {
+      parts.push(`keeping in mind: ${customization.restrictions}`);
+    }
+    
+    return parts.length > 0 ? `, ${parts.join(', ')}` : '';
   };
 
   // Function to handle customization application
@@ -165,8 +192,8 @@ export function RecipeGenerationForm({
     // Get current prompt value
     const currentPrompt = form.getValues("prompt");
     
-    // Remove any existing customization text (anything in brackets at the end)
-    const basePrompt = currentPrompt.replace(/\s*\[.*?\]\s*$/, '');
+    // Remove any existing customization text (look for the pattern we create)
+    const basePrompt = currentPrompt.replace(/,\s*(perfect for|great for|ideal for|suitable for|using|with|that is|keeping in mind).*$/, '').trim();
     
     // Add new customization text
     const customizationText = formatCustomizationText(newCustomization);
@@ -182,7 +209,7 @@ export function RecipeGenerationForm({
     
     // Get current prompt value and remove customization text
     const currentPrompt = form.getValues("prompt");
-    const basePrompt = currentPrompt.replace(/\s*\[.*?\]\s*$/, '');
+    const basePrompt = currentPrompt.replace(/,\s*(perfect for|great for|ideal for|suitable for|using|with|that is|keeping in mind).*$/, '').trim();
     
     // Update the form with just the base prompt
     form.setValue("prompt", basePrompt);
