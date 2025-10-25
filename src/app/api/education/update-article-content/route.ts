@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const { adminDb } = initializeFirebaseServer();
 
-    const articleSlug = "mastering-stirring-cocktails";
+    const articleSlug = "double-strain-technique-perfect-cocktails";
     
     const articlesSnapshot = await adminDb.collection('education_articles')
       .where('slug', '==', articleSlug)
@@ -18,524 +18,457 @@ export async function POST(request: NextRequest) {
     const articleDoc = articlesSnapshot.docs[0];
     const articleId = articleDoc.id;
 
-    const fullContent = `# Mastering the Fine Art of Stirring Cocktails
+    const fullContent = `# The Double Strain Technique for Perfect Cocktails
 
-Stirring is one of the most fundamental yet nuanced techniques in mixology. While shaking gets the spotlight for its dramatic flair, stirring is where the true artistry of cocktail-making lies. This comprehensive guide explores the science, technique, and finesse required to master the art of stirring cocktails to perfection.
+The double strain is one of the most underrated yet essential techniques in professional bartending. While it might seem like an extra step, this simple method transforms cocktails from good to exceptional by ensuring silk-smooth texture, eliminating unwanted ice chips, and creating that luxurious mouthfeel that separates amateur drinks from professional craftsmanship.
 
-## Why Stir Instead of Shake?
+## What is Double Straining?
 
-### The Purpose of Stirring
+### The Two-Layer System
 
-**What Stirring Does:**
-- Dilutes cocktails with melted ice water
-- Chills the mixture evenly
-- Combines ingredients without aerating
-- Creates silky, smooth texture
-- Preserves clarity in transparent drinks
+**How It Works:**
+- First strain: Hawthorne strainer to catch large ice and citrus
+- Second strain: Fine mesh sieve to catch tiny ice chips and pulp
+- Result: Crystal-clear, smooth cocktail
+- Professional finishing touch
+- Essential for premium cocktails
 
-**When to Stir:**
-- Spirits-forward cocktails (Manhattan, Martini, Old Fashioned)
-- Drinks with only alcoholic ingredients
-- When you want a clear, transparent cocktail
-- When texture should be velvety, not frothy
-- Classic cocktails that call for stirring
+**The Process:**
+- Strain from shaker through Hawthorne strainer
+- Immediately strain again through fine mesh sieve
+- Pour into chilled serving glass
+- Enjoy perfectly smooth texture
+- Professional presentation every time
 
-### The Difference Between Stirring and Shaking
+### Why It Matters
 
-**Stirring Characteristics:**
-- No aeration or foam
-- Cleaner presentation
-- Smoother mouthfeel
-- Preserves spirits' delicate flavors
-- Professional bartender standard
+**Texture Improvement:**
+- Eliminates ice shards completely
+- Removes citrus pulp and seeds
+- Creates silky, smooth mouthfeel
+- Prevents ice chips from melting and diluting
+- Professional-grade consistency
 
-**Shaking Characteristics:**
-- Adds texture and froth
-- More vigorous dilution
-- Incorporates air bubbles
-- Best for cocktails with juices or dairy
-- More dramatic presentation
+**Presentation Quality:**
+- Crystal-clear cocktails
+- No visible debris or ice
+- Clean, professional appearance
+- Elevates the entire experience
+- Shows attention to detail
 
-## The Science of Stirring
+## When to Double Strain
 
-### How Dilution Works
+### Always Double Strain
 
-**Ice Melting Process:**
-- Ice melts when it contacts warmer liquid
-- Creates cold water that dilutes the drink
-- Brings cocktail to optimal drinking temperature
-- Balances alcohol intensity
-- Makes flavors more approachable
+**Shaken Cocktails:**
+- All shaken cocktails benefit
+- Ice breaks into smaller pieces during shaking
+- Especially important for egg white drinks
+- Daiquiris, Whiskey Sours, etc.
+- Creates smooth, creamy texture
 
-**Ideal Dilution:**
-- Too little: Drinks taste too strong, harsh
-- Just right: Balanced, smooth, refreshing
-- Too much: Watered down, flavorless
-- Target: 20-25% increase in volume from ice melt
-- Professional sweet spot: 30-45 seconds of stirring
+**Citrus-Heavy Drinks:**
+- Juiced cocktails have pulp
+- Pineapple and other fruits have fiber
+- Seeds can sneak through
+- Ensures clear, clean drink
+- Professional standard
 
-### Temperature and Viscosity
+### When Single Strain is Enough
 
-**The Role of Cold:**
-- Cold reduces perception of alcohol burn
-- Allows subtle flavors to emerge
-- Creates refreshing experience
-- Ideal serving temperature: 28-32°F
-- Too cold (below 25°F): Numb taste buds
+**Stirred Cocktails:**
+- Usually only need single strain
+- Ice stays more intact
+- Less risk of ice chips
+- But fine mesh still improves
+- Professional choice
 
-**Viscosity Changes:**
-- Cold increases liquid viscosity slightly
-- Creates creamier mouthfeel
-- Changes how liquid coats your tongue
-- Affects flavor perception
-- Professional bartenders understand this
+**Simple Spirits:**
+- Neat spirits don't need straining
+- But if mixed and iced, consider it
+- Quality always matters
+- Worth the extra effort
+- Professional attention
 
-## Essential Equipment for Stirring
+## Essential Equipment
 
-### The Bar Spoon
+### Hawthorne Strainer
 
-**Types of Bar Spoons:**
-- **Standard Bar Spoon**: Long handle (10-12 inches), twisted stem
-- **Japanese Style**: Longer handle, weighted end, precise
-- **European Style**: Ornate design, decorative
-- **Functional**: Designed for stirring, not decoration
+**Function:**
+- Primary filtering layer
+- Coils catch large ice pieces
+- Handles shaker opening
+- Quick first pass filtration
+- Essential first step
 
-**Why Length Matters:**
-- Reaches bottom of mixing glass
-- Allows proper technique
-- Prevents ice spillage
-- Comfortable hand position
-- Professional standard length
+**Features:**
+- Spring coils for flexibility
+- Handle for control
+- Fits various shaker sizes
+- Durable construction
+- Professional quality
 
-### Mixing Glass Selection
+### Fine Mesh Strainer
 
-**Best Materials:**
-- Clear crystal (Japanese Yarai)
-- Heavy base for stability
-- No design patterns on bottom
-- 16-20 oz capacity
-- Professional quality construction
+**Critical Second Layer:**
+- Very fine mesh (60-100 wires per inch)
+- Catches smallest ice chips
+- Removes citrus pulp
+- Filters out any sediment
+- Final refinement
 
-**Size Considerations:**
-- Too small: Constrains stirring motion
-- Too large: Wastes ice, harder to control
-- Just right: Comfortable stirring with control
-- Standard: 16-18 oz capacity
-- Room for ice and liquid
+**Selection Tips:**
+- Choose quality materials
+- Ensure fine enough mesh
+- Comfortable handle grip
+- Easy to clean
+- Durable construction
 
-### Ice Quality
+### Tools Summary
 
-**Optimal Ice for Stirring:**
-- Large, dense cubes
-- Minimal air bubbles (clear ice preferred)
-- Consistent size (1.5-2 inch cubes)
-- Fresh, hard ice that resists cracking
-- Enough cubes to fill most of mixing glass
+**Basic Setup:**
+- Hawthorne strainer
+- Fine mesh sieve
+- That's it for essentials
+- Both relatively affordable
+- Worth investment
 
-**Why Ice Quality Matters:**
-- Poor ice melts too fast (over-dilution)
-- Airy ice melts inconsistently
-- Large cubes melt slowly and uniformly
-- Clear ice has no impurities
-- Quality ice = quality drinks
+**Quality Matters:**
+- Better tools last longer
+- Perform more consistently
+- Easier to clean and maintain
+- Professional results
+- Worth spending more
 
-## The Technique: How to Stir Properly
+## The Technique: How to Double Strain
 
-### Proper Grip and Positioning
+### Step-by-Step Process
 
-**Holding the Bar Spoon:**
-- Pinch between thumb and index finger
-- Middle finger supports for stability
-- Spiral end of handle between fingers
-- Comfortable, relaxed grip
-- Not too tight or loose
+**Step 1: Prepare Your Strainer**
+- Hold fine mesh sieve over glass
+- Position Hawthorne strainer in other hand
+- Ready for pouring
+- Quick and efficient setup
 
-**Hand Position:**
-- Wrist slightly elevated
-- Elbow in, comfortable
-- Smooth rotating motion
-- Consistent speed and rhythm
-- Professional appearance
+**Step 2: First Strain (Hawthorne)**
+- Remove shaker lid
+- Place Hawthorne strainer on shaker
+- Pour through into fine mesh sieve
+- Catch large ice and citrus
+- First filtration layer
 
-### The Stirring Motion
+**Step 3: Second Strain (Fine Mesh)**
+- Liquid catches in fine mesh
+- Small ice chips trapped
+- Citrus pulp removed
+- Crystal-clear cocktail results
+- Final polishing step
 
-**Basic Technique:**
-1. Insert spoon to bottom of mixing glass
-2. Rotate spoon in circular motion
-3. Keep spoon against side of glass
-4. Maintain consistent speed
-5. Stir for 30-45 seconds
-
-**Motion Details:**
-- Smooth, controlled circles
-- Push ice around, not just through
-- Stir slowly enough to control dilution
-- Fast enough for proper chilling
-- Professional rhythm and cadence
+**Step 4: Serve**
+- Pour into prepared glass
+- Enjoy professional-quality texture
+- Notice the smoothness
+- Appreciate the clarity
+- Professional finish
 
 ### Common Mistakes to Avoid
 
-**Mistake 1: Stirring Too Fast**
-- Problem: Turbulence creates unwanted aeration
-- Result: Defeats purpose of stirring
-- Solution: Slower, controlled motion
+**Mistake 1: Skipping Second Strain**
+- Problem: Ice chips in drink
+- Result: Chunks of ice dilute drink over time
+- Solution: Always use fine mesh
 
-**Mistake 2: Not Stirring Long Enough**
-- Problem: Insufficient dilution and chilling
-- Result: Harsh, warm cocktail
-- Solution: 30-45 seconds minimum
+**Mistake 2: Wrong Order**
+- Problem: Straining through fine mesh first
+- Result: Clogs easier, less efficient
+- Solution: Always Hawthorne first, then fine mesh
 
-**Mistake 3: Stirring Too Slowly**
-- Problem: Ice doesn't move enough
-- Result: Inconsistent chilling
-- Solution: Moderate, consistent speed
+**Mistake 3: Not Cleaning Between Drinks**
+- Problem: Previous residue affects taste
+- Result: Flavors contaminate next cocktail
+- Solution: Rinse both strainers
 
-**Mistake 4: Not Reaching Bottom**
-- Problem: Layering of ingredients
-- Result: Uneven mixing
-- Solution: Keep spoon at bottom
+**Mistake 4: Using Too Fine a Mesh**
+- Problem: Takes forever to strain
+- Result: Frustrating, inefficient
+- Solution: Balance between fineness and speed
 
-**Mistake 5: Lifting Spoon Too High**
-- Problem: Breaks surface and aerates
-- Result: Loses clarity
-- Solution: Keep top submerged
+**Mistake 5: Not Positioning Correctly**
+- Problem: Spills or misses glass
+- Result: Messy, wasteful
+- Solution: Practice positioning
 
-## Mastering Dilution Control
+## Double Straining by Cocktail Type
 
-### Reading Your Drink
+### Shaken Citrus Cocktails
 
-**Visual Cues:**
-- Notice how ice cubes change
-- Watch for condensation on glass
-- Observe slight increase in volume
-- See smooth, consistent motion
-- Professional eye for doneness
+**Essential Applications:**
+- Whiskey Sour
+- Daiquiri
+- Sidecar
+- Margarita
+- All sour family drinks
 
-**Taste Testing:**
-- Professional bartenders taste
-- Check for balance and temperature
-- Adjust stirring time as needed
-- Learn to recognize perfect dilution
-- Develop palate for ideal dilution
+**Why It's Critical:**
+- Ice breaks into many pieces
+- Citrus pulp present
+- Seeds from limes and lemons
+- Creates smooth, professional texture
+- Industry standard
 
-### Time Guidelines
+### Egg White Cocktails
 
-**Stirring Duration:**
-- 30-45 seconds: Standard for most drinks
-- 45-60 seconds: Spirit-forward, strong cocktails
-- 20-30 seconds: Lighter cocktails, pre-chilled ingredients
-- Adjust based on ice quality and temperature
-- Always test and adjust
+**Absolutely Essential:**
+- Whiskey Sour (with egg white)
+- Ramos Gin Fizz
+- Clover Club
+- Any foamy cocktail
 
-**Factors Affecting Time:**
-- Ice temperature and quality
-- Room temperature
-- Starting temperature of ingredients
-- Size and number of ice cubes
-- Volume of liquid to chill
-
-## Advanced Stirring Techniques
-
-### The Japanese Method
-
-**Circular Motion Technique:**
-- Stir in tight circles along glass edge
-- Keep spoon against side continuously
-- Create smooth, flowing motion
-- Professional Japanese bartender technique
-- Maximizes efficiency and control
-
-**Why It's Superior:**
-- More efficient ice movement
-- Better control over dilution
-- Consistent chilling throughout
+**Why Egg Whites Need It:**
+- Creates smooth, creamy foam
+- No lumps or clumps
+- Perfect texture throughout
 - Professional presentation
-- Quiet, focused technique
+- Essential for quality
 
-### The Figure-Eight Method
+### Shaken Cocktails Without Citrus
 
-**Alternating Motion:**
-- Create figure-eight patterns
-- Moves ice through different paths
-- Ensures thorough mixing
-- Some bartenders prefer this
-- Adds slight variation
+**Still Beneficial:**
+- Cream cocktails
+- Martinis (if shaken)
+- Any shaken cocktail
+- Improves texture regardless
+- Professional standard
 
-**When to Use:**
-- Larger mixing glasses
-- Thicker cocktails
-- Personal preference
-- Variation on standard technique
-- Creating consistent results
+**Benefits:**
+- Eliminates ice chips
+- Smoother texture
+- Better presentation
+- More professional result
+- Worth the extra step
 
-### Two-Handed Stirring
+## Advanced Double Straining Techniques
 
-**Professional Technique:**
-- One hand holds mixing glass
-- Other hand stirs with spoon
-- Rotate glass while stirring
-- Requires practice and coordination
-- Impressive to watch
+### The One-Handed Method
 
-**Advantages:**
-- Maximum ice movement
-- Optimal mixing and chilling
-- Shows advanced skill
-- Professional presentation
-- Precise control
+**Professional Speed:**
+- Hold both strainers together
+- Create makeshift two-layer system
+- Strain in one motion
+- Faster for busy service
+- Requires practice
 
-## Stirring by Drink Type
+**How It Works:**
+- Fine mesh nestles inside Hawthorne
+- Creates double-filter effect
+- Single motion straining
+- More efficient workflow
+- Professional technique
 
-### Spirit-Forward Cocktails
+### Clean and Quick
 
-**Classic Examples:**
-- Manhattan
-- Martini
-- Old Fashioned
-- Negroni
-- Boulevardier
+**Efficiency Tips:**
+- Have strainers ready before mixing
+- Position both over glass together
+- Streamline the process
+- Don't rush quality
+- Practice makes smooth
 
-**Stirring Approach:**
-- 30-45 seconds minimum
-- Check dilution carefully
-- Taste for balance
-- Serve at proper temperature
-- Strain into chilled glass
+**Workflow Integration:**
+- Part of your routine
+- Natural extension of stirring/shaking
+- Second nature with practice
+- Adds seconds, not minutes
+- Worth the time
 
-### Aperitifs and Digestifs
+## Why Texture Matters
 
-**Light, Aromatic Drinks:**
-- Americano
-- Aperol Spritz
-- Boulevardier
-- Vermouth-based drinks
+### Mouthfeel Science
 
-**Stirring Considerations:**
-- May need less time
-- Preserve delicate aromatics
-- Watch for over-dilution
-- Balance citrus and bitterness
-- Lighter touch
+**Sensory Experience:**
+- Smooth texture enhances flavor
+- Ice chips distract from taste
+- Creamy texture adds luxury
+- Professional quality perception
+- Overall enjoyment
 
-### Cocktails with Liqueurs
+**Customer Perception:**
+- Icy drinks feel cheap
+- Smooth texture feels premium
+- Attention to detail shows
+- Professional care evident
+- Worth the effort
 
-**Complex Flavor Profiles:**
-- Drinks with multiple liqueurs
-- Bitters-heavy cocktails
-- Layered flavor profiles
+### The Professional Difference
 
-**Stirring Approach:**
-- Thorough mixing essential
-- Combine all flavors evenly
-- Check for integration
-- Balance all components
-- Ensure harmony
-
-## Perfecting Your Stir
-
-### Developing Consistency
-
-**Practice and Repetition:**
-- Stir same cocktail repeatedly
-- Note timing and results
-- Taste each version
-- Adjust technique
-- Build muscle memory
-
-**Standardization:**
-- Establish your timing
-- Create repeatable process
-- Develop consistency
-- Professional approach
-- Build confidence
-
-### Building Intuition
-
-**Sensing the Right Moment:**
-- Feel temperature change
-- Notice ice consistency
-- See visual changes
-- Develop bartender's intuition
-- Learn to read the drink
-
-**Making Adjustments:**
-- Taste and evaluate
-- Adjust technique as needed
-- Account for variables
-- Respond to ingredients
-- Professional flexibility
-
-## Professional Tips and Secrets
-
-### Pre-Chilling Ingredients
-
-**Why It Helps:**
-- Reduces chilling time
-- Better control over dilution
-- Consistent results
-- Professional approach
-- Time efficiency
-
-**What to Pre-Chill:**
-- Vermouth
-- Liqueurs
-- Mixed ingredients
-- Mixing glass itself
-- Everything possible
-
-### Using a Glass Mat
-
-**Protecting Surfaces:**
-- Prevents glass from sticking
-- Allows smooth motion
-- Professional setup
-- Proper presentation
-- Essential equipment
-
-### The Sound of Quality
-
-**What You Hear:**
-- Ice cubes clinking smoothly
-- No harsh cracking sounds
-- Consistent rhythm
-- Professional audio
-- Quality indication
-
-**Training Your Ear:**
-- Listen while you stir
-- Recognize good sound
-- Identify issues by sound
-- Develop auditory skill
-- Professional awareness
-
-## Troubleshooting Common Issues
-
-### Over-Dilution
-
-**Causes:**
-- Stirring too long
-- Ice melting too fast
-- Too many ice cubes
-- Room temperature too warm
-
-**Solutions:**
-- Reduce stirring time
-- Use colder, harder ice
-- Fewer ice cubes
-- Chill ingredients first
-
-### Under-Dilution
-
-**Causes:**
-- Not stirring long enough
-- Ice too cold and hard
-- Insufficient ice cubes
-- Room too cold
-
-**Solutions:**
-- Increase stirring time
-- Let ice temper slightly
-- More ice cubes
-- Stir longer or harder
-
-### Uneven Chilling
-
-**Causes:**
-- Inconsistent stirring
-- Poor ice distribution
-- Not enough ice
-- Irregular cube sizes
-
-**Solutions:**
-- Maintain consistent motion
-- Ensure ice fills glass
-- Add more ice
-- Use uniform cube sizes
-
-## The Art of Presentation
-
-### Final Strain
-
-**Proper Straining:**
-- Use Julep strainer or fine mesh
-- Pour into chilled glass
-- Control pour speed
-- Prevent splashing
+**What Customers Notice:**
+- Smooth, silky texture
+- No ice chips or debris
+- Clean, clear appearance
+- Consistent quality
 - Professional presentation
 
-**Finishing Touch:**
-- Check for ice chips
-- Ensure clarity
-- Smooth, clean pour
-- Impressive final product
-- Attention to detail
+**Why It Matters:**
+- Elevates experience
+- Shows craftsmanship
+- Demonstrates care
+- Professional standard
+- Quality matters
 
-### Maintaining Temperature
+## Equipment Care and Maintenance
 
-**Serving Properly:**
-- Serve immediately after stirring
-- Use chilled glassware
-- Don't let sit
-- Preserve cold temperature
-- Maintain quality
+### Cleaning Your Strainers
 
-## Learning from the Masters
+**After Each Use:**
+- Rinse with hot water immediately
+- Remove any stuck particles
+- Prevent residue buildup
+- Maintain food safety
+- Extend equipment life
 
-### Japanese Bartending Philosophy
+**Deep Cleaning:**
+- Use dish soap for stuck debris
+- Scrub coils carefully
+- Ensure mesh is clear
+- Dry completely
+- Store properly
 
-**Precision and Respect:**
-- Every movement considered
-- Respect for ingredients
-- Focus on perfection
-- Dedication to craft
-- Professional discipline
+### Proper Storage
 
-**Continuous Improvement:**
-- Always refining technique
-- Learning from mistakes
-- Seeking perfection
-- Professional mindset
-- Growth and development
+**Maintaining Quality:**
+- Store in dry place
+- Keep mesh protected
+- Prevent bending or warping
+- Maintain cleanliness
+- Extend longevity
 
-### Building Your Skill
+**Equipment Life:**
+- Good strainers last years
+- Proper care pays off
+- Quality tools maintain quality
+- Professional investment
+- Worth maintaining
 
-**Daily Practice:**
-- Stir drinks regularly
-- Taste and adjust
-- Seek feedback
-- Compare to standards
-- Improve consistently
+## Troubleshooting
 
-**Study and Learn:**
-- Watch professional bartenders
-- Read cocktail books
-- Understand theory
-- Practice techniques
-- Develop expertise
+### Clogged Fine Mesh
+
+**Problem:**
+- Too much pulp caught
+- Straining too slow
+
+**Solutions:**
+- Use larger mesh size
+- Strain through Hawthorne first (you should!)
+- Clean between cocktails
+- Don't let debris accumulate
+- Maintain equipment
+
+### Slow Straining
+
+**Causes:**
+- Mesh too fine for ingredients
+- Too much pulp or ice
+- Wrong order of operations
+
+**Solutions:**
+- Balance mesh fineness
+- Hawthorne first always
+- Clean regularly
+- Right tool for the job
+- Adjust as needed
+
+## Professional Tips
+
+### Speed and Efficiency
+
+**Making It Fast:**
+- Setup before you need it
+- Have both strainers ready
+- Practice the motion
+- Make it fluid
+- Don't sacrifice quality for speed
+
+**Integration:**
+- Part of muscle memory
+- Natural workflow step
+- Automatic habit
+- Professional routine
+- Second nature
+
+### When Guests Ask
+
+**Explaining the Process:**
+- Educate about texture
+- Show the difference
+- Demonstrate craftsmanship
+- Share technique knowledge
+- Professional teaching
+
+**Building Appreciation:**
+- Customers notice quality
+- They appreciate care
+- Word spreads about quality
+- Professional reputation
+- Worth the education
+
+## The Science Behind the Smoothness
+
+### Ice Chip Problem
+
+**Why Chips Form:**
+- Ice breaks during shaking
+- Impact creates small pieces
+- Smaller pieces melt faster
+- Uneven dilution results
+- Texture suffers
+
+**How Double Strain Fixes:**
+- Removes all ice chips
+- Prevents continued melting
+- Consistent dilution
+- Controlled texture
+- Professional result
+
+### Pulp and Sediment
+
+**Natural Debris:**
+- Citrus has pulp naturally
+- Seeds can slip through
+- Other fruits have fiber
+- Natural but unwanted
+- Professionals remove it
+
+**Professional Solution:**
+- Fine mesh catches everything
+- Crystal-clear cocktails
+- Smooth, clean texture
+- No visible debris
+- Premium quality
 
 ## Conclusion
 
-Mastering the art of stirring cocktails is about more than just moving a spoon—it's about understanding dilution, respecting ingredients, and developing the intuition to create perfectly balanced drinks. Whether you're stirring a classic Manhattan or exploring new stirred creations, the technique you develop will elevate every cocktail you make.
+The double strain technique is a simple yet transformative method that elevates any cocktail from good to exceptional. By taking those few extra seconds to strain twice, you create that silk-smooth texture and crystal-clear presentation that defines professional-quality cocktails.
 
 **Key Takeaways:**
-- Stir spirit-forward cocktails for clarity and smoothness
-- Use quality ice and proper equipment
-- Stir for 30-45 seconds, adjusting as needed
-- Develop consistent technique through practice
-- Taste and adjust for perfect dilution
+- Always double strain shaken cocktails
+- Use Hawthorne strainer first, then fine mesh sieve
+- Essential for egg white and citrus cocktails
+- Creates professional-grade texture and clarity
+- Worth the extra effort for quality
 
 **Remember:**
-- Slow, controlled motion is key
-- Practice develops consistency and intuition
 - Quality equipment makes a difference
-- Every cocktail deserves proper stirring
-- Mastery comes with dedicated practice
+- Practice makes the process efficient
+- Texture significantly enhances experience
+- Details separate good from great
+- Professional bartenders never skip this step
 
-The path to mastering stirring is one of patience, practice, and attention to detail. Each stirred cocktail is an opportunity to refine your technique and move closer to bartending excellence. Here's to stirring your way to perfection!`;
+Mastering the double strain is investing in your cocktails' quality. Every perfectly smooth, crystal-clear drink you serve demonstrates your commitment to craft and attention to detail. That's the hallmark of a professional bartender.`;
 
     await adminDb.collection('education_articles').doc(articleId).update({
       content: fullContent,
-      readingTime: 18,
+      readingTime: 12,
       updatedAt: new Date(),
       wordCount: fullContent.split(/\s+/).length,
       lastReviewed: new Date()
