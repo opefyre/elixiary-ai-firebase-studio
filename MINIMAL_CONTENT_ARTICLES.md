@@ -10,7 +10,7 @@
 ## Articles That Need Full Content
 
 ### Category: Techniques (4 articles)
-1. **Stirring vs. Shaking: When to Use Each Method**
+1. ✅ **Stirring vs. Shaking: When to Use Each Method** - COMPLETED (7,584 chars)
    - Current: 91 chars
    - Needs: Comprehensive guide on when to stir vs shake
 
