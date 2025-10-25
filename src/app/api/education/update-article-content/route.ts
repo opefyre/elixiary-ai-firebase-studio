@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const { adminDb } = initializeFirebaseServer();
 
-    const articleSlug = "advanced-bar-equipment-serious-home-bartenders";
+    const articleSlug = "advanced-bar-equipment-serious-bartenders";
     
     const articlesSnapshot = await adminDb.collection('education_articles')
       .where('slug', '==', articleSlug)
