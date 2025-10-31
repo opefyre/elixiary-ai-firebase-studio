@@ -25,7 +25,6 @@ import {
   Loader2,
   Zap
 } from 'lucide-react';
-import { useRecipes } from '@/firebase/firestore/use-recipes';
 import { useSubscription } from '@/firebase';
 import ReactMarkdown from 'react-markdown';
 import { useToast } from '@/hooks/use-toast';
@@ -58,9 +57,17 @@ interface UnifiedRecipeCardProps {
   };
   onDelete?: (recipeId: string) => Promise<void>;
   onUnsave?: (recipeId: string) => Promise<void>;
+  updateRecipeTags: (recipeId: string, tags: string[]) => Promise<void>;
+  updateRecipeImage: (recipeId: string, imageUrl: string, imagePrompt?: string) => Promise<void>;
 }
 
-export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeCardProps) {
+export function UnifiedRecipeCard({
+  recipe,
+  onDelete,
+  onUnsave,
+  updateRecipeTags,
+  updateRecipeImage,
+}: UnifiedRecipeCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
@@ -74,7 +81,6 @@ export function UnifiedRecipeCard({ recipe, onDelete, onUnsave }: UnifiedRecipeC
   const [showUnsaveDialog, setShowUnsaveDialog] = useState(false);
   
   const { toast } = useToast();
-  const { updateRecipeTags, updateRecipeImage } = useRecipes();
   const { isPro } = useSubscription();
 
   const isAIRecipe = recipe.source === 'ai';

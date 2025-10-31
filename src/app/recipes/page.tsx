@@ -15,7 +15,7 @@ import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
 
 export default function RecipesPage() {
   const { user, isUserLoading } = useUser();
-  const { recipes, isLoading, deleteRecipe } = useRecipes();
+  const { recipes, isLoading, deleteRecipe, updateRecipeTags, updateRecipeImage } = useRecipes();
   const { savedRecipes, unsaveRecipe } = useSavedRecipes();
   const { isPro } = useSubscription();
   const [searchQuery, setSearchQuery] = useState('');
@@ -343,6 +343,8 @@ export default function RecipesPage() {
               recipe={recipe}
               onDelete={recipe.source === 'ai' ? deleteRecipe : undefined}
               onUnsave={recipe.source === 'curated' ? unsaveRecipe : undefined}
+              updateRecipeTags={updateRecipeTags}
+              updateRecipeImage={updateRecipeImage}
             />
           ))}
         </div>
