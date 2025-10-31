@@ -72,6 +72,14 @@ export async function GET(request: NextRequest) {
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Articles Archive -->
+  <url>
+    <loc>https://elixiary.com/education/articles</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
   
   <!-- Category Pages -->
   ${categories.map((category) => `
