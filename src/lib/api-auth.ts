@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { FieldValue } from 'firebase-admin/firestore';
 import { APIKeyManager } from './api-keys';
 import { RateLimiter } from './rate-limiter';
 import { InputSanitizer } from './input-sanitizer';
@@ -242,7 +243,7 @@ export class APIAuthenticator {
       
       // Update usage counters in the API key document
       const updateData = {
-        'usage.totalRequests': adminDb.FieldValue.increment(1),
+        'usage.totalRequests': FieldValue.increment(1),
         'usage.lastUsed': now,
         'usage.requestsToday': requestsToday,
         'usage.requestsThisMonth': requestsThisMonth,
