@@ -3,6 +3,7 @@ import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
 import type {
   CollectionReference,
+  DocumentSnapshot,
   OrderByDirection,
   Query,
   QueryDocumentSnapshot,
@@ -16,6 +17,8 @@ const querySchema = z.object({
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(10),
   sort: z.enum(['newest', 'oldest', 'popular', 'readingTime']).nullable().default('newest'),
+  cursor: z.string().nullable().optional(),
+  direction: z.enum(['next', 'prev']).nullable().default('next'),
 });
 
 type ArticleQueryParams = z.infer<typeof querySchema>;
@@ -74,6 +77,58 @@ function mapArticleFromSnapshot(doc: QueryDocumentSnapshot): ArticleWithTokens {
     : [];
 
   return { article, searchTokens };
+}
+
+type CursorPayload = {
+  id: string;
+  publishedAt?: string | number;
+  sort?: ArticleQueryParams['sort'];
+};
+
+function encodeCursor(payload: CursorPayload): string {
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
+}
+
+function encodeCursorFromSnapshot(
+  doc: DocumentSnapshot | QueryDocumentSnapshot,
+  sort: ArticleQueryParams['sort']
+): string {
+  const data = doc.data();
+
+  let publishedAt: string | number | undefined;
+
+  if (data?.publishedAt) {
+    const publishedAtDate = toDate(data.publishedAt);
+    if (!Number.isNaN(publishedAtDate.getTime())) {
+      publishedAt = publishedAtDate.toISOString();
+    }
+  }
+
+  return encodeCursor({
+    id: doc.id,
+    publishedAt,
+    sort,
+  });
+}
+
+function decodeCursor(cursor?: string | null): CursorPayload | null {
+  if (!cursor) {
+    return null;
+  }
+
+  try {
+    const json = Buffer.from(cursor, 'base64').toString('utf8');
+    const parsed = JSON.parse(json);
+
+    if (parsed && typeof parsed.id === 'string') {
+      return parsed;
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Failed to decode pagination cursor', error);
+    return null;
+  }
 }
 
 function sortArticlesInMemory(
@@ -166,13 +221,52 @@ async function buildFallbackResponse(
   const sortedArticles = sortArticlesInMemory(filteredArticles, query.sort);
 
   const total = sortedArticles.length;
-  const startIndex = (query.page - 1) * query.limit;
-  const paginatedArticles =
-    startIndex < sortedArticles.length
-      ? sortedArticles.slice(startIndex, startIndex + query.limit)
-      : [];
+
+  const decodedCursor = decodeCursor(query.cursor);
+  let paginatedArticles: EducationArticle[] = [];
+
+  if (decodedCursor) {
+    const cursorIndex = sortedArticles.findIndex((article) => article.id === decodedCursor.id);
+
+    if (cursorIndex !== -1) {
+      if (query.direction === 'prev') {
+        const endIndex = cursorIndex;
+        const startIndex = Math.max(0, endIndex - query.limit);
+        paginatedArticles = sortedArticles.slice(startIndex, endIndex);
+      } else {
+        const startIndex = cursorIndex + 1;
+        paginatedArticles = sortedArticles.slice(startIndex, startIndex + query.limit);
+      }
+    }
+  }
+
+  if (paginatedArticles.length === 0) {
+    const startIndex = (query.page - 1) * query.limit;
+    paginatedArticles =
+      startIndex < sortedArticles.length
+        ? sortedArticles.slice(startIndex, startIndex + query.limit)
+        : [];
+  }
 
   const totalPages = total === 0 ? 0 : Math.ceil(total / query.limit);
+
+  const nextCursor =
+    paginatedArticles.length === query.limit
+      ? encodeCursor({
+          id: paginatedArticles[paginatedArticles.length - 1]!.id,
+          publishedAt: paginatedArticles[paginatedArticles.length - 1]!.publishedAt.toISOString(),
+          sort: query.sort,
+        })
+      : null;
+
+  const prevCursor =
+    query.page > 1 && paginatedArticles.length > 0
+      ? encodeCursor({
+          id: paginatedArticles[0]!.id,
+          publishedAt: paginatedArticles[0]!.publishedAt.toISOString(),
+          sort: query.sort,
+        })
+      : null;
 
   return {
     data: paginatedArticles,
@@ -183,6 +277,10 @@ async function buildFallbackResponse(
       totalPages,
       hasNext: query.page < totalPages,
       hasPrev: query.page > 1 && total > 0,
+      nextCursor,
+      prevCursor,
+      cursor: query.cursor ?? null,
+      direction: query.direction ?? 'next',
     },
   };
 }
@@ -200,6 +298,8 @@ export async function GET(request: NextRequest) {
       page: searchParams.get('page') || '1',
       limit: searchParams.get('limit') || '10',
       sort: searchParams.get('sort') || 'newest',
+      cursor: searchParams.get('cursor'),
+      direction: searchParams.get('direction') || 'next',
     });
 
     parsedQuery = query;
@@ -266,20 +366,95 @@ export async function GET(request: NextRequest) {
       total = fallbackSnapshot.size;
     }
 
-    const offset = (query.page - 1) * query.limit;
-    if (offset > 0) {
-      orderedQuery = orderedQuery.offset(offset);
+    let decodedCursor = decodeCursor(query.cursor);
+    const direction = query.direction ?? 'next';
+
+    if (direction === 'prev' && !decodedCursor) {
+      return NextResponse.json(
+        { error: 'Cursor is required when requesting the previous page.' },
+        { status: 400 }
+      );
     }
 
-    orderedQuery = orderedQuery.limit(query.limit);
+    let paginatedQuery: Query = orderedQuery;
+    let previousPageCursor: DocumentSnapshot | QueryDocumentSnapshot | null = null;
 
-    const snapshot = await orderedQuery.get();
+    if (decodedCursor) {
+      const cursorDocSnapshot = await articlesRef.doc(decodedCursor.id).get();
+
+      if (!cursorDocSnapshot.exists) {
+        return NextResponse.json(
+          { error: 'Invalid cursor provided' },
+          { status: 400 }
+        );
+      }
+
+      if (direction === 'prev') {
+        paginatedQuery = paginatedQuery
+          .endBefore(cursorDocSnapshot as DocumentSnapshot)
+          .limitToLast(query.limit);
+      } else {
+        previousPageCursor = cursorDocSnapshot as DocumentSnapshot;
+        paginatedQuery = paginatedQuery
+          .startAfter(cursorDocSnapshot as DocumentSnapshot)
+          .limit(query.limit);
+      }
+    } else if (query.page > 1) {
+      let traversalQuery: Query = paginatedQuery.limit(query.limit);
+      let lastDoc: QueryDocumentSnapshot | null = null;
+
+      for (let currentPage = 1; currentPage < query.page; currentPage++) {
+        const traversalSnapshot = await traversalQuery.get();
+        if (traversalSnapshot.empty) {
+          lastDoc = null;
+          break;
+        }
+
+        lastDoc = traversalSnapshot.docs[traversalSnapshot.docs.length - 1] ?? null;
+
+        traversalQuery = paginatedQuery.startAfter(lastDoc as DocumentSnapshot).limit(query.limit);
+      }
+
+      if (lastDoc) {
+        previousPageCursor = lastDoc;
+        paginatedQuery = paginatedQuery.startAfter(lastDoc as DocumentSnapshot).limit(query.limit);
+      } else {
+        paginatedQuery = paginatedQuery.limit(query.limit);
+      }
+    } else {
+      paginatedQuery = paginatedQuery.limit(query.limit);
+    }
+
+    const snapshot = await paginatedQuery.get();
     const articles: EducationArticle[] = [];
 
-    snapshot.forEach((doc) => {
+    let nextCursor: string | null = null;
+    let prevCursor: string | null = null;
+
+    snapshot.forEach((doc, index) => {
       const { article } = mapArticleFromSnapshot(doc);
       articles.push(article);
+
+      if (index === 0 && (query.page > 1 || decodedCursor)) {
+        prevCursor = encodeCursor({
+          id: doc.id,
+          publishedAt: article.publishedAt.toISOString(),
+          sort: query.sort,
+        });
+      }
+
+      if (index === snapshot.size - 1 && snapshot.size === query.limit) {
+        nextCursor = encodeCursor({
+          id: doc.id,
+          publishedAt: article.publishedAt.toISOString(),
+          sort: query.sort,
+        });
+      }
     });
+
+    if (!prevCursor && previousPageCursor && (query.page > 1 || decodedCursor)) {
+      prevCursor = encodeCursorFromSnapshot(previousPageCursor, query.sort);
+    }
 
     const response: PaginatedResponse<EducationArticle> = {
       data: articles,
@@ -290,6 +465,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / query.limit),
         hasNext: query.page < Math.ceil(total / query.limit),
         hasPrev: query.page > 1,
+        nextCursor,
+        prevCursor,
+        cursor: query.cursor ?? null,
+        direction,
       },
     };
 
