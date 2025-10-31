@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
+import { FieldPath } from 'firebase-admin/firestore';
+import type { OrderByDirection, Query } from 'firebase-admin/firestore';
 import { EducationArticle, PaginatedResponse } from '@/types/education';
 
 const querySchema = z.object({
@@ -28,12 +30,75 @@ export async function GET(request: NextRequest) {
     const articlesRef = adminDb.collection('education_articles');
 
     // Build query based on filters
-    let queryBuilder = articlesRef.where('status', '==', 'published');
+    let filteredQuery = articlesRef.where('status', '==', 'published');
 
-    // Apply pagination
-    queryBuilder = queryBuilder.limit(query.limit);
+    if (query.category) {
+      filteredQuery = filteredQuery.where('category', '==', query.category);
+    }
 
-    const snapshot = await queryBuilder.get();
+    if (query.difficulty) {
+      filteredQuery = filteredQuery.where('difficulty', '==', query.difficulty);
+    }
+
+    if (query.search && query.search.trim().length > 0) {
+      const searchTokens = query.search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+      if (searchTokens.length === 1) {
+        filteredQuery = filteredQuery.where('searchTokens', 'array-contains', searchTokens[0]);
+      } else if (searchTokens.length > 1) {
+        filteredQuery = filteredQuery.where(
+          'searchTokens',
+          'array-contains-any',
+          searchTokens.slice(0, 10)
+        );
+      }
+    }
+
+    const sortOrders: Array<{ field: string | FieldPath; direction: OrderByDirection }> = [];
+
+    switch (query.sort) {
+      case 'oldest':
+        sortOrders.push({ field: 'publishedAt', direction: 'asc' });
+        break;
+      case 'popular':
+        sortOrders.push({ field: 'stats.views', direction: 'desc' });
+        sortOrders.push({ field: 'publishedAt', direction: 'desc' });
+        break;
+      case 'readingTime':
+        sortOrders.push({ field: 'readingTime', direction: 'asc' });
+        sortOrders.push({ field: 'publishedAt', direction: 'desc' });
+        break;
+      case 'newest':
+      default:
+        sortOrders.push({ field: 'publishedAt', direction: 'desc' });
+        break;
+    }
+
+    // Ensure deterministic ordering regardless of the requested sort
+    sortOrders.push({ field: FieldPath.documentId(), direction: 'asc' });
+
+    let orderedQuery: Query = filteredQuery;
+    for (const { field, direction } of sortOrders) {
+      orderedQuery = orderedQuery.orderBy(field, direction);
+    }
+
+    let total: number;
+    try {
+      const totalSnapshot = await filteredQuery.count().get();
+      total = totalSnapshot.data().count;
+    } catch (error) {
+      const fallbackSnapshot = await filteredQuery.get();
+      total = fallbackSnapshot.size;
+    }
+
+    const offset = (query.page - 1) * query.limit;
+    if (offset > 0) {
+      orderedQuery = orderedQuery.offset(offset);
+    }
+
+    orderedQuery = orderedQuery.limit(query.limit);
+
+    const snapshot = await orderedQuery.get();
     const articles: EducationArticle[] = [];
 
     snapshot.forEach((doc) => {
@@ -57,11 +122,6 @@ export async function GET(request: NextRequest) {
         stats: data.stats || { views: 0, likes: 0, shares: 0 },
       });
     });
-
-    // Get total count for pagination
-    const totalQuery = articlesRef.where('status', '==', 'published');
-    const totalSnapshot = await totalQuery.get();
-    const total = totalSnapshot.size;
 
     const response: PaginatedResponse<EducationArticle> = {
       data: articles,
