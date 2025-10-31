@@ -175,15 +175,15 @@ export function EducationHub() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-24">
+    <div className="container mx-auto px-4 py-10 pt-28">
       {/* Header */}
-      <section className="mb-12 text-center">
-        <h1 className="font-headline text-4xl font-bold md:text-5xl mb-4 text-blue-400">
-          Master the Art of Mixology
+      <section className="mb-12 text-center space-y-4">
+        <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-foreground">
+          Elevate Your Mixology Practice
         </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-lg text-muted-foreground">
-          Learn from expert mixologists with our comprehensive education center. 
-          From cocktail fundamentals to advanced techniques, we've got you covered.
+        <p className="mx-auto max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed">
+          Learn from expert mixologists with a curated library of lessons, guides, and hands-on tutorials.
+          Explore techniques, tools, and timeless recipes crafted for every skill level.
         </p>
       </section>
 
@@ -194,7 +194,7 @@ export function EducationHub() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Highlight Bar */}
       <section className="mb-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
@@ -233,11 +233,11 @@ export function EducationHub() {
 
       {/* Categories Section */}
       <section className="mb-16">
-        <div className="text-center mb-12">
-          <h2 className="font-headline text-3xl font-bold mb-4 text-blue-400">
+        <div className="text-center mb-12 space-y-3">
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
             Explore by Category
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Browse our carefully curated categories to find content that matches your learning goals and experience level.
           </p>
         </div>
@@ -261,13 +261,13 @@ export function EducationHub() {
       </section>
 
       {/* Featured Articles */}
-      {featuredArticles.length > 0 && (
+        {featuredArticles.length > 0 && (
         <section className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="font-headline text-3xl font-bold mb-4 text-blue-400">
+          <div className="text-center mb-12 space-y-3">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
               Featured Articles
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
               Most popular and highly-rated articles from our community.
             </p>
           </div>
@@ -283,10 +283,10 @@ export function EducationHub() {
       <section className="mb-16">
         <div className="flex justify-between items-center mb-12">
           <div>
-            <h2 className="font-headline text-3xl font-bold mb-4 text-blue-400">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground mb-2">
               {searchQuery ? `Search Results for "${searchQuery}"` : 'Latest Articles'}
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm md:text-base">
               {searchQuery ? `Found ${articles.length} articles` : 'Stay up to date with the latest mixology insights and techniques.'}
             </p>
           </div>
