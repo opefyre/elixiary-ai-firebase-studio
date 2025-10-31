@@ -24,7 +24,8 @@ import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useRecipes, useSubscription, useUser, useFirebase } from "@/firebase";
+import { useRecipeActions } from "@/firebase/firestore/use-recipe-actions";
+import { useSubscription, useUser, useFirebase } from "@/firebase";
 import { useBadges } from "@/hooks/use-badges";
 import { incrementGenerationCount } from "@/firebase/firestore/use-subscription";
 import { UpgradeModal } from "@/components/upgrade-modal";
@@ -97,7 +98,7 @@ export function RecipeGenerationForm({
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [customization, setCustomization] = useState<CustomizationOptions | null>(null);
   const { toast } = useToast();
-  const { saveRecipe } = useRecipes();
+  const { saveRecipe } = useRecipeActions();
   const { user } = useUser();
   const { firestore, auth } = useFirebase();
   const { canGenerateRecipe, canSaveRecipe, remainingGenerations, remainingSaves, isPro } = useSubscription();

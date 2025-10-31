@@ -24,5 +24,6 @@ export function getSdks(firebaseApp: FirebaseApp) {
 
 export * from './provider';
 export * from './client-provider';
+export * from './firestore/use-recipe-actions';
 export * from './firestore/use-recipes';
 export * from './firestore/use-subscription';
