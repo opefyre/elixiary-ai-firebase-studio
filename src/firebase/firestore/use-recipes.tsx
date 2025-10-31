@@ -1,19 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase';
-import { updateRecipeCount } from '@/firebase/firestore/use-subscription';
+import { useRecipeActions } from '@/firebase/firestore/use-recipe-actions';
 import type { GenerateCocktailRecipeOutput } from '@/ai/flows/generate-cocktail-recipe';
 
 export interface SavedRecipe extends GenerateCocktailRecipeOutput {
@@ -34,6 +24,7 @@ export function useRecipes() {
   const [recipes, setRecipes] = useState<SavedRecipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const actions = useRecipeActions();
 
   useEffect(() => {
     if (!user) {
@@ -67,75 +58,11 @@ export function useRecipes() {
     return () => unsubscribe();
   }, [user, firestore]);
 
-  const saveRecipe = async (
-    recipe: GenerateCocktailRecipeOutput,
-    userPrompt: string
-  ) => {
-    if (!user) throw new Error('User must be authenticated to save recipes');
-
-    const recipesRef = collection(firestore, `users/${user.uid}/recipes`);
-    await addDoc(recipesRef, {
-      ...recipe,
-      userId: user.uid,
-      userPrompt,
-      createdAt: serverTimestamp(),
-    });
-    
-    // Update recipe count for usage tracking
-    await updateRecipeCount(user.uid, firestore, 1);
-  };
-
-  const deleteRecipe = async (recipeId: string) => {
-    if (!user) throw new Error('User must be authenticated to delete recipes');
-
-    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
-    await deleteDoc(recipeRef);
-    
-    // Update recipe count for usage tracking
-    await updateRecipeCount(user.uid, firestore, -1);
-  };
-
-  const updateRecipeTags = async (recipeId: string, tags: string[]) => {
-    if (!user) throw new Error('User must be authenticated');
-
-    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
-    await updateDoc(recipeRef, { tags });
-  };
-
-  const updateRecipeCollection = async (recipeId: string, collection: string) => {
-    if (!user) throw new Error('User must be authenticated');
-
-    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
-    await updateDoc(recipeRef, { collection });
-  };
-
-  const toggleFavorite = async (recipeId: string, isFavorite: boolean) => {
-    if (!user) throw new Error('User must be authenticated');
-
-    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
-    await updateDoc(recipeRef, { isFavorite });
-  };
-
-  const updateRecipeImage = async (recipeId: string, imageUrl: string, imagePrompt?: string) => {
-    if (!user) throw new Error('User must be authenticated');
-
-    const recipeRef = doc(firestore, `users/${user.uid}/recipes/${recipeId}`);
-    await updateDoc(recipeRef, { 
-      imageUrl,
-      ...(imagePrompt && { imagePrompt }),
-    });
-  };
-
   return {
     recipes,
     isLoading,
     error,
-    saveRecipe,
-    deleteRecipe,
-    updateRecipeTags,
-    updateRecipeCollection,
-    toggleFavorite,
-    updateRecipeImage,
+    ...actions,
   };
 }
 
