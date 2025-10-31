@@ -110,7 +110,7 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
   return (
     <div className="relative w-full">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/60 w-5 h-5" />
         <Input
           ref={inputRef}
           type="text"
@@ -123,14 +123,14 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
               setShowSuggestions(true);
             }
           }}
-          className="pl-10 pr-10 h-12 text-lg"
+          className="pl-10 pr-10 h-12 text-sm md:text-base rounded-xl border border-border/60 bg-background/80 focus:border-foreground/40 focus:ring-0"
         />
         {query && (
           <Button
             variant="ghost"
             size="sm"
             onClick={clearSearch}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-foreground/60 hover:text-foreground"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -139,11 +139,11 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
 
       {/* Suggestions Dropdown */}
       {showSuggestions && (
-        <Card ref={suggestionsRef} className="absolute top-full left-0 right-0 mt-2 z-50 shadow-lg border-0 bg-background">
+        <Card ref={suggestionsRef} className="absolute top-full left-0 right-0 mt-2 z-50 border border-border/60 bg-background/95 shadow-sm backdrop-blur">
           <CardContent className="p-0">
             {loading ? (
               <div className="p-4 text-center text-muted-foreground">
-                <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                <div className="animate-spin w-5 h-5 border-2 border-foreground/40 border-t-transparent rounded-full mx-auto mb-2"></div>
                 Searching...
               </div>
             ) : suggestions.length > 0 ? (
@@ -152,15 +152,15 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
                   <button
                     key={article.id}
                     onClick={() => handleSuggestionClick(article)}
-                    className="w-full text-left p-4 hover:bg-muted border-b border-border last:border-b-0"
+                    className="w-full text-left p-4 transition-colors hover:bg-muted/40 border-b border-border/60 last:border-b-0"
                   >
                     <div className="font-medium mb-1">{article.title}</div>
-                    <div className="text-sm text-muted-foreground line-clamp-2">{article.excerpt}</div>
+                    <div className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{article.excerpt}</div>
                     <div className="flex items-center space-x-2 mt-2">
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs border border-border/60 bg-muted/40 text-foreground/70">
                         {article.category}
                       </Badge>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border border-border/60 text-foreground/60">
                         {article.difficulty}
                       </Badge>
                     </div>
@@ -179,7 +179,7 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
                     <Badge
                       key={term}
                       variant="outline"
-                      className="cursor-pointer hover:bg-primary/10 hover:border-primary/20 transition-colors"
+                      className="cursor-pointer border border-border/60 text-foreground/70 hover:bg-muted/40 transition-colors"
                       onClick={() => handlePopularSearchClick(term)}
                     >
                       {term}
