@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
-import type { OrderByDirection, Query } from 'firebase-admin/firestore';
+import type {
+  CollectionReference,
+  OrderByDirection,
+  Query,
+  QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
 import { EducationArticle, PaginatedResponse } from '@/types/education';
 
 const querySchema = z.object({
@@ -13,7 +18,179 @@ const querySchema = z.object({
   sort: z.enum(['newest', 'oldest', 'popular', 'readingTime']).nullable().default('newest'),
 });
 
+type ArticleQueryParams = z.infer<typeof querySchema>;
+
+type ArticleWithTokens = {
+  article: EducationArticle;
+  searchTokens: string[];
+};
+
+function isMissingIndexError(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const firestoreError = error as { code?: unknown; message?: unknown };
+
+  return (
+    firestoreError.code === 9 ||
+    (typeof firestoreError.message === 'string' &&
+      firestoreError.message.toLowerCase().includes('requires an index'))
+  );
+}
+
+function toDate(value: any): Date {
+  if (value?.toDate) {
+    return value.toDate();
+  }
+
+  return value instanceof Date ? value : new Date(value);
+}
+
+function mapArticleFromSnapshot(doc: QueryDocumentSnapshot): ArticleWithTokens {
+  const data = doc.data();
+
+  const article: EducationArticle = {
+    id: doc.id,
+    title: data.title,
+    slug: data.slug,
+    excerpt: data.excerpt,
+    content: data.content,
+    featuredImage: data.featuredImage,
+    category: data.category,
+    difficulty: data.difficulty,
+    readingTime: data.readingTime,
+    tags: data.tags || [],
+    author: data.author,
+    publishedAt: toDate(data.publishedAt),
+    updatedAt: toDate(data.updatedAt),
+    status: data.status,
+    seo: data.seo,
+    stats: data.stats || { views: 0, likes: 0, shares: 0 },
+  };
+
+  const searchTokens = Array.isArray(data.searchTokens)
+    ? data.searchTokens.map((token: unknown) => String(token))
+    : [];
+
+  return { article, searchTokens };
+}
+
+function sortArticlesInMemory(
+  articles: EducationArticle[],
+  sortOrder: ArticleQueryParams['sort']
+) {
+  const articlesCopy = [...articles];
+
+  switch (sortOrder) {
+    case 'oldest':
+      return articlesCopy.sort((a, b) => a.publishedAt.getTime() - b.publishedAt.getTime());
+    case 'popular':
+      return articlesCopy.sort((a, b) => {
+        const viewsDiff = (b.stats?.views ?? 0) - (a.stats?.views ?? 0);
+
+        if (viewsDiff !== 0) {
+          return viewsDiff;
+        }
+
+        return b.publishedAt.getTime() - a.publishedAt.getTime();
+      });
+    case 'readingTime':
+      return articlesCopy.sort((a, b) => {
+        const readingDiff = (a.readingTime ?? 0) - (b.readingTime ?? 0);
+
+        if (readingDiff !== 0) {
+          return readingDiff;
+        }
+
+        return b.publishedAt.getTime() - a.publishedAt.getTime();
+      });
+    case 'newest':
+    default:
+      return articlesCopy.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+  }
+}
+
+function filterArticlesBySearch(
+  articles: ArticleWithTokens[],
+  searchQuery: ArticleQueryParams['search']
+) {
+  if (!searchQuery || searchQuery.trim().length === 0) {
+    return articles;
+  }
+
+  const tokens = searchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+  if (tokens.length === 0) {
+    return articles;
+  }
+
+  return articles.filter(({ article, searchTokens }) => {
+    if (!searchTokens.length) {
+      return false;
+    }
+
+    const normalizedTokens = searchTokens.map((token) => token.toLowerCase());
+
+    if (tokens.length === 1) {
+      return normalizedTokens.includes(tokens[0]);
+    }
+
+    return tokens.some((token) => normalizedTokens.includes(token));
+  });
+}
+
+async function buildFallbackResponse(
+  articlesRef: CollectionReference,
+  query: ArticleQueryParams
+): Promise<PaginatedResponse<EducationArticle>> {
+  const snapshot = await articlesRef.where('status', '==', 'published').get();
+
+  let articlesWithTokens = snapshot.docs.map(mapArticleFromSnapshot);
+
+  if (query.category) {
+    articlesWithTokens = articlesWithTokens.filter(
+      ({ article }) => article.category === query.category
+    );
+  }
+
+  if (query.difficulty) {
+    articlesWithTokens = articlesWithTokens.filter(
+      ({ article }) => article.difficulty === query.difficulty
+    );
+  }
+
+  articlesWithTokens = filterArticlesBySearch(articlesWithTokens, query.search);
+
+  const filteredArticles = articlesWithTokens.map(({ article }) => article);
+  const sortedArticles = sortArticlesInMemory(filteredArticles, query.sort);
+
+  const total = sortedArticles.length;
+  const startIndex = (query.page - 1) * query.limit;
+  const paginatedArticles =
+    startIndex < sortedArticles.length
+      ? sortedArticles.slice(startIndex, startIndex + query.limit)
+      : [];
+
+  const totalPages = total === 0 ? 0 : Math.ceil(total / query.limit);
+
+  return {
+    data: paginatedArticles,
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages,
+      hasNext: query.page < totalPages,
+      hasPrev: query.page > 1 && total > 0,
+    },
+  };
+}
+
 export async function GET(request: NextRequest) {
+  let articlesRef: CollectionReference | null = null;
+  let parsedQuery: ArticleQueryParams | null = null;
+
   try {
     const { searchParams } = new URL(request.url);
     const query = querySchema.parse({
@@ -25,8 +202,10 @@ export async function GET(request: NextRequest) {
       sort: searchParams.get('sort') || 'newest',
     });
 
+    parsedQuery = query;
+
     const { adminDb } = initializeFirebaseServer();
-    const articlesRef = adminDb.collection('education_articles');
+    articlesRef = adminDb.collection('education_articles');
 
     // Build query based on filters
     let filteredQuery = articlesRef.where('status', '==', 'published');
@@ -98,25 +277,8 @@ export async function GET(request: NextRequest) {
     const articles: EducationArticle[] = [];
 
     snapshot.forEach((doc) => {
-      const data = doc.data();
-      articles.push({
-        id: doc.id,
-        title: data.title,
-        slug: data.slug,
-        excerpt: data.excerpt,
-        content: data.content,
-        featuredImage: data.featuredImage,
-        category: data.category,
-        difficulty: data.difficulty,
-        readingTime: data.readingTime,
-        tags: data.tags || [],
-        author: data.author,
-        publishedAt: data.publishedAt?.toDate ? data.publishedAt.toDate() : data.publishedAt,
-        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt,
-        status: data.status,
-        seo: data.seo,
-        stats: data.stats || { views: 0, likes: 0, shares: 0 },
-      });
+      const { article } = mapArticleFromSnapshot(doc);
+      articles.push(article);
     });
 
     const response: PaginatedResponse<EducationArticle> = {
@@ -133,6 +295,18 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error: any) {
+    if (isMissingIndexError(error) && articlesRef && parsedQuery) {
+      try {
+        console.warn(
+          'Missing Firestore index for education articles query. Using fallback processing.'
+        );
+        const fallbackResponse = await buildFallbackResponse(articlesRef, parsedQuery);
+        return NextResponse.json(fallbackResponse);
+      } catch (fallbackError) {
+        console.error('Fallback processing for education articles failed:', fallbackError);
+      }
+    }
+
     console.error('Error fetching education articles:', error);
     return NextResponse.json(
       { error: 'Failed to fetch articles', details: error.message },
