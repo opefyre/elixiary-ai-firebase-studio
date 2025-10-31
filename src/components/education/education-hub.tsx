@@ -1,15 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Search, BookOpen, Users, TrendingUp, Star, Clock, Filter } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EducationArticle, EducationCategory } from '@/types/education';
 import { ArticleCard } from './article-card';
 import { CategoryGrid } from './category-grid';
 import { SearchInterface } from './search-interface';
+
+type AnalyticsEntry = {
+  type?: string;
+  userId?: string | null;
+  data?: {
+    rating?: number;
+  };
+};
 
 export function EducationHub() {
   const [articles, setArticles] = useState<EducationArticle[]>([]);
@@ -17,27 +23,90 @@ export function EducationHub() {
   const [featuredArticles, setFeaturedArticles] = useState<EducationArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [educationStats, setEducationStats] = useState<{
+    totalArticles: number | null;
+    totalCategories: number | null;
+    totalStudents: number | null;
+    averageRating: number | null;
+  }>({
+    totalArticles: null,
+    totalCategories: null,
+    totalStudents: null,
+    averageRating: null,
+  });
 
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
-
-  const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Fetch categories
       const categoriesResponse = await fetch('/api/education/categories');
+      if (!categoriesResponse.ok) {
+        throw new Error(`Failed to load categories: ${categoriesResponse.status}`);
+      }
       const categoriesData = await categoriesResponse.json();
       setCategories(categoriesData || []);
 
       // Fetch recent articles
       const articlesResponse = await fetch('/api/education/articles?limit=6&sort=newest');
+      if (!articlesResponse.ok) {
+        throw new Error(`Failed to load articles: ${articlesResponse.status}`);
+      }
       const articlesData = await articlesResponse.json();
       setArticles(articlesData.data || []);
 
+      const categoriesTotal = Array.isArray(categoriesData) ? categoriesData.length : null;
+      const articlesTotal =
+        typeof articlesData?.pagination?.total === 'number'
+          ? articlesData.pagination.total
+          : Array.isArray(articlesData?.data)
+          ? articlesData.data.length
+          : null;
+
+      let totalStudents: number | null = null;
+      let averageRating: number | null = null;
+
+      try {
+        const analyticsResponse = await fetch('/api/education/analytics');
+        if (analyticsResponse.ok) {
+          const analyticsData: unknown = await analyticsResponse.json();
+          if (Array.isArray(analyticsData)) {
+            const viewEvents = (analyticsData as AnalyticsEntry[]).filter((event) => event.type === 'view');
+            if (viewEvents.length > 0) {
+              const uniqueUserIds = new Set(
+                viewEvents
+                  .map((event) => event.userId)
+                  .filter((id): id is string => Boolean(id))
+              );
+              totalStudents = uniqueUserIds.size > 0 ? uniqueUserIds.size : viewEvents.length;
+            }
+
+            const ratingValues = (analyticsData as AnalyticsEntry[])
+              .map((event) => event?.data?.rating)
+              .filter((rating): rating is number => typeof rating === 'number');
+
+            if (ratingValues.length > 0) {
+              const ratingSum = ratingValues.reduce((sum, rating) => sum + rating, 0);
+              averageRating = Number((ratingSum / ratingValues.length).toFixed(1));
+            }
+          }
+        }
+      } catch (analyticsError) {
+        console.error('Error fetching analytics data:', analyticsError);
+      }
+
+      setEducationStats({
+        totalArticles: articlesTotal,
+        totalCategories: categoriesTotal,
+        totalStudents,
+        averageRating,
+      });
+
       // Fetch featured articles (most popular)
       const featuredResponse = await fetch('/api/education/articles?limit=3&sort=popular');
+      if (!featuredResponse.ok) {
+        throw new Error(`Failed to load featured articles: ${featuredResponse.status}`);
+      }
       const featuredData = await featuredResponse.json();
       setFeaturedArticles(featuredData.data || []);
 
@@ -47,36 +116,39 @@ export function EducationHub() {
       setCategories([]);
       setArticles([]);
       setFeaturedArticles([]);
+      setEducationStats({
+        totalArticles: null,
+        totalCategories: null,
+        totalStudents: null,
+        averageRating: null,
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      fetchInitialData();
+    const normalizedQuery = query.trim();
+    setSearchQuery(normalizedQuery);
+    if (!normalizedQuery) {
+      await fetchInitialData();
       return;
     }
 
     try {
-      const response = await fetch(`/api/education/search?q=${encodeURIComponent(query)}&limit=12`);
+      const response = await fetch(`/api/education/search?q=${encodeURIComponent(normalizedQuery)}&limit=12`);
+      if (!response.ok) {
+        throw new Error(`Search request failed: ${response.status}`);
+      }
       const data = await response.json();
-      setArticles(data.data);
+      setArticles(data.data || []);
     } catch (error) {
       console.error('Error searching articles:', error);
-    }
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner':
-        return 'bg-primary/10 text-primary border-primary/20';
-      case 'intermediate':
-        return 'bg-accent/10 text-accent-foreground border-accent/20';
-      case 'advanced':
-        return 'bg-destructive/10 text-destructive border-destructive/20';
-      default:
-        return 'bg-muted text-muted-foreground border-border';
+      setArticles([]);
     }
   };
 
@@ -125,22 +197,37 @@ export function EducationHub() {
       {/* Stats Section */}
       <section className="mb-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">50+</div>
-            <div className="text-sm text-muted-foreground">Expert Articles</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">6</div>
-            <div className="text-sm text-muted-foreground">Categories</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">10k+</div>
-            <div className="text-sm text-muted-foreground">Students</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary mb-2">4.9</div>
-            <div className="text-sm text-muted-foreground">Average Rating</div>
-          </div>
+          {[
+            {
+              label: 'Expert Articles',
+              value: educationStats.totalArticles,
+              formatter: (value: number) => value.toLocaleString(),
+            },
+            {
+              label: 'Categories',
+              value: educationStats.totalCategories,
+              formatter: (value: number) => value.toLocaleString(),
+            },
+            {
+              label: 'Students',
+              value: educationStats.totalStudents,
+              formatter: (value: number) => value.toLocaleString(),
+            },
+            {
+              label: 'Average Rating',
+              value: educationStats.averageRating,
+              formatter: (value: number) => value.toFixed(1),
+            },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <div className="text-3xl font-bold text-primary mb-2">
+                {stat.value === null || Number.isNaN(stat.value)
+                  ? '—'
+                  : stat.formatter(stat.value)}
+              </div>
+              <div className="text-sm text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
