@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { z } from 'zod';
-import { FieldPath } from 'firebase-admin/firestore';
 import type { OrderByDirection, Query } from 'firebase-admin/firestore';
 import { EducationArticle, PaginatedResponse } from '@/types/education';
 
@@ -54,7 +53,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const sortOrders: Array<{ field: string | FieldPath; direction: OrderByDirection }> = [];
+    const sortOrders: Array<{ field: string; direction: OrderByDirection }> = [];
 
     switch (query.sort) {
       case 'oldest':
@@ -73,9 +72,6 @@ export async function GET(request: NextRequest) {
         sortOrders.push({ field: 'publishedAt', direction: 'desc' });
         break;
     }
-
-    // Ensure deterministic ordering regardless of the requested sort
-    sortOrders.push({ field: FieldPath.documentId(), direction: 'asc' });
 
     let orderedQuery: Query = filteredQuery;
     for (const { field, direction } of sortOrders) {
