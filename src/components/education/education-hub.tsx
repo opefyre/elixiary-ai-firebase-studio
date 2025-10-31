@@ -21,6 +21,7 @@ export function EducationHub() {
   const [articles, setArticles] = useState<EducationArticle[]>([]);
   const [categories, setCategories] = useState<EducationCategory[]>([]);
   const [featuredArticles, setFeaturedArticles] = useState<EducationArticle[]>([]);
+  const [featuredError, setFeaturedError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [educationStats, setEducationStats] = useState<{
@@ -41,35 +42,50 @@ export function EducationHub() {
   }, []);
 
   const fetchInitialData = useCallback(async () => {
-    try {
-      setLoading(true);
+    setLoading(true);
+    setFeaturedError(false);
 
+    let categoriesTotal: number | null = null;
+    let articlesTotal: number | null = null;
+    let totalStudents: number | null = null;
+    let averageRating: number | null = null;
+
+    try {
       // Fetch categories
-      const categoriesResponse = await fetch('/api/education/categories');
-      if (!categoriesResponse.ok) {
-        throw new Error(`Failed to load categories: ${categoriesResponse.status}`);
+      try {
+        const categoriesResponse = await fetch('/api/education/categories');
+        if (!categoriesResponse.ok) {
+          throw new Error(`Failed to load categories: ${categoriesResponse.status}`);
+        }
+        const categoriesData = await categoriesResponse.json();
+        const normalizedCategories = Array.isArray(categoriesData) ? categoriesData : [];
+        categoriesTotal = normalizedCategories.length;
+        setCategories(normalizedCategories);
+      } catch (categoriesError) {
+        console.error('Error fetching categories:', categoriesError);
+        setCategories([]);
       }
-      const categoriesData = await categoriesResponse.json();
-      setCategories(categoriesData || []);
 
       // Fetch recent articles
-      const articlesResponse = await fetch('/api/education/articles?limit=6&sort=newest');
-      if (!articlesResponse.ok) {
-        throw new Error(`Failed to load articles: ${articlesResponse.status}`);
+      let articlesData: { data?: EducationArticle[]; pagination?: { total?: number } } | null = null;
+      try {
+        const articlesResponse = await fetch('/api/education/articles?limit=6&sort=newest');
+        if (!articlesResponse.ok) {
+          throw new Error(`Failed to load articles: ${articlesResponse.status}`);
+        }
+        articlesData = await articlesResponse.json();
+        setArticles(Array.isArray(articlesData?.data) ? articlesData.data : []);
+      } catch (articlesError) {
+        console.error('Error fetching latest articles:', articlesError);
+        setArticles([]);
       }
-      const articlesData = await articlesResponse.json();
-      setArticles(articlesData.data || []);
 
-      const categoriesTotal = Array.isArray(categoriesData) ? categoriesData.length : null;
-      const articlesTotal =
+      articlesTotal =
         typeof articlesData?.pagination?.total === 'number'
           ? articlesData.pagination.total
           : Array.isArray(articlesData?.data)
           ? articlesData.data.length
           : null;
-
-      let totalStudents: number | null = null;
-      let averageRating: number | null = null;
 
       try {
         const analyticsResponse = await fetch('/api/education/analytics');
@@ -108,25 +124,20 @@ export function EducationHub() {
       });
 
       // Fetch featured articles (most popular)
-      const featuredResponse = await fetch('/api/education/articles?limit=3&sort=popular');
-      if (!featuredResponse.ok) {
-        throw new Error(`Failed to load featured articles: ${featuredResponse.status}`);
+      try {
+        const featuredResponse = await fetch('/api/education/articles?limit=3&sort=popular');
+        if (!featuredResponse.ok) {
+          throw new Error(`Failed to load featured articles: ${featuredResponse.status}`);
+        }
+        const featuredData = await featuredResponse.json();
+        setFeaturedArticles(Array.isArray(featuredData?.data) ? featuredData.data : []);
+      } catch (featuredError) {
+        console.error('Error fetching featured articles:', featuredError);
+        setFeaturedArticles([]);
+        setFeaturedError(true);
       }
-      const featuredData = await featuredResponse.json();
-      setFeaturedArticles(featuredData.data || []);
-
     } catch (error) {
-      console.error('Error fetching education data:', error);
-      // Set empty arrays to prevent crashes
-      setCategories([]);
-      setArticles([]);
-      setFeaturedArticles([]);
-      setEducationStats({
-        totalArticles: null,
-        totalCategories: null,
-        totalStudents: null,
-        averageRating: null,
-      });
+      console.error('Unexpected error fetching education data:', error);
     } finally {
       setLoading(false);
     }
@@ -305,7 +316,7 @@ export function EducationHub() {
             )}
           </section>
 
-          {featuredArticles.length > 0 && (
+          {(featuredArticles.length > 0 || featuredError) && (
             <section className="mb-16">
               <div className="text-center mb-12 space-y-3">
                 <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
@@ -315,11 +326,17 @@ export function EducationHub() {
                   Most popular and highly-rated articles from our community.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {featuredArticles.map((article) => (
-                  <ArticleCard key={article.id} article={article} variant="featured" />
-                ))}
-              </div>
+              {featuredError ? (
+                <div className="border border-dashed border-muted rounded-lg bg-muted/40 p-6 text-center text-sm text-muted-foreground">
+                  Featured articles are unavailable right now. Please check back soon.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {featuredArticles.map((article) => (
+                    <ArticleCard key={article.id} article={article} variant="featured" />
+                  ))}
+                </div>
+              )}
             </section>
           )}
         </>
