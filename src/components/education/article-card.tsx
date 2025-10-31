@@ -1,9 +1,8 @@
 'use client';
 
-import { Clock, User, Eye, Heart, Share2, BookOpen, Star } from 'lucide-react';
+import { Clock, Eye, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { EducationArticle } from '@/types/education';
 import Link from 'next/link';
 
@@ -16,46 +15,46 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return 'bg-primary/10 text-primary border-primary/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       case 'intermediate':
-        return 'bg-accent/10 text-accent-foreground border-accent/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       case 'advanced':
-        return 'bg-destructive/10 text-destructive border-destructive/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       default:
-        return 'bg-muted text-muted-foreground border-border';
+        return 'border border-border/60 bg-muted/30 text-foreground/70';
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'fundamentals':
-        return 'bg-primary/10 text-primary border-primary/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       case 'equipment':
-        return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       case 'techniques':
-        return 'bg-accent/10 text-accent-foreground border-accent/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       case 'ingredients':
-        return 'bg-primary/10 text-primary border-primary/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       case 'classics':
-        return 'bg-destructive/10 text-destructive border-destructive/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       case 'trends':
-        return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
+        return 'border border-border/60 bg-muted/30 text-foreground/80';
       default:
-        return 'bg-muted text-muted-foreground border-border';
+        return 'border border-border/60 bg-muted/30 text-foreground/70';
     }
   };
 
   if (variant === 'compact') {
     return (
       <Link href={`/education/${article.category}/${article.slug}`}>
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="border border-border/60 bg-background/80 hover:border-border cursor-pointer transition-colors">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm text-foreground truncate">
+                <h3 className="font-medium text-sm text-foreground truncate">
                   {article.title}
                 </h3>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                   {article.excerpt}
                 </p>
                 <div className="flex items-center space-x-2 mt-2">
@@ -78,10 +77,10 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
   if (variant === 'featured') {
     return (
       <Link href={`/education/${article.category}/${article.slug}`}>
-        <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-0 bg-card/50 backdrop-blur-sm">
+        <Card className="group border border-border/60 bg-muted/30 backdrop-blur-sm transition-all duration-300 cursor-pointer hover:border-border">
           <div className="relative">
             {article.featuredImage && (
-              <div className="aspect-video bg-gradient-to-r from-blue-400 to-purple-500 rounded-t-lg overflow-hidden">
+              <div className="aspect-video rounded-t-lg overflow-hidden bg-muted">
                 <img
                   src={article.featuredImage}
                   alt={article.title}
@@ -90,25 +89,25 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               </div>
             )}
             <div className="absolute top-4 left-4">
-              <Badge className="bg-background text-foreground border-0 shadow-sm">
+              <Badge className="bg-background/90 text-foreground border border-border/60 shadow-sm">
                 <Star className="w-3 h-3 mr-1" />
                 Featured
               </Badge>
             </div>
           </div>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between mb-2">
-              <Badge className={getCategoryColor(article.category)}>
+          <CardHeader className="pb-3 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className={`capitalize ${getCategoryColor(article.category)}`}>
                 {article.category}
               </Badge>
-              <Badge className={getDifficultyColor(article.difficulty)}>
+              <Badge className={`capitalize ${getDifficultyColor(article.difficulty)}`}>
                 {article.difficulty}
               </Badge>
             </div>
-            <CardTitle className="text-lg group-hover:text-primary transition-colors">
+            <CardTitle className="text-lg font-semibold group-hover:text-foreground/90 transition-colors">
               {article.title}
             </CardTitle>
-            <CardDescription className="line-clamp-2">
+            <CardDescription className="line-clamp-2 leading-relaxed">
               {article.excerpt}
             </CardDescription>
           </CardHeader>
@@ -124,13 +123,8 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
                   {article.stats.views}
                 </div>
               </div>
-              <div className="flex items-center space-x-1">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Heart className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Share2 className="w-4 h-4" />
-                </Button>
+              <div className="hidden md:flex items-center text-xs uppercase tracking-wide text-foreground/60">
+                Editorial pick
               </div>
             </div>
           </CardContent>
@@ -141,10 +135,10 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
 
   return (
     <Link href={`/education/${article.category}/${article.slug}`}>
-      <Card className="hover:shadow-md transition-all duration-300 cursor-pointer group">
+      <Card className="group border border-border/60 bg-background/80 transition-transform duration-200 hover:-translate-y-0.5 hover:border-border cursor-pointer">
         <div className="relative">
           {article.featuredImage && (
-            <div className="aspect-video bg-gradient-to-r from-blue-400 to-purple-500 rounded-t-lg overflow-hidden">
+            <div className="aspect-video rounded-t-lg overflow-hidden bg-muted">
               <img
                 src={article.featuredImage}
                 alt={article.title}
@@ -153,19 +147,19 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
             </div>
           )}
         </div>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between mb-2">
-            <Badge className={getCategoryColor(article.category)}>
+        <CardHeader className="pb-3 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className={`capitalize ${getCategoryColor(article.category)}`}>
               {article.category}
             </Badge>
-            <Badge className={getDifficultyColor(article.difficulty)}>
+            <Badge className={`capitalize ${getDifficultyColor(article.difficulty)}`}>
               {article.difficulty}
             </Badge>
           </div>
-          <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-2">
+          <CardTitle className="text-lg font-semibold group-hover:text-foreground transition-colors line-clamp-2">
             {article.title}
           </CardTitle>
-          <CardDescription className="line-clamp-2">
+          <CardDescription className="line-clamp-2 leading-relaxed">
             {article.excerpt}
           </CardDescription>
         </CardHeader>
@@ -181,13 +175,8 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
                 {article.stats.views}
               </div>
             </div>
-            <div className="flex items-center space-x-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Heart className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Share2 className="w-4 h-4" />
-              </Button>
+            <div className="hidden md:flex items-center text-xs uppercase tracking-wide text-foreground/60">
+              Read &amp; save later
             </div>
           </div>
         </CardContent>

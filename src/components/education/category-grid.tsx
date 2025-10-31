@@ -1,5 +1,6 @@
 'use client';
 
+import { BookOpen, Wrench, Wand2, FlaskConical, Martini, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EducationCategory } from '@/types/education';
 import Link from 'next/link';
@@ -12,19 +13,19 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'fundamentals':
-        return '📚';
+        return BookOpen;
       case 'equipment':
-        return '🔧';
+        return Wrench;
       case 'techniques':
-        return '🎯';
+        return Wand2;
       case 'ingredients':
-        return '🥃';
+        return FlaskConical;
       case 'classics':
-        return '🍸';
+        return Martini;
       case 'trends':
-        return '✨';
+        return Sparkles;
       default:
-        return '📖';
+        return BookOpen;
     }
   };
 
@@ -69,22 +70,27 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {categories.map((category) => (
         <Link key={`category-${category.id}`} href={`/education/${category.slug}`}>
-          <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-card/50 backdrop-blur-sm h-full">
-            <CardHeader className="text-center pb-4">
-              <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
-                {getCategoryIcon(category.slug)}
+          <Card className="group border border-border/60 bg-background/80 transition-colors duration-200 hover:border-border cursor-pointer h-full">
+            <CardHeader className="text-center pb-4 space-y-4">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-border/60 bg-muted/40 text-foreground/80">
+                {(() => {
+                  const Icon = getCategoryIcon(category.slug);
+                  return <Icon className="h-6 w-6" strokeWidth={1.5} />;
+                })()}
               </div>
-              <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                {category.name}
-              </CardTitle>
-              <CardDescription className="text-sm">
-                {getCategoryDescription(category.slug)}
-              </CardDescription>
+              <div className="space-y-2">
+                <CardTitle className="text-lg font-semibold text-foreground group-hover:text-foreground">
+                  {category.name}
+                </CardTitle>
+                <CardDescription className="text-sm leading-relaxed line-clamp-3 text-muted-foreground">
+                  {getCategoryDescription(category.slug)}
+                </CardDescription>
+              </div>
             </CardHeader>
-            <CardContent className="text-center">
-              <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+            <CardContent className="text-center pt-0">
+              <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-wide text-foreground/60">
                 <span>{category.articleCount} articles</span>
-                <span>•</span>
+                <span aria-hidden="true">•</span>
                 <span>All levels</span>
               </div>
             </CardContent>
