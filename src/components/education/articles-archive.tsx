@@ -12,6 +12,8 @@ interface ArticlesArchiveProps {
     sort?: string;
     difficulty?: string;
     category?: string;
+    cursor?: string;
+    direction?: 'next' | 'prev';
   };
 }
 
@@ -56,6 +58,14 @@ async function fetchArticles(searchParams: ArticlesArchiveProps['searchParams'])
     params.set('category', searchParams.category);
   }
 
+  if (searchParams.cursor) {
+    params.set('cursor', searchParams.cursor);
+  }
+
+  if (searchParams.direction) {
+    params.set('direction', searchParams.direction);
+  }
+
   const response = await fetch(`${baseUrl}/api/education/articles?${params.toString()}`, {
     next: { revalidate: 60 },
   });
@@ -79,64 +89,75 @@ function PaginationControls({
     return null;
   }
 
-  const buildHref = (page: number) => {
-    const params = new URLSearchParams();
+  const baseParams = new URLSearchParams();
 
-    if (searchParams.sort) {
-      params.set('sort', searchParams.sort);
-    }
+  if (searchParams.sort) {
+    baseParams.set('sort', searchParams.sort);
+  }
 
-    if (searchParams.difficulty) {
-      params.set('difficulty', searchParams.difficulty);
-    }
+  if (searchParams.difficulty) {
+    baseParams.set('difficulty', searchParams.difficulty);
+  }
 
-    if (searchParams.category) {
-      params.set('category', searchParams.category);
-    }
+  if (searchParams.category) {
+    baseParams.set('category', searchParams.category);
+  }
 
+  const buildHref = (page: number, direction: 'next' | 'prev', cursor: string | null | undefined) => {
+    const params = new URLSearchParams(baseParams);
     params.set('page', page.toString());
 
-    const queryString = params.toString();
-    return queryString ? `?${queryString}` : `?page=${page}`;
+    if (cursor) {
+      params.set('cursor', cursor);
+      params.set('direction', direction);
+    } else {
+      params.delete('cursor');
+      params.delete('direction');
+    }
+
+    return `?${params.toString()}`;
   };
 
-  const pages = Array.from({ length: pagination.totalPages }, (_, index) => index + 1);
+  const showPrev = pagination.hasPrev && Boolean(pagination.prevCursor);
+  const showNext = pagination.hasNext && Boolean(pagination.nextCursor);
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 py-6">
-      {pagination.hasPrev ? (
-        <Button asChild variant="outline" size="sm">
-          <Link href={buildHref(pagination.page - 1)}>Previous</Link>
-        </Button>
-      ) : (
-        <Button variant="outline" size="sm" disabled>
-          Previous
-        </Button>
-      )}
-
-      <div className="flex flex-wrap items-center justify-center gap-1">
-        {pages.map((page) => (
-          page === pagination.page ? (
-            <Button key={page} variant="default" size="sm" className="w-10">
-              {page}
-            </Button>
-          ) : (
-            <Button key={page} asChild variant="outline" size="sm" className="w-10">
-              <Link href={buildHref(page)}>{page}</Link>
-            </Button>
-          )
-        ))}
+    <div className="flex flex-col items-center justify-center gap-3 py-6">
+      <div className="text-sm text-muted-foreground">
+        Page {pagination.page} of {pagination.totalPages}
       </div>
 
-      {pagination.hasNext ? (
-        <Button asChild variant="outline" size="sm">
-          <Link href={buildHref(pagination.page + 1)}>Next</Link>
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          asChild={showPrev}
+          variant="outline"
+          size="sm"
+          disabled={!showPrev}
+        >
+          {showPrev ? (
+            <Link href={buildHref(pagination.page - 1, 'prev', pagination.prevCursor ?? undefined)}>
+              Previous
+            </Link>
+          ) : (
+            <>Previous</>
+          )}
         </Button>
-      ) : (
-        <Button variant="outline" size="sm" disabled>
-          Next
+
+        <Button
+          asChild={showNext}
+          variant="outline"
+          size="sm"
+          disabled={!showNext}
+        >
+          {showNext ? (
+            <Link href={buildHref(pagination.page + 1, 'next', pagination.nextCursor ?? undefined)}>
+              Next
+            </Link>
+          ) : (
+            <>Next</>
+          )}
         </Button>
-      )}
+      </div>
     </div>
   );
 }

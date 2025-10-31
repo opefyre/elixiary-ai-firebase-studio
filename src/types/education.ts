@@ -87,5 +87,9 @@ export interface PaginatedResponse<T> {
     totalPages: number;
     hasNext: boolean;
     hasPrev: boolean;
+    nextCursor?: string | null;
+    prevCursor?: string | null;
+    cursor?: string | null;
+    direction?: 'next' | 'prev';
   };
 }
