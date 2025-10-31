@@ -11,9 +11,14 @@ import { EducationArticle } from '@/types/education';
 interface SearchInterfaceProps {
   onSearch: (query: string) => void;
   placeholder?: string;
+  onSearchApplied?: () => void;
 }
 
-export function SearchInterface({ onSearch, placeholder = "Search articles, techniques, ingredients..." }: SearchInterfaceProps) {
+export function SearchInterface({
+  onSearch,
+  placeholder = "Search articles, techniques, ingredients...",
+  onSearchApplied,
+}: SearchInterfaceProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<EducationArticle[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -80,6 +85,7 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
     if (searchQuery.trim()) {
       onSearch(searchQuery.trim());
       setShowSuggestions(false);
+      onSearchApplied?.();
       inputRef.current?.blur();
     }
   };
@@ -91,8 +97,12 @@ export function SearchInterface({ onSearch, placeholder = "Search articles, tech
   };
 
   const handleSuggestionClick = (suggestion: EducationArticle) => {
-    setQuery(suggestion.title);
-    handleSearch(suggestion.title);
+    const title = suggestion.title;
+    setQuery(title);
+    setShowSuggestions(false);
+    onSearch(title.trim());
+    onSearchApplied?.();
+    inputRef.current?.blur();
   };
 
   const handlePopularSearchClick = (term: string) => {

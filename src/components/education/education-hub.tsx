@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -34,6 +34,11 @@ export function EducationHub() {
     totalStudents: null,
     averageRating: null,
   });
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToResults = useCallback(() => {
+    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const fetchInitialData = useCallback(async () => {
     try {
@@ -152,6 +157,12 @@ export function EducationHub() {
     }
   };
 
+  useEffect(() => {
+    if (searchQuery) {
+      scrollToResults();
+    }
+  }, [searchQuery, articles, scrollToResults]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -190,97 +201,12 @@ export function EducationHub() {
       {/* Search Bar */}
       <section className="mb-12">
         <div className="max-w-2xl mx-auto">
-          <SearchInterface onSearch={handleSearch} />
+          <SearchInterface onSearch={handleSearch} onSearchApplied={scrollToResults} />
         </div>
       </section>
 
-      {/* Highlight Bar */}
-      <section className="mb-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            {
-              label: 'Expert Articles',
-              value: educationStats.totalArticles,
-              formatter: (value: number) => value.toLocaleString(),
-            },
-            {
-              label: 'Categories',
-              value: educationStats.totalCategories,
-              formatter: (value: number) => value.toLocaleString(),
-            },
-            {
-              label: 'Students',
-              value: educationStats.totalStudents,
-              formatter: (value: number) => value.toLocaleString(),
-            },
-            {
-              label: 'Average Rating',
-              value: educationStats.averageRating,
-              formatter: (value: number) => value.toFixed(1),
-            },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <div className="text-3xl font-bold text-primary mb-2">
-                {stat.value === null || Number.isNaN(stat.value)
-                  ? '—'
-                  : stat.formatter(stat.value)}
-              </div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="mb-16">
-        <div className="text-center mb-12 space-y-3">
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-            Explore by Category
-          </h2>
-          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-            Browse our carefully curated categories to find content that matches your learning goals and experience level.
-          </p>
-        </div>
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-8 bg-muted rounded mb-2"></div>
-                  <div className="h-4 bg-muted rounded"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-16 bg-muted rounded"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <CategoryGrid categories={categories} />
-        )}
-      </section>
-
-      {/* Featured Articles */}
-        {featuredArticles.length > 0 && (
-        <section className="mb-16">
-          <div className="text-center mb-12 space-y-3">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
-              Featured Articles
-            </h2>
-            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              Most popular and highly-rated articles from our community.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} variant="featured" />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Recent Articles */}
-      <section className="mb-16">
+      {/* Search Results */}
+      <section ref={resultsRef} className="mb-16">
         <div className="flex justify-between items-center mb-12">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground mb-2">
@@ -296,7 +222,7 @@ export function EducationHub() {
             </Button>
           )}
         </div>
-        
+
         {articles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((article) => (
@@ -311,6 +237,93 @@ export function EducationHub() {
           </div>
         )}
       </section>
+
+      {/* Highlight Bar */}
+      {!searchQuery && (
+        <>
+          <section className="mb-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              {[
+                {
+                  label: 'Expert Articles',
+                  value: educationStats.totalArticles,
+                  formatter: (value: number) => value.toLocaleString(),
+                },
+                {
+                  label: 'Categories',
+                  value: educationStats.totalCategories,
+                  formatter: (value: number) => value.toLocaleString(),
+                },
+                {
+                  label: 'Students',
+                  value: educationStats.totalStudents,
+                  formatter: (value: number) => value.toLocaleString(),
+                },
+                {
+                  label: 'Average Rating',
+                  value: educationStats.averageRating,
+                  formatter: (value: number) => value.toFixed(1),
+                },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-3xl font-bold text-primary mb-2">
+                    {stat.value === null || Number.isNaN(stat.value)
+                      ? '—'
+                      : stat.formatter(stat.value)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mb-16">
+            <div className="text-center mb-12 space-y-3">
+              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
+                Explore by Category
+              </h2>
+              <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                Browse our carefully curated categories to find content that matches your learning goals and experience level.
+              </p>
+            </div>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-8 bg-muted rounded mb-2"></div>
+                      <div className="h-4 bg-muted rounded"></div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-16 bg-muted rounded"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <CategoryGrid categories={categories} />
+            )}
+          </section>
+
+          {featuredArticles.length > 0 && (
+            <section className="mb-16">
+              <div className="text-center mb-12 space-y-3">
+                <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
+                  Featured Articles
+                </h2>
+                <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+                  Most popular and highly-rated articles from our community.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {featuredArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} variant="featured" />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
     </div>
   );
 }
