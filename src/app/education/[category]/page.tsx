@@ -5,6 +5,40 @@ import { StructuredData } from '@/components/education/structured-data';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { getCanonicalUrl } from '@/lib/config';
 
+type SortOption = 'newest' | 'oldest' | 'popular' | 'readingTime';
+type DifficultyOption = 'beginner' | 'intermediate' | 'advanced';
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_SORT: SortOption = 'newest';
+const ALLOWED_SORTS = new Set<SortOption>(['newest', 'oldest', 'popular', 'readingTime']);
+const ALLOWED_DIFFICULTIES = new Set<DifficultyOption>([
+  'beginner',
+  'intermediate',
+  'advanced',
+]);
+
+function normalizeCategorySearchParams(searchParams: CategoryPageProps['searchParams']) {
+  const rawPage = searchParams?.page;
+  const parsedPage = rawPage ? Number.parseInt(rawPage, 10) : DEFAULT_PAGE;
+  const page = Number.isNaN(parsedPage) || parsedPage < 1 ? DEFAULT_PAGE : parsedPage;
+
+  const rawSort = searchParams?.sort;
+  const sort = rawSort && ALLOWED_SORTS.has(rawSort as SortOption)
+    ? (rawSort as SortOption)
+    : DEFAULT_SORT;
+
+  const rawDifficulty = searchParams?.difficulty;
+  const difficulty = rawDifficulty && ALLOWED_DIFFICULTIES.has(rawDifficulty as DifficultyOption)
+    ? (rawDifficulty as DifficultyOption)
+    : undefined;
+
+  return {
+    page,
+    sort,
+    difficulty,
+  };
+}
+
 interface CategoryPageProps {
   params: {
     category: string;
@@ -16,11 +50,11 @@ interface CategoryPageProps {
   };
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: CategoryPageProps): Promise<Metadata> {
   try {
     const { adminDb } = initializeFirebaseServer();
     const categoriesRef = adminDb.collection('education_categories');
-    
+
     const querySnapshot = await categoriesRef
       .where('slug', '==', params.category)
       .limit(1)
@@ -35,7 +69,28 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
     const categoryData = querySnapshot.docs[0].data();
 
-    const canonicalUrl = getCanonicalUrl(`/education/${params.category}`);
+    const normalized = normalizeCategorySearchParams(searchParams);
+
+    const canonicalParams = new URLSearchParams();
+
+    if (normalized.page > DEFAULT_PAGE) {
+      canonicalParams.set('page', normalized.page.toString());
+    }
+
+    if (normalized.sort !== DEFAULT_SORT) {
+      canonicalParams.set('sort', normalized.sort);
+    }
+
+    if (normalized.difficulty) {
+      canonicalParams.set('difficulty', normalized.difficulty);
+    }
+
+    const canonicalPath = canonicalParams.toString()
+      ? `/education/${params.category}?${canonicalParams.toString()}`
+      : `/education/${params.category}`;
+
+    const canonicalUrl = getCanonicalUrl(canonicalPath);
+    const shouldIndex = canonicalParams.toString().length === 0;
 
     return {
       title: `${categoryData.name} | Elixiary Education`,
@@ -54,6 +109,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
         card: 'summary_large_image',
         title: `${categoryData.name} | Elixiary Education`,
         description: categoryData.description,
+      },
+      robots: {
+        index: shouldIndex,
+        follow: true,
       },
     };
   } catch (error) {
