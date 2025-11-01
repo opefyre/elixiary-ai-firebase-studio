@@ -9,7 +9,6 @@ import { OfflineWarning } from "@/components/offline-warning";
 import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
-import { AuthGuard } from "@/components/auth-guard";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 import { config } from "@/lib/config";
 import { getNonce } from "@/lib/nonce";
@@ -226,7 +225,7 @@ export default async function RootLayout({
               <Sprout className="h-full w-full" />
             </div>
             <main id="main-content" className="relative z-10 flex-1 mobile-body-padding">
-              <AuthGuard>{children}</AuthGuard>
+              {children}
             </main>
             
             {/* Desktop Footer */}

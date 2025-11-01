@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { AuthGuard } from '@/components/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Account | Elixiary AI',
@@ -14,5 +15,5 @@ export default function AccountLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <AuthGuard>{children}</AuthGuard>;
 }
