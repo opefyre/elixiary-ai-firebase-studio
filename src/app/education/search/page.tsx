@@ -1,15 +1,19 @@
 import { Metadata } from 'next';
 import { SearchResultsPage } from '@/components/education/search-results-page';
+import { getCanonicalUrl } from '@/lib/config';
 
 export const metadata: Metadata = {
   title: 'Search Articles | Elixiary Education',
   description: 'Search through our comprehensive collection of mixology articles, techniques, and guides.',
   keywords: ['mixology search', 'cocktail articles', 'bartending guides', 'mixology techniques'],
+  alternates: {
+    canonical: getCanonicalUrl('/education/search'),
+  },
   openGraph: {
     title: 'Search Articles | Elixiary Education',
     description: 'Search through our comprehensive collection of mixology articles, techniques, and guides.',
     type: 'website',
-    url: 'https://elixiary.com/education/search',
+    url: getCanonicalUrl('/education/search'),
   },
   twitter: {
     card: 'summary',

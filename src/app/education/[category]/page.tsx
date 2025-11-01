@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { CategoryPage } from '@/components/education/category-page';
 import { StructuredData } from '@/components/education/structured-data';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { getCanonicalUrl } from '@/lib/config';
 
 interface CategoryPageProps {
   params: {
@@ -34,15 +35,20 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
     const categoryData = querySnapshot.docs[0].data();
 
+    const canonicalUrl = getCanonicalUrl(`/education/${params.category}`);
+
     return {
       title: `${categoryData.name} | Elixiary Education`,
       description: categoryData.description,
       keywords: [categoryData.name, 'mixology', 'cocktails', 'education'],
+      alternates: {
+        canonical: canonicalUrl,
+      },
       openGraph: {
         title: `${categoryData.name} | Elixiary Education`,
         description: categoryData.description,
         type: 'website',
-        url: `https://elixiary.com/education/${params.category}`,
+        url: canonicalUrl,
       },
       twitter: {
         card: 'summary_large_image',

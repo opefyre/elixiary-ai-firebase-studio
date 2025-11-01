@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { ArticlesArchive } from '@/components/education/articles-archive';
+import { getCanonicalUrl } from '@/lib/config';
 
 type ArchiveSearchParams = {
   page?: string;
@@ -24,15 +25,18 @@ export const metadata: Metadata = {
     'mixology techniques',
     'cocktail tips',
   ],
+  alternates: {
+    canonical: getCanonicalUrl('/education/articles'),
+  },
   openGraph: {
     title: 'Education Articles Archive | Elixiary Mixology Library',
     description:
       'Browse the complete archive of Elixiary education articles covering mixology techniques, bar equipment tips, and cocktail inspiration.',
     type: 'website',
-    url: 'https://elixiary.com/education/articles',
+    url: getCanonicalUrl('/education/articles'),
     images: [
       {
-        url: 'https://elixiary.com/og-education-archive.jpg',
+        url: getCanonicalUrl('/og-education-archive.jpg'),
         width: 1200,
         height: 630,
         alt: 'Elixiary Education Articles Archive',
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
     title: 'Education Articles Archive | Elixiary Mixology Library',
     description:
       'Browse the complete archive of Elixiary education articles covering mixology techniques, bar equipment tips, and cocktail inspiration.',
-    images: ['https://elixiary.com/og-education-archive.jpg'],
+    images: [getCanonicalUrl('/og-education-archive.jpg')],
   },
 };
 

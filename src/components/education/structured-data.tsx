@@ -1,4 +1,5 @@
 import { EducationArticle, EducationCategory } from '@/types/education';
+import { config, getCanonicalUrl } from '@/lib/config';
 
 interface StructuredDataProps {
   type: 'article' | 'category' | 'breadcrumb' | 'organization';
@@ -29,14 +30,14 @@ export function StructuredData({ type, data, breadcrumbs }: StructuredDataProps)
             name: 'Elixiary',
             logo: {
               '@type': 'ImageObject',
-              url: 'https://elixiary.com/logo.png',
+              url: getCanonicalUrl('/logo.png'),
             },
           },
           datePublished: article.publishedAt.toISOString(),
           dateModified: article.updatedAt.toISOString(),
           mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': `https://elixiary.com/education/${article.category}/${article.slug}`,
+            '@id': getCanonicalUrl(`/education/${article.category}/${article.slug}`),
           },
           articleSection: article.category,
           keywords: article.seo.keywords?.join(', ') || article.tags.join(', '),
@@ -58,7 +59,7 @@ export function StructuredData({ type, data, breadcrumbs }: StructuredDataProps)
           '@type': 'CollectionPage',
           name: category.name,
           description: category.description,
-          url: `https://elixiary.com/education/${category.slug}`,
+          url: getCanonicalUrl(`/education/${category.slug}`),
           mainEntity: {
             '@type': 'ItemList',
             name: `${category.name} Articles`,
@@ -72,19 +73,19 @@ export function StructuredData({ type, data, breadcrumbs }: StructuredDataProps)
                 '@type': 'ListItem',
                 position: 1,
                 name: 'Home',
-                item: 'https://elixiary.com',
+                item: config.baseUrl,
               },
               {
                 '@type': 'ListItem',
                 position: 2,
                 name: 'Education',
-                item: 'https://elixiary.com/education',
+                item: getCanonicalUrl('/education'),
               },
               {
                 '@type': 'ListItem',
                 position: 3,
                 name: category.name,
-                item: `https://elixiary.com/education/${category.slug}`,
+                item: getCanonicalUrl(`/education/${category.slug}`),
               },
             ],
           },
@@ -109,8 +110,8 @@ export function StructuredData({ type, data, breadcrumbs }: StructuredDataProps)
           '@type': 'Organization',
           name: 'Elixiary',
           description: 'Learn the art of mixology with our comprehensive education center',
-          url: 'https://elixiary.com',
-          logo: 'https://elixiary.com/logo.png',
+          url: config.baseUrl,
+          logo: getCanonicalUrl('/logo.png'),
           sameAs: [
             'https://twitter.com/elixiary',
             'https://instagram.com/elixiary',
