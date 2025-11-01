@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { EducationArticle } from '@/types/education';
 
 interface SearchInterfaceProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string) => Promise<void> | void;
   placeholder?: string;
   onSearchApplied?: () => void;
 }
@@ -56,7 +57,7 @@ export function SearchInterface({
 
   const handleInputChange = async (value: string) => {
     setQuery(value);
-    
+
     if (value.length >= 2) {
       setLoading(true);
       try {
@@ -81,9 +82,11 @@ export function SearchInterface({
     }
   };
 
-  const handleSearch = (searchQuery: string = query) => {
-    if (searchQuery.trim()) {
-      onSearch(searchQuery.trim());
+  const handleSearch = async (searchQuery: string = query) => {
+    const normalizedQuery = searchQuery.trim();
+
+    if (normalizedQuery) {
+      await Promise.resolve(onSearch(normalizedQuery));
       setShowSuggestions(false);
       onSearchApplied?.();
       inputRef.current?.blur();
@@ -92,7 +95,7 @@ export function SearchInterface({
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSearch();
+      void handleSearch();
     }
   };
 
@@ -100,21 +103,19 @@ export function SearchInterface({
     const title = suggestion.title;
     setQuery(title);
     setShowSuggestions(false);
-    onSearch(title.trim());
-    onSearchApplied?.();
-    inputRef.current?.blur();
+    void handleSearch(title);
   };
 
   const handlePopularSearchClick = (term: string) => {
     setQuery(term);
-    handleSearch(term);
+    void handleSearch(term);
   };
 
   const clearSearch = () => {
     setQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
-    onSearch('');
+    void Promise.resolve(onSearch(''));
   };
 
   return (
@@ -158,50 +159,45 @@ export function SearchInterface({
               </div>
             ) : suggestions.length > 0 ? (
               <div className="max-h-64 overflow-y-auto">
-                {suggestions.map((article) => (
+                {suggestions.map((suggestion) => (
                   <button
-                    key={article.id}
-                    onClick={() => handleSuggestionClick(article)}
-                    className="w-full text-left p-4 transition-colors hover:bg-muted/40 border-b border-border/60 last:border-b-0"
+                    key={suggestion.id}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full text-left px-4 py-3 hover:bg-muted/60 transition-colors"
                   >
-                    <div className="font-medium mb-1">{article.title}</div>
-                    <div className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{article.excerpt}</div>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Badge variant="secondary" className="text-xs border border-border/60 bg-muted/40 text-foreground/70">
-                        {article.category}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs border border-border/60 text-foreground/60">
-                        {article.difficulty}
-                      </Badge>
-                    </div>
+                    <div className="font-medium text-foreground">{suggestion.title}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-2">{suggestion.excerpt}</div>
                   </button>
                 ))}
               </div>
-            ) : query.length >= 2 ? (
-              <div className="p-4 text-center text-muted-foreground">
-                No articles found for "{query}"
-              </div>
             ) : (
-              <div className="p-4">
-                <div className="text-sm text-muted-foreground mb-3">Popular searches:</div>
-                <div className="flex flex-wrap gap-2">
-                  {popularSearches.map((term) => (
-                    <Badge
-                      key={term}
-                      variant="outline"
-                      className="cursor-pointer border border-border/60 text-foreground/70 hover:bg-muted/40 transition-colors"
-                      onClick={() => handlePopularSearchClick(term)}
-                    >
-                      {term}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              <div className="p-4 text-center text-muted-foreground text-sm">No suggestions found</div>
             )}
           </CardContent>
         </Card>
       )}
 
+      {/* Popular Searches */}
+      <div className="mt-4">
+        <div className="flex items-center justify-between text-xs uppercase tracking-wider text-muted-foreground mb-2">
+          <span className="flex items-center gap-2">
+            <Filter className="w-4 h-4" /> Popular searches
+          </span>
+          <span>Tap to explore</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {popularSearches.map((term) => (
+            <Badge
+              key={term}
+              variant="secondary"
+              onClick={() => handlePopularSearchClick(term)}
+              className="cursor-pointer rounded-full px-3 py-1 text-xs font-medium hover:bg-primary hover:text-primary-foreground"
+            >
+              {term}
+            </Badge>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
