@@ -68,14 +68,6 @@ export async function GET(request: NextRequest) {
     <priority>0.9</priority>
   </url>
 
-  <!-- Search Page -->
-  <url>
-    <loc>${getCanonicalUrl('/education/search')}</loc>
-    <lastmod>${now}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
   <!-- Articles Archive -->
   <url>
     <loc>${getCanonicalUrl('/education/articles')}</loc>
