@@ -95,7 +95,7 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${config.baseUrl}/sitemap.xml`,
-    host: config.baseUrl,
+    host: config.domain,
     // Add crawl delay for Bing
     crawlDelay: 1,
   };
