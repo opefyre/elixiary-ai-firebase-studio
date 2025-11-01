@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { EducationArticle, EducationCategory } from '@/types/education';
+import { getCanonicalUrl } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -55,45 +56,47 @@ export async function GET(request: NextRequest) {
     });
 
     // Generate sitemap XML
+    const now = new Date().toISOString();
+
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Education Hub -->
   <url>
-    <loc>https://elixiary.com/education</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <loc>${getCanonicalUrl('/education')}</loc>
+    <lastmod>${now}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <!-- Search Page -->
   <url>
-    <loc>https://elixiary.com/education/search</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <loc>${getCanonicalUrl('/education/search')}</loc>
+    <lastmod>${now}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Articles Archive -->
   <url>
-    <loc>https://elixiary.com/education/articles</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <loc>${getCanonicalUrl('/education/articles')}</loc>
+    <lastmod>${now}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
-  
+
   <!-- Category Pages -->
   ${categories.map((category) => `
   <url>
-    <loc>https://elixiary.com/education/${category.slug}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <loc>${getCanonicalUrl(`/education/${category.slug}`)}</loc>
+    <lastmod>${now}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('')}
-  
+
   <!-- Article Pages -->
   ${articles.map((article) => `
   <url>
-    <loc>https://elixiary.com/education/${article.category}/${article.slug}</loc>
+    <loc>${getCanonicalUrl(`/education/${article.category}/${article.slug}`)}</loc>
     <lastmod>${article.updatedAt.toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
