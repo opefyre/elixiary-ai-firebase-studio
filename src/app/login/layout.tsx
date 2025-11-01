@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Sign in to your Elixiary AI account to access your cocktail recipes and AI-powered mixology tools.',
   robots: {
     index: false,
-    follow: false,
+    follow: true,
   },
 };
 

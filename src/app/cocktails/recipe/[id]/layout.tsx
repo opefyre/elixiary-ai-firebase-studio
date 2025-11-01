@@ -58,9 +58,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         title: title,
         description: `Learn how to make ${recipe.name} cocktail.`,
       },
-      alternates: {
-        canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/cocktails/recipe/${params.id}`,
-      },
     };
   } catch (error) {
     console.error('Error generating metadata:', error);

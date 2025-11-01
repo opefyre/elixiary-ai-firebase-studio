@@ -49,9 +49,6 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
         title: `${categoryData.name} | Elixiary Education`,
         description: categoryData.description,
       },
-      alternates: {
-        canonical: `https://elixiary.com/education/${params.category}`,
-      },
     };
   } catch (error) {
     console.error('Error generating metadata for category:', error);

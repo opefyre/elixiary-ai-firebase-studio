@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Manage your Elixiary AI account, view subscription details, API keys, and personal statistics.',
   robots: {
     index: false,
-    follow: false,
+    follow: true,
   },
 };
 

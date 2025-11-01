@@ -23,12 +23,9 @@ export const metadata: Metadata = {
     title: 'My Recipes | Elixiary AI',
     description: 'View and manage your AI-generated cocktail recipes and saved curated recipes.',
   },
-  alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/recipes`,
-  },
   robots: {
     index: false, // This is a user-specific page
-    follow: false,
+    follow: true,
   },
 };
 

@@ -46,9 +46,6 @@ export const metadata: Metadata = {
       'Browse the complete archive of Elixiary education articles covering mixology techniques, bar equipment tips, and cocktail inspiration.',
     images: ['https://elixiary.com/og-education-archive.jpg'],
   },
-  alternates: {
-    canonical: 'https://elixiary.com/education/articles',
-  },
 };
 
 interface EducationArticlesPageProps {

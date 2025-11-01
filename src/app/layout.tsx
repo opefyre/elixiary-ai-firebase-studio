@@ -11,7 +11,7 @@ import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
 import { AuthGuard } from "@/components/auth-guard";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
-import { config, getCanonicalUrl } from "@/lib/config";
+import { config } from "@/lib/config";
 import { getNonce } from "@/lib/nonce";
 
 export const metadata: Metadata = {
@@ -90,9 +90,6 @@ export const metadata: Metadata = {
     other: {
       'msvalidate.01': '99FF65807C300F99D988A4FFD56374FE',
     },
-  },
-  alternates: {
-    canonical: getCanonicalUrl(),
   },
   category: 'food',
   classification: 'Cocktail Recipe Generator',

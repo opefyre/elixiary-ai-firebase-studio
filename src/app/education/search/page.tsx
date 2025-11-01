@@ -16,9 +16,6 @@ export const metadata: Metadata = {
     title: 'Search Articles | Elixiary Education',
     description: 'Search through our comprehensive collection of mixology articles, techniques, and guides.',
   },
-  alternates: {
-    canonical: 'https://elixiary.com/education/search',
-  },
 };
 
 interface SearchPageProps {
