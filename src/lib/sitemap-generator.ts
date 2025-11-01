@@ -1,5 +1,6 @@
 import { initializeFirebaseServer } from '@/firebase/server';
 import { config } from '@/lib/config';
+import { isPathBlockedForSitemap } from '@/lib/seo-sitemap-guards';
 
 export interface SitemapEntry {
   url: string;
@@ -37,44 +38,42 @@ export class SitemapGenerator {
     if (cached) return cached;
 
     const now = new Date();
-    const staticPages: SitemapEntry[] = [
+    const staticPageConfigs = [
       {
-        url: this.baseUrl,
-        lastModified: now,
-        changeFrequency: 'daily',
+        path: '/',
+        changeFrequency: 'daily' as const,
         priority: 1.0,
       },
       {
-        url: `${this.baseUrl}/cocktails`,
-        lastModified: now,
-        changeFrequency: 'daily',
+        path: '/cocktails',
+        changeFrequency: 'daily' as const,
         priority: 0.9,
       },
       {
-        url: `${this.baseUrl}/pricing`,
-        lastModified: now,
-        changeFrequency: 'weekly',
+        path: '/pricing',
+        changeFrequency: 'weekly' as const,
         priority: 0.8,
       },
       {
-        url: `${this.baseUrl}/login`,
-        lastModified: now,
-        changeFrequency: 'monthly',
-        priority: 0.5,
-      },
-      {
-        url: `${this.baseUrl}/privacy`,
-        lastModified: now,
-        changeFrequency: 'monthly',
+        path: '/privacy',
+        changeFrequency: 'monthly' as const,
         priority: 0.3,
       },
       {
-        url: `${this.baseUrl}/api/docs`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.6,
+        path: '/education',
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
       },
     ];
+
+    const staticPages: SitemapEntry[] = staticPageConfigs
+      .filter(page => !isPathBlockedForSitemap(page.path))
+      .map(page => ({
+        url: page.path === '/' ? this.baseUrl : `${this.baseUrl}${page.path}`,
+        lastModified: now,
+        changeFrequency: page.changeFrequency,
+        priority: page.priority,
+      }));
 
     this.setCache(cacheKey, staticPages);
     return staticPages;
