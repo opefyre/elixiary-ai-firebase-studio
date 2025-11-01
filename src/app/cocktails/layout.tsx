@@ -35,9 +35,6 @@ export const metadata: Metadata = {
     title: 'Cocktail Recipes | 500+ Curated Drinks',
     description: 'Discover 500+ expertly curated cocktail recipes from around the world.',
   },
-  alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/cocktails`,
-  },
 };
 
 export default function CocktailsLayout({

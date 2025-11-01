@@ -31,9 +31,6 @@ export const metadata: Metadata = {
     title: 'Pricing | Elixiary AI Pro',
     description: 'Upgrade to Elixiary AI Pro for unlimited AI-generated cocktail recipes and advanced features.',
   },
-  alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/pricing`,
-  },
 };
 
 export default function PricingLayout({

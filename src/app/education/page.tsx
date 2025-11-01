@@ -26,9 +26,6 @@ export const metadata: Metadata = {
     description: 'Master the art of mixology with our comprehensive education center. Learn cocktail techniques, equipment guides, ingredient knowledge, and classic recipes from expert mixologists.',
     images: ['https://elixiary.com/og-education.jpg'],
   },
-  alternates: {
-    canonical: 'https://elixiary.com/education',
-  },
 };
 
 export default function EducationPage() {

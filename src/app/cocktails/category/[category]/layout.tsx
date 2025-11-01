@@ -35,9 +35,6 @@ export async function generateMetadata({ params }: CategoryLayoutProps): Promise
       title: `${categoryName} Cocktails | Elixiary AI`,
       description: `Discover ${categoryName.toLowerCase()} cocktail recipes.`,
     },
-    alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/cocktails/category/${category}`,
-    },
   };
 }
 

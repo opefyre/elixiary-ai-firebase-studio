@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Key, Mail, Copy, Code, BookOpen, Globe, Shield, Clock, ChevronDown, ChevronRight, ExternalLink, Info, AlertCircle, Users, Star, Zap } from 'lucide-react';
 import Link from 'next/link';
-import { config, getApiUrl } from '@/lib/config';
+import { config } from '@/lib/config';
 
 export default function APIDocsPage() {
   const { user, isUserLoading } = useFirebase();

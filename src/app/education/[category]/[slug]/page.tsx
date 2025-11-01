@@ -63,9 +63,6 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
         description: article.seo.metaDescription || article.excerpt,
         images: article.featuredImage ? [article.featuredImage] : undefined,
       },
-      alternates: {
-        canonical: `https://elixiary.com/education/${params.category}/${params.slug}`,
-      },
     };
   } catch (error) {
     console.error('Error generating metadata for article:', error);
