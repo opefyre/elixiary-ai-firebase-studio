@@ -1,56 +1,49 @@
 import { MetadataRoute } from 'next';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { config } from '@/lib/config';
+import { isPathBlockedForSitemap } from '@/lib/seo-sitemap-guards';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = config.baseUrl;
   const now = new Date();
 
-  // Static pages that actually exist
-  const staticPages: MetadataRoute.Sitemap = [
+  // Static pages that actually exist. Paths must not be disallowed in robots.ts.
+  const staticPageConfigs = [
     {
-      url: baseUrl,
-      lastModified: now,
-      changeFrequency: 'daily',
+      path: '/',
+      changeFrequency: 'daily' as const,
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/cocktails`,
-      lastModified: now,
-      changeFrequency: 'daily',
+      path: '/cocktails',
+      changeFrequency: 'daily' as const,
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/pricing`,
-      lastModified: now,
-      changeFrequency: 'weekly',
+      path: '/pricing',
+      changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/login`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: now,
-      changeFrequency: 'monthly',
+      path: '/privacy',
+      changeFrequency: 'monthly' as const,
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/api/docs`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/education`,
-      lastModified: now,
-      changeFrequency: 'weekly',
+      path: '/education',
+      changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
   ];
+
+  const staticPages: MetadataRoute.Sitemap = staticPageConfigs
+    .filter(page => !isPathBlockedForSitemap(page.path))
+    .map(page => ({
+      url: page.path === '/' ? baseUrl : `${baseUrl}${page.path}`,
+      lastModified: now,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+    }));
 
   try {
     // Initialize Firebase Admin
