@@ -19,6 +19,20 @@ type AnalyticsEntry = {
   } | null;
 };
 
+function isMissingIndexError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const firestoreError = error as { code?: unknown; message?: unknown };
+
+  return (
+    firestoreError.code === 9 ||
+    (typeof firestoreError.message === 'string' &&
+      firestoreError.message.toLowerCase().includes('requires an index'))
+  );
+}
+
 function toDate(value: unknown): Date {
   if (value && typeof value === 'object' && 'toDate' in (value as Record<string, unknown>)) {
     const candidate = (value as { toDate: () => Date }).toDate();
@@ -112,7 +126,24 @@ export async function loadEducationHubData(): Promise<EducationHubContent | null
     latestArticles = latestSnapshot.docs.map((doc) => mapArticleSnapshot(doc));
   } catch (error) {
     console.error('Error loading latest education articles for hub:', error);
-    latestArticles = [];
+    if (isMissingIndexError(error)) {
+      try {
+        const fallbackSnapshot = await adminDb
+          .collection('education_articles')
+          .where('status', '==', 'published')
+          .get();
+
+        latestArticles = fallbackSnapshot.docs
+          .map((doc) => mapArticleSnapshot(doc))
+          .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
+          .slice(0, 6);
+      } catch (fallbackError) {
+        console.error('Fallback loading latest education articles for hub failed:', fallbackError);
+        latestArticles = [];
+      }
+    } else {
+      latestArticles = [];
+    }
   }
 
   try {
@@ -141,8 +172,34 @@ export async function loadEducationHubData(): Promise<EducationHubContent | null
     featuredArticles = featuredSnapshot.docs.map((doc) => mapArticleSnapshot(doc));
   } catch (error) {
     console.error('Error loading featured education articles for hub:', error);
-    featuredArticles = [];
-    featuredError = true;
+    if (isMissingIndexError(error)) {
+      try {
+        const fallbackSnapshot = await adminDb
+          .collection('education_articles')
+          .where('status', '==', 'published')
+          .get();
+
+        featuredArticles = fallbackSnapshot.docs
+          .map((doc) => mapArticleSnapshot(doc))
+          .sort((a, b) => {
+            const viewDifference = (b.stats?.views ?? 0) - (a.stats?.views ?? 0);
+            if (viewDifference !== 0) {
+              return viewDifference;
+            }
+
+            return b.publishedAt.getTime() - a.publishedAt.getTime();
+          })
+          .slice(0, 3);
+        featuredError = false;
+      } catch (fallbackError) {
+        console.error('Fallback loading featured education articles for hub failed:', fallbackError);
+        featuredArticles = [];
+        featuredError = true;
+      }
+    } else {
+      featuredArticles = [];
+      featuredError = true;
+    }
   }
 
   try {
