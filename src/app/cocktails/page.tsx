@@ -1,6 +1,6 @@
-import { headers } from 'next/headers';
 import { CuratedCocktailsClient } from './curated-client';
 import { Category, CuratedRecipe, Tag } from './types';
+import { initializeFirebaseServer } from '@/firebase/server';
 
 interface InitialCocktailsData {
   recipes: CuratedRecipe[];
@@ -10,76 +10,55 @@ interface InitialCocktailsData {
   error?: string;
 }
 
-function resolveBaseUrl() {
-  const envUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.SITE_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
-
-  if (envUrl) {
-    return envUrl.replace(/\/$/, '');
-  }
-
-  let headerList: ReturnType<typeof headers> | null = null;
-  try {
-    headerList = headers();
-  } catch (error) {
-    // headers() can throw during static generation. We'll fall back to localhost below.
-    console.warn('Falling back to localhost for cocktails base URL', error);
-  }
-
-  if (headerList) {
-    const forwardedProto = headerList.get('x-forwarded-proto');
-    const forwardedHost = headerList.get('x-forwarded-host');
-    const host = headerList.get('host');
-
-    if (forwardedHost) {
-      return `${forwardedProto ?? 'https'}://${forwardedHost}`.replace(/\/$/, '');
-    }
-
-    if (host) {
-      return `${forwardedProto ?? 'https'}://${host}`.replace(/\/$/, '');
-    }
-  }
-
-  return 'http://localhost:3000';
-}
-
 async function loadInitialCocktailsData(): Promise<InitialCocktailsData> {
   try {
-    const baseUrl = resolveBaseUrl();
-    const recipesUrl = new URL('/api/curated-recipes', baseUrl);
-    recipesUrl.searchParams.set('limit', '20');
-    recipesUrl.searchParams.set('page', '1');
-    const categoriesUrl = new URL('/api/curated-categories', baseUrl);
-    const tagsUrl = new URL('/api/curated-tags', baseUrl);
-    const [recipesRes, categoriesRes, tagsRes] = await Promise.all([
-      fetch(recipesUrl, {
-        cache: 'no-store'
-      }),
-      fetch(categoriesUrl, {
-        cache: 'no-store'
-      }),
-      fetch(tagsUrl, {
-        cache: 'no-store'
-      })
-    ]);
+    const { adminDb } = initializeFirebaseServer();
 
-    if (!recipesRes.ok || !categoriesRes.ok || !tagsRes.ok) {
-      throw new Error('Failed to load curated cocktails');
-    }
+    const limit = 20;
 
-    const [recipesData, categoriesData, tagsData] = await Promise.all([
-      recipesRes.json(),
-      categoriesRes.json(),
-      tagsRes.json()
-    ]);
+    const recipesQuery = adminDb
+      .collection('curated-recipes')
+      .orderBy('name', 'asc')
+      .limit(limit);
+
+    const categoriesQuery = adminDb
+      .collection('curated-categories')
+      .orderBy('sortOrder', 'asc');
+
+    const tagsQuery = adminDb
+      .collection('curated-tags')
+      .orderBy('count', 'desc');
+
+    const [recipesSnapshot, totalRecipesSnapshot, categoriesSnapshot, tagsSnapshot] =
+      await Promise.all([
+        recipesQuery.get(),
+        adminDb.collection('curated-recipes').get(),
+        categoriesQuery.get(),
+        tagsQuery.get()
+      ]);
+
+    const recipes = recipesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as CuratedRecipe[];
+
+    const categories = categoriesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Category[];
+
+    const tags = tagsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Tag[];
+
+    const total = totalRecipesSnapshot.size;
 
     return {
-      recipes: recipesData.recipes || [],
-      categories: categoriesData.categories || [],
-      tags: tagsData.tags || [],
-      hasMore: recipesData.pagination?.hasNext ?? false
+      recipes,
+      categories,
+      tags,
+      hasMore: limit < total
     };
   } catch (error) {
     console.error('Error loading curated cocktails', error);

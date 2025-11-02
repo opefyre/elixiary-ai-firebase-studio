@@ -215,6 +215,12 @@ The app is automatically deployed to Vercel on every push to `main` branch.
 
 ---
 
+## ✅ Regression Checks
+
+- **Protected Preview Cocktails Page**: Enable [Vercel preview protection](https://vercel.com/docs/security/deployment-protection) and open `/cocktails` on the preview deployment. The page should render the curated recipes grid without triggering network requests to the `/api/curated-*` routes because server-side rendering now reads directly from Firestore.
+
+---
+
 ## 📝 License
 
 This project is private and proprietary. All rights reserved.
