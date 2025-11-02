@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -368,14 +367,15 @@ export function CuratedCocktailsClient({
             <CardContent className="p-0 h-full flex flex-col">
               <div className="relative h-80 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
                 {recipe.imageUrl ? (
-                  <Image
+                  <img
                     src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
                     alt={recipe.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.classList.add('hidden');
                     }}
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
