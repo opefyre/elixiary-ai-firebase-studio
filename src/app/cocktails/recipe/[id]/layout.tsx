@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { initializeFirebaseServer } from '@/firebase/server';
+import { getCanonicalUrl } from '@/lib/config';
 
 // Generate metadata for individual recipe pages
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -57,6 +58,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         card: 'summary_large_image',
         title: title,
         description: `Learn how to make ${recipe.name} cocktail.`,
+      },
+      alternates: {
+        canonical: getCanonicalUrl(`/cocktails/recipe/${params.id}`),
       },
     };
   } catch (error) {

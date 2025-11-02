@@ -1,13 +1,9 @@
 import { Metadata } from 'next';
+import { getCanonicalUrl } from '@/lib/config';
 
-interface CategoryLayoutProps {
-  children: React.ReactNode;
-  params: Promise<{ category: string }>;
-}
+export async function generateMetadata({ params }: { params: { category: string } }): Promise<Metadata> {
+  const { category } = params;
 
-export async function generateMetadata({ params }: CategoryLayoutProps): Promise<Metadata> {
-  const { category } = await params;
-  
   // Convert category from URL format to readable format
   const categoryName = category
     .replace(/^cat_/, '')
@@ -34,6 +30,9 @@ export async function generateMetadata({ params }: CategoryLayoutProps): Promise
       card: 'summary_large_image',
       title: `${categoryName} Cocktails | Elixiary AI`,
       description: `Discover ${categoryName.toLowerCase()} cocktail recipes.`,
+    },
+    alternates: {
+      canonical: getCanonicalUrl(`/cocktails/category/${category}`),
     },
   };
 }
