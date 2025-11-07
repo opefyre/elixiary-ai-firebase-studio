@@ -81,20 +81,33 @@ Source: ${recipe.source || 'Elixiary AI'}
   }, [copyRecipe, recipe.name]);
 
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center justify-center gap-2">
       <SaveRecipeButton
         recipeId={recipe.id}
         recipeData={recipe}
         variant="outline"
-        className="flex-1"
+        size="icon"
+        showText={false}
       />
-      <Button onClick={copyRecipe} variant="outline" className="flex-1">
-        <Copy className="h-4 w-4 mr-2" />
-        Copy Recipe
+      <Button
+        onClick={copyRecipe}
+        variant="outline"
+        size="icon"
+        aria-label="Copy recipe"
+        title="Copy recipe"
+      >
+        <Copy className="h-4 w-4" />
+        <span className="sr-only">Copy recipe</span>
       </Button>
-      <Button onClick={shareRecipe} variant="outline" className="flex-1">
-        <Share2 className="h-4 w-4 mr-2" />
-        Share
+      <Button
+        onClick={shareRecipe}
+        variant="outline"
+        size="icon"
+        aria-label="Share recipe"
+        title="Share recipe"
+      >
+        <Share2 className="h-4 w-4" />
+        <span className="sr-only">Share recipe</span>
       </Button>
     </div>
   );
