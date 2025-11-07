@@ -1,25 +1,11 @@
-export interface CuratedRecipe {
+export interface CuratedRecipeSummary {
   id: string;
   name: string;
-  ingredients: Array<{
-    name: string;
-    measure: string;
-    amount: number;
-    unit: string;
-    ingredient: string;
-  }>;
-  instructions: string[];
-  glassware: string;
-  garnish: string;
-  category: string;
-  categoryId: string;
-  difficulty: string;
   prepTime: string;
+  glassware: string;
+  difficulty: string;
   tags: string[];
-  moods: string[];
-  imageUrl: string;
-  isCurated: boolean;
-  source: string;
+  imageUrl?: string | null;
 }
 
 export interface Category {

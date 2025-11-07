@@ -1,9 +1,9 @@
 import { CuratedCocktailsClient } from './curated-client';
-import { Category, CuratedRecipe, Tag } from './types';
+import { Category, CuratedRecipeSummary, Tag } from './types';
 import { initializeFirebaseServer } from '@/firebase/server';
 
 interface InitialCocktailsData {
-  recipes: CuratedRecipe[];
+  recipes: CuratedRecipeSummary[];
   categories: Category[];
   tags: Tag[];
   hasMore: boolean;
@@ -37,10 +37,18 @@ async function loadInitialCocktailsData(): Promise<InitialCocktailsData> {
         tagsQuery.get()
       ]);
 
-    const recipes = recipesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as CuratedRecipe[];
+    const recipes = recipesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        prepTime: data.prepTime,
+        glassware: data.glassware,
+        difficulty: data.difficulty,
+        tags: data.tags ?? [],
+        imageUrl: data.imageUrl ?? null
+      } as CuratedRecipeSummary;
+    });
 
     const categories = categoriesSnapshot.docs.map(doc => ({
       id: doc.id,
