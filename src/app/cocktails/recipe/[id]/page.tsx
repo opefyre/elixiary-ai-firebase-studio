@@ -101,8 +101,8 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className="space-y-4">
-          <div className="relative h-[800px] overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
+        <div className="space-y-4 lg:space-y-6">
+          <div className="relative flex aspect-[3/4] w-full max-h-[80vh] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
             {recipe.imageUrl ? (
               <RecipeImage
                 src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
@@ -112,7 +112,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                 sizes="(min-width: 1024px) 50vw, 100vw"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
                 <Martini className="h-24 w-24 text-primary/30" />
               </div>
             )}
