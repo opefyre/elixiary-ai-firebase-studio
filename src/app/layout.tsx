@@ -15,6 +15,9 @@ import { getNonce } from "@/lib/nonce";
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.baseUrl),
+  alternates: {
+    canonical: config.baseUrl,
+  },
   title: {
     default: 'Elixiary AI - Free AI Cocktail Generator',
     template: '%s | Elixiary AI',

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { getCanonicalUrl } from '@/lib/config';
 
 export const metadata: Metadata = {
   title: 'Cocktail Recipes | 500+ Curated Drinks',
@@ -17,6 +18,9 @@ export const metadata: Metadata = {
     'cocktail categories',
     'cocktail ingredients',
   ],
+  alternates: {
+    canonical: getCanonicalUrl('/cocktails'),
+  },
   openGraph: {
     title: 'Cocktail Recipes | 500+ Curated Drinks',
     description: 'Discover 500+ expertly curated cocktail recipes from around the world. Browse by category, difficulty, and ingredients.',

@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Lock, Eye, Database, Users, Mail } from "lucide-react";
+import { getCanonicalUrl } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Elixiary AI",
   description: "Privacy Policy and Terms of Service for Elixiary AI. Learn how we protect your data and respect your privacy.",
+  alternates: {
+    canonical: getCanonicalUrl("/privacy"),
+  },
 };
 
 export default function PrivacyPage() {
