@@ -2,11 +2,12 @@
 
 import { AuthForm } from '@/components/auth-form';
 import { useUser } from '@/firebase';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
@@ -30,5 +31,13 @@ export default function LoginPage() {
         <AuthForm />
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AppClientProviders>
+      <LoginPageContent />
+    </AppClientProviders>
   );
 }

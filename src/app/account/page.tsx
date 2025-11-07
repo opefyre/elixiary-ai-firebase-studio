@@ -32,8 +32,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { signOut } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 
-export default function AccountPage() {
+function AccountPageContent() {
   const { user, isUserLoading } = useUser();
   const { auth } = useFirebase();
   const { 
@@ -492,5 +493,13 @@ export default function AccountPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <AppClientProviders>
+      <AccountPageContent />
+    </AppClientProviders>
   );
 }

@@ -8,7 +8,7 @@ import { BookOpen, Wine, Code, GraduationCap } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useSubscription } from "@/firebase/firestore/use-subscription";
 
-export function Header() {
+export function HeaderClient() {
   const { user } = useUser();
   const { subscription } = useSubscription();
 
@@ -19,7 +19,7 @@ export function Header() {
           <Logo width={24} height={24} className="h-6 w-6" />
           <h1 className="text-lg font-bold leading-none font-headline">Elixiary</h1>
         </Link>
-        
+
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
@@ -42,7 +42,7 @@ export function Header() {
               </Link>
             </Button>
           )}
-          {user && subscription?.tier === 'pro' && (
+          {user && subscription?.tier === "pro" && (
             <Button variant="ghost" size="sm" asChild>
               <Link href="/api/docs">
                 <Code className="mr-2 h-4 w-4" />
@@ -72,7 +72,7 @@ export function Header() {
               </Link>
             </Button>
           )}
-          {user && subscription?.tier === 'pro' && (
+          {user && subscription?.tier === "pro" && (
             <Button variant="ghost" size="sm" asChild>
               <Link href="/api/docs">
                 <Code className="h-4 w-4" />
@@ -85,3 +85,4 @@ export function Header() {
     </header>
   );
 }
+

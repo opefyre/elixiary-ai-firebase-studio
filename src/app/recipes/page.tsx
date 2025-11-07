@@ -12,8 +12,9 @@ import Link from 'next/link';
 import { UnifiedRecipeCard } from '@/components/unified-recipe-card';
 import { ShoppingListDialog } from '@/components/shopping-list-dialog';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 
-export default function RecipesPage() {
+function RecipesPageContent() {
   const { user, isUserLoading } = useUser();
   const { recipes, isLoading, deleteRecipe, updateRecipeTags, updateRecipeImage } = useRecipes();
   const { savedRecipes, unsaveRecipe } = useSavedRecipes();
@@ -366,6 +367,14 @@ export default function RecipesPage() {
         featureIcon={<ShoppingCart className="h-8 w-8 text-white" />}
       />
     </div>
+  );
+}
+
+export default function RecipesPage() {
+  return (
+    <AppClientProviders>
+      <RecipesPageContent />
+    </AppClientProviders>
   );
 }
 

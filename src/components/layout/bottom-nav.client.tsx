@@ -4,18 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/firebase";
 import { useSubscription } from "@/firebase/firestore/use-subscription";
-import { 
-  Home, 
-  Wine, 
-  BookOpen, 
-  Code, 
+import {
+  Home,
+  Wine,
+  BookOpen,
+  Code,
   User,
-  Plus,
-  Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function BottomNav() {
+export function BottomNavClient() {
   const pathname = usePathname();
   const { user } = useUser();
   const { subscription } = useSubscription();
@@ -25,20 +23,20 @@ export function BottomNav() {
       href: "/",
       icon: Home,
       label: "Home",
-      active: pathname === "/"
+      active: pathname === "/",
     },
     {
       href: "/cocktails",
       icon: Wine,
       label: "Cocktails",
-      active: pathname.startsWith("/cocktails")
+      active: pathname.startsWith("/cocktails"),
     },
     {
       href: "/recipes",
       icon: BookOpen,
       label: "My Recipes",
       active: pathname.startsWith("/recipes"),
-      requireAuth: true
+      requireAuth: true,
     },
     {
       href: "/api/docs",
@@ -46,20 +44,19 @@ export function BottomNav() {
       label: "API",
       active: pathname.startsWith("/api/docs"),
       requireAuth: true,
-      requirePro: true
+      requirePro: true,
     },
     {
       href: user ? "/account" : "/login",
       icon: User,
       label: user ? "Account" : "Sign In",
-      active: pathname.startsWith("/account") || pathname.startsWith("/login")
-    }
+      active: pathname.startsWith("/account") || pathname.startsWith("/login"),
+    },
   ];
 
-  // Filter items based on auth requirements
-  const visibleItems = navItems.filter(item => {
+  const visibleItems = navItems.filter((item) => {
     if (item.requireAuth && !user) return false;
-    if (item.requirePro && subscription?.tier !== 'pro') return false;
+    if (item.requirePro && subscription?.tier !== "pro") return false;
     return true;
   });
 
@@ -88,3 +85,4 @@ export function BottomNav() {
     </nav>
   );
 }
+
