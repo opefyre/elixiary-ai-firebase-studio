@@ -1,12 +1,7 @@
-import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { HeaderFallback } from "@/components/layout/header";
 import { BottomNavFallback } from "@/components/layout/bottom-nav";
-
-const AppChromeClient = dynamic(
-  () => import("@/components/layout/app-chrome.client").then((mod) => mod.AppChromeClient),
-  { ssr: false }
-);
+import { AppChromeClientBoundary } from "@/components/layout/app-chrome-boundary.client";
 
 export function AppChrome() {
   return (
@@ -22,7 +17,7 @@ export function AppChrome() {
         </>
       }
     >
-      <AppChromeClient />
+      <AppChromeClientBoundary />
     </Suspense>
   );
 }
