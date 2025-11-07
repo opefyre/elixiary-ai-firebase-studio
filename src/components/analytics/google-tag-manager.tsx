@@ -14,7 +14,7 @@ export function GoogleTagManager({ nonce }: GoogleTagManagerProps) {
       {/* Google Tag Manager */}
       <Script
         id="gtm-script"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         nonce={nonce}
         dangerouslySetInnerHTML={{
           __html: `

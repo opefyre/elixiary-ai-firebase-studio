@@ -12,13 +12,13 @@ export function GoogleAnalytics({ nonce }: GoogleAnalyticsProps) {
   return (
     <>
       <Script
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
         nonce={nonce}
       />
       <Script
         id="google-analytics"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         nonce={nonce}
         dangerouslySetInnerHTML={{
           __html: `
