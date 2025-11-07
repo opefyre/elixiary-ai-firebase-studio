@@ -102,16 +102,16 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(16rem,24rem)_minmax(0,1fr)]">
           <div className="space-y-4 lg:space-y-6">
-            <div className="relative flex aspect-[3/4] w-full max-h-[80vh] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
+            <div className="relative mx-auto flex aspect-[3/4] w-full max-w-[clamp(16rem,40vw,28rem)] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
               {recipe.imageUrl ? (
                 <RecipeImage
                   src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
                   alt={recipe.name}
                   fill
                   className="object-cover"
-                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 35vw, 100vw"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
