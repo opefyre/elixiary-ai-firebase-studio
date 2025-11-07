@@ -170,6 +170,18 @@ export default async function RootLayout({
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://drive.google.com" />
         <link rel="dns-prefetch" href="https://drive.google.com" />
+        <link
+          rel="preconnect"
+          href="https://lh3.googleusercontent.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         
         {/* Structured Data */}
         <script
