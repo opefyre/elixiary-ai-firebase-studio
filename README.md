@@ -4,7 +4,7 @@
 
 Generate unique, personalized cocktail recipes with AI. Tell our AI mixologist what you're in the mood for, and it will create a custom cocktail recipe just for you.
 
-🌐 **Live App**: [elixiary.com](https://elixiary.com)
+🌐 **Live App**: [www.elixiary.com](https://www.elixiary.com)
 
 ---
 
@@ -211,7 +211,7 @@ src/
 
 The app is automatically deployed to Vercel on every push to `main` branch.
 
-**Production URL**: https://elixiary.com
+**Production URL**: https://www.elixiary.com
 
 ---
 
@@ -230,7 +230,7 @@ This project is private and proprietary. All rights reserved.
 ## 🤝 Support
 
 - **Email**: hello@elixiary.com
-- **Website**: [elixiary.com](https://elixiary.com)
+- **Website**: [www.elixiary.com](https://www.elixiary.com)
 
 ---
 

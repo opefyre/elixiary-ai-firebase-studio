@@ -11,7 +11,7 @@ export class SecurityMiddleware {
    */
   static addSecurityHeaders(response: NextResponse): NextResponse {
     // CORS headers for API endpoints
-    response.headers.set('Access-Control-Allow-Origin', 'https://elixiary.com');
+    response.headers.set('Access-Control-Allow-Origin', 'https://www.elixiary.com');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'x-api-key, x-user-email, content-type, authorization');
     response.headers.set('Access-Control-Max-Age', '86400');
