@@ -1,7 +1,7 @@
 # 🍸 Elixiary AI - Open API Documentation
 
 **Version**: 1.1.0  
-**Base URL**: `https://elixiary.com/api/v1`  
+**Base URL**: `https://www.elixiary.com/api/v1`
 **Last Updated**: January 2025
 
 ---
@@ -50,7 +50,7 @@ Content-Type: application/json
 ```
 
 ### Getting API Keys
-1. Sign up for a Pro subscription at [elixiary.com](https://elixiary.com)
+1. Sign up for a Pro subscription at [www.elixiary.com](https://www.elixiary.com)
 2. Go to your Account page
 3. Navigate to the "API Keys" section
 4. Create a new API key with a descriptive name
@@ -136,7 +136,7 @@ GET /recipes
 
 **Example:**
 ```bash
-curl -X GET "https://elixiary.com/api/v1/recipes?category=Beer%20Cocktails&difficulty=Easy&limit=5" \
+curl -X GET "https://www.elixiary.com/api/v1/recipes?category=Beer%20Cocktails&difficulty=Easy&limit=5" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -202,7 +202,7 @@ GET /recipes/{id}
 
 **Example:**
 ```bash
-curl -X GET "https://elixiary.com/api/v1/recipes/hhk7z9swf" \
+curl -X GET "https://www.elixiary.com/api/v1/recipes/hhk7z9swf" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -275,7 +275,7 @@ GET /user/recipes
 
 **Example:**
 ```bash
-curl -X GET "https://elixiary.com/api/v1/user/recipes?source=curated&limit=10" \
+curl -X GET "https://www.elixiary.com/api/v1/user/recipes?source=curated&limit=10" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -294,7 +294,7 @@ POST /user/recipes
 
 **Example:**
 ```bash
-curl -X POST "https://elixiary.com/api/v1/user/recipes" \
+curl -X POST "https://www.elixiary.com/api/v1/user/recipes" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com" \
   -H "Content-Type: application/json" \
@@ -308,7 +308,7 @@ DELETE /user/recipes/{id}
 
 **Example:**
 ```bash
-curl -X DELETE "https://elixiary.com/api/v1/user/recipes/NeHIddPDqYCq0t9578x9" \
+curl -X DELETE "https://www.elixiary.com/api/v1/user/recipes/NeHIddPDqYCq0t9578x9" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -320,7 +320,7 @@ GET /user/badges
 
 **Example:**
 ```bash
-curl -X GET "https://elixiary.com/api/v1/user/badges" \
+curl -X GET "https://www.elixiary.com/api/v1/user/badges" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -334,7 +334,7 @@ GET /keys
 
 **Example:**
 ```bash
-curl -X GET "https://elixiary.com/api/v1/keys" \
+curl -X GET "https://www.elixiary.com/api/v1/keys" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -353,7 +353,7 @@ POST /keys
 
 **Example:**
 ```bash
-curl -X POST "https://elixiary.com/api/v1/keys" \
+curl -X POST "https://www.elixiary.com/api/v1/keys" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com" \
   -H "Content-Type: application/json" \
@@ -367,7 +367,7 @@ DELETE /keys/{keyId}
 
 **Example:**
 ```bash
-curl -X DELETE "https://elixiary.com/api/v1/keys/elx_live_abc123" \
+curl -X DELETE "https://www.elixiary.com/api/v1/keys/elx_live_abc123" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -379,7 +379,7 @@ POST /keys/{keyId}/rotate
 
 **Example:**
 ```bash
-curl -X POST "https://elixiary.com/api/v1/keys/elx_live_abc123/rotate" \
+curl -X POST "https://www.elixiary.com/api/v1/keys/elx_live_abc123/rotate" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -393,7 +393,7 @@ GET /docs
 
 **Example:**
 ```bash
-curl -X GET "https://elixiary.com/api/v1/docs" \
+curl -X GET "https://www.elixiary.com/api/v1/docs" \
   -H "x-api-key: elx_live_your_api_key_here" \
   -H "x-user-email: your-email@example.com"
 ```
@@ -512,7 +512,7 @@ For security reasons, error messages are now generic to prevent information disc
 ### JavaScript/Node.js
 
 ```javascript
-const API_BASE = 'https://elixiary.com/api/v1';
+const API_BASE = 'https://www.elixiary.com/api/v1';
 const API_KEY = 'elx_live_your_api_key_here';
 const USER_EMAIL = 'your-email@example.com';
 
@@ -565,7 +565,7 @@ saveRecipe('hhk7z9swf')
 import requests
 import json
 
-API_BASE = 'https://elixiary.com/api/v1'
+API_BASE = 'https://www.elixiary.com/api/v1'
 API_KEY = 'elx_live_your_api_key_here'
 USER_EMAIL = 'your-email@example.com'
 
@@ -606,7 +606,7 @@ except requests.exceptions.RequestException as e:
 
 ```php
 <?php
-$apiBase = 'https://elixiary.com/api/v1';
+$apiBase = 'https://www.elixiary.com/api/v1';
 $apiKey = 'elx_live_your_api_key_here';
 $userEmail = 'your-email@example.com';
 

@@ -1,11 +1,11 @@
 // Centralized configuration for the application
 export const config = {
   // Base URL configuration
-  baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com',
+  baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com',
   domain: process.env.NEXT_PUBLIC_DOMAIN || 'elixiary.com',
   
   // API configuration
-  apiBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/api/v1`,
+  apiBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/api/v1`,
   
   // SEO configuration
   siteName: 'Elixiary AI',

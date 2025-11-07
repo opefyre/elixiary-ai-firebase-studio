@@ -33,7 +33,7 @@ export function MetaTags({
       <meta property="og:description" content={description || 'AI-Powered Cocktail Recipe Generator'} />
       <meta property="og:type" content={ogType} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:url" content={canonical || process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'} />
+      <meta property="og:url" content={canonical || process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'} />
       <meta property="og:site_name" content="Elixiary AI" />
       
       {/* Twitter */}
