@@ -1,20 +1,23 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SaveRecipeButton } from '@/components/save-recipe-button';
+import { useUser } from '@/firebase';
 import {
   Search,
   Filter,
   Clock,
   Zap,
   Martini,
-  Loader2
+  Loader2,
+  Star
 } from 'lucide-react';
 import { CuratedRecipe, Category, Tag } from './types';
 
@@ -34,6 +37,24 @@ interface FetchOptions {
   difficultyOverride?: string | null;
   tagsOverride?: string[];
 }
+
+const DynamicSaveRecipeButton = dynamic(
+  () => import('@/components/save-recipe-button').then((mod) => mod.SaveRecipeButton),
+  {
+    ssr: false,
+    loading: () => (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled
+        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="sr-only">Preparing save option...</span>
+      </Button>
+    )
+  }
+);
 
 export function CuratedCocktailsClient({
   initialRecipes,
@@ -55,6 +76,19 @@ export function CuratedCocktailsClient({
   const [lastSearchQuery, setLastSearchQuery] = useState('');
 
   const filtersInitialized = useRef(false);
+  const { user } = useUser();
+  const router = useRouter();
+
+  const handlePromptSignIn = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      const redirectPath = typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}`
+        : '/cocktails';
+      router.push(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+    },
+    [router]
+  );
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -423,14 +457,27 @@ export function CuratedCocktailsClient({
                 </div>
 
                 <div className="flex justify-center">
-                  <SaveRecipeButton
-                    recipeId={recipe.id}
-                    recipeData={recipe}
-                    variant="ghost"
-                    size="sm"
-                    showText={false}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  />
+                  {user ? (
+                    <DynamicSaveRecipeButton
+                      recipeId={recipe.id}
+                      recipeData={recipe}
+                      variant="ghost"
+                      size="sm"
+                      showText={false}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    />
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handlePromptSignIn}
+                      title="Sign in to save recipes"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <Star className="h-4 w-4" />
+                      <span className="sr-only">Sign in to save recipes</span>
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
