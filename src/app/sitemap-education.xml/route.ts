@@ -1,12 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Timestamp } from 'firebase-admin/firestore';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { EducationArticle, EducationCategory } from '@/types/education';
 import { getCanonicalUrl } from '@/lib/config';
+
+function coerceToDate(value: unknown): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value;
+  }
+
+  if (value instanceof Timestamp) {
+    return value.toDate();
+  }
+
+  if (typeof (value as { toDate?: () => unknown })?.toDate === 'function') {
+    const result = (value as { toDate: () => unknown }).toDate();
+    if (result instanceof Date) {
+      return result;
+    }
+    const dateFromResult = new Date(result as string | number | Date);
+    return Number.isNaN(dateFromResult.getTime()) ? null : dateFromResult;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   try {
     const { adminDb } = initializeFirebaseServer();
     
+    const requestTime = new Date();
+    const fallbackIso = requestTime.toISOString();
+
     // Fetch categories
     const categoriesSnapshot = await adminDb
       .collection('education_categories')
@@ -35,6 +69,20 @@ export async function GET(request: NextRequest) {
     const articles: EducationArticle[] = [];
     articlesSnapshot.forEach((doc) => {
       const data = doc.data();
+
+      const publishedAt = coerceToDate(data.publishedAt);
+      const updatedAt = coerceToDate(data.updatedAt);
+
+      if (!publishedAt && !updatedAt) {
+        console.warn('[sitemap-education] Skipping article due to missing timestamps', {
+          id: doc.id,
+        });
+        return;
+      }
+
+      const safePublishedAt = publishedAt ?? updatedAt ?? requestTime;
+      const safeUpdatedAt = updatedAt ?? publishedAt ?? requestTime;
+
       articles.push({
         id: doc.id,
         title: data.title,
@@ -47,8 +95,8 @@ export async function GET(request: NextRequest) {
         readingTime: data.readingTime,
         tags: data.tags || [],
         author: data.author,
-        publishedAt: data.publishedAt.toDate(),
-        updatedAt: data.updatedAt.toDate(),
+        publishedAt: safePublishedAt,
+        updatedAt: safeUpdatedAt,
         status: data.status,
         seo: data.seo,
         stats: data.stats || { views: 0, likes: 0, shares: 0 },
@@ -56,7 +104,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Generate sitemap XML
-    const now = new Date().toISOString();
+    const now = fallbackIso;
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -86,13 +134,20 @@ export async function GET(request: NextRequest) {
   </url>`).join('')}
 
   <!-- Article Pages -->
-  ${articles.map((article) => `
+  ${articles.map((article) => {
+    const lastModifiedDate = article.updatedAt ?? article.publishedAt;
+    const safeLastMod = lastModifiedDate && !Number.isNaN(lastModifiedDate.getTime())
+      ? lastModifiedDate.toISOString()
+      : fallbackIso;
+
+    return `
   <url>
     <loc>${getCanonicalUrl(`/education/${article.category}/${article.slug}`)}</loc>
-    <lastmod>${article.updatedAt.toISOString()}</lastmod>
+    <lastmod>${safeLastMod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>`).join('')}
+  </url>`;
+  }).join('')}
 </urlset>`;
 
     return new NextResponse(sitemap, {
