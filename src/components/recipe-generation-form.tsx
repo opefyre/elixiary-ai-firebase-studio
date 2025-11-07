@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Wand2, Dices, Share2, Copy, Check, Save } from "lucide-react";
-import "./recipe-generation-form.css";
 import type { GenerateCocktailRecipeOutput } from "@/ai/flows/generate-cocktail-recipe";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,7 +31,6 @@ import { incrementGenerationCount } from "@/firebase/firestore/use-subscription"
 import { UpgradeModal } from "@/components/upgrade-modal";
 import { CustomizationDialog, type CustomizationOptions } from "@/components/customization-dialog";
 import { generateCocktailGradient } from "@/lib/generate-cocktail-gradient";
-import "@/styles/prose.css";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please describe what kind of cocktail you'd like").min(10, "Please provide more details about your desired cocktail (at least 10 characters)"),
@@ -634,7 +632,7 @@ ${window.location.origin}`.trim();
               {/* Loading Bar */}
               <div className="w-full max-w-xs">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-primary/20">
-                  <div className="h-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+                  <div className="h-full animate-shimmer bg-gradient-to-r from-transparent via-primary to-transparent"></div>
                 </div>
               </div>
             </div>
