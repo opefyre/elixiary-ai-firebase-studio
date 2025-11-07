@@ -3,16 +3,14 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import "../styles/mobile-pwa.css";
 import { Toaster } from "@/components/ui/toaster";
-import { Header } from "@/components/layout/header";
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
-import { FirebaseClientProvider } from "@/firebase";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 import { config } from "@/lib/config";
 import { getNonce } from "@/lib/nonce";
 import { cn } from "@/lib/utils";
+import { AppChrome } from "@/components/layout/app-chrome";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -220,17 +218,13 @@ export default async function RootLayout({
       </head>
       <body className={cn(inter.className, "font-body antialiased")}>
         <GoogleAnalytics nonce={nonce} />
-        <FirebaseClientProvider>
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
-          
-          {/* Desktop Header */}
-          <div className="hidden md:block">
-            <Header />
-          </div>
-          
-          <div className="relative min-h-screen flex flex-col ios-viewport-fix mobile-content-container">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+
+        <AppChrome />
+
+        <div className="relative min-h-screen flex flex-col ios-viewport-fix mobile-content-container">
             <div className="absolute top-1/4 left-1/4 h-32 w-32 animate-float text-primary/10 [animation-delay:-2s]">
               <Martini className="h-full w-full" />
             </div>
@@ -246,20 +240,14 @@ export default async function RootLayout({
             <main id="main-content" className="relative z-10 flex-1 mobile-body-padding">
               {children}
             </main>
-            
+
             {/* Desktop Footer */}
             <div className="hidden md:block">
               <Footer />
             </div>
-            
-            {/* Mobile Bottom Navigation */}
-            <div className="md:hidden">
-              <BottomNav />
-            </div>
           </div>
-          <Toaster />
-          <OfflineWarning />
-        </FirebaseClientProvider>
+        <Toaster />
+        <OfflineWarning />
         
         {/* Mobile Viewport Height Fix */}
         <script

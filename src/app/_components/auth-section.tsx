@@ -1,28 +1,12 @@
-'use client';
+import { Suspense } from "react";
+import { AuthSectionFallback } from "./auth-section-fallback";
+import { AuthSectionClientBoundary } from "./auth-section-boundary.client";
 
-import { type ReactNode } from 'react';
-import dynamic from 'next/dynamic';
-
-import { useUser } from '@/firebase';
-
-const RecipeGenerationForm = dynamic(
-  () =>
-    import('@/components/recipe-generation-form').then(
-      (mod) => mod.RecipeGenerationForm
-    ),
-  { ssr: false }
-);
-
-type AuthSectionProps = {
-  guestHero: ReactNode;
-};
-
-export function AuthSection({ guestHero }: AuthSectionProps) {
-  const { user, isUserLoading } = useUser();
-
-  if (isUserLoading || !user) {
-    return <>{guestHero}</>;
-  }
-
-  return <RecipeGenerationForm />;
+export function AuthSection() {
+  return (
+    <Suspense fallback={<AuthSectionFallback />}>
+      <AuthSectionClientBoundary />
+    </Suspense>
+  );
 }
+

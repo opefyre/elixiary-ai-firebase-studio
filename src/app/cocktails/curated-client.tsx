@@ -20,6 +20,7 @@ import {
   Star
 } from 'lucide-react';
 import { CuratedRecipeSummary, Category, Tag } from './types';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 
 interface CuratedCocktailsClientProps {
   initialRecipes: CuratedRecipeSummary[];
@@ -56,7 +57,7 @@ const DynamicSaveRecipeButton = dynamic(
   }
 );
 
-export function CuratedCocktailsClient({
+function CuratedCocktailsClientContent({
   initialRecipes,
   initialCategories,
   initialTags,
@@ -537,5 +538,13 @@ export function CuratedCocktailsClient({
         </div>
       )}
     </div>
+  );
+}
+
+export function CuratedCocktailsClient(props: CuratedCocktailsClientProps) {
+  return (
+    <AppClientProviders>
+      <CuratedCocktailsClientContent {...props} />
+    </AppClientProviders>
   );
 }
