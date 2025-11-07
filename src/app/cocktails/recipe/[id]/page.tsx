@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { initializeFirebaseServer } from '@/firebase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +13,7 @@ import {
   Wine,
 } from 'lucide-react';
 import { RecipeActions } from './recipe-actions';
+import { RecipeImage } from '../recipe-image';
 import type { CuratedRecipe } from './types';
 
 interface RecipeDetailPageProps {
@@ -104,14 +104,12 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
         <div className="space-y-4">
           <div className="relative h-[800px] overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
             {recipe.imageUrl ? (
-              <Image
+              <RecipeImage
                 src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
                 alt={recipe.name}
                 fill
                 className="object-cover"
-                onError={(e) => {
-                  e.currentTarget.classList.add('hidden');
-                }}
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
@@ -237,14 +235,14 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                   <CardContent className="flex h-full flex-col p-0">
                     <div className="relative h-60 flex-shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5">
                       {relatedRecipe.imageUrl ? (
-                        <Image
-                          src={getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl}
+                        <RecipeImage
+                          src={
+                            getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl
+                          }
                           alt={relatedRecipe.name}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          onError={(e) => {
-                            e.currentTarget.classList.add('hidden');
-                          }}
+                          sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 100vw"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
