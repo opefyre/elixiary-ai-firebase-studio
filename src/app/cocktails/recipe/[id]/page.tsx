@@ -102,7 +102,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(16rem,24rem)_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
           <div className="space-y-4 lg:space-y-6">
             <div className="relative mx-auto flex aspect-[3/4] w-full max-w-[clamp(16rem,40vw,28rem)] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
               {recipe.imageUrl ? (
