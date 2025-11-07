@@ -1,4 +1,5 @@
 import { AuthSection } from './_components/auth-section';
+import { GuestHero } from './_components/guest-hero';
 
 export default function Home() {
   return (
@@ -13,7 +14,7 @@ export default function Home() {
       </section>
 
       <section>
-        <AuthSection />
+        <AuthSection guestHero={<GuestHero />} />
       </section>
     </div>
   );
