@@ -270,35 +270,39 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               // Fix for mobile viewport height issues (especially iOS)
-              function setViewportHeight() {
+              const updateViewportHeight = () => {
                 const vh = window.innerHeight * 0.01;
-                // Create a style element with nonce to set CSS custom property
-                const style = document.createElement('style');
-                style.setAttribute('nonce', '${nonce}');
-                style.textContent = ':root { --vh: ' + vh + 'px; }';
-                style.className = 'viewport-height-fix';
-                // Remove existing style if any
-                const existingStyle = document.querySelector('.viewport-height-fix');
-                if (existingStyle) {
-                  existingStyle.remove();
+                document.documentElement.style.setProperty('--vh', vh + 'px');
+              };
+
+              let scheduled = false;
+              const scheduleViewportUpdate = () => {
+                if (scheduled) {
+                  return;
                 }
-                document.head.appendChild(style);
-              }
-              
+
+                scheduled = true;
+                requestAnimationFrame(() => {
+                  scheduled = false;
+                  updateViewportHeight();
+                });
+              };
+
               // Set initial viewport height
-              setViewportHeight();
-              
+              updateViewportHeight();
+
               // Update on resize and orientation change
-              window.addEventListener('resize', setViewportHeight);
-              window.addEventListener('orientationchange', function() {
-                setTimeout(setViewportHeight, 100);
+              window.addEventListener('resize', scheduleViewportUpdate, { passive: true });
+              window.addEventListener('orientationchange', () => {
+                scheduled = false;
+                setTimeout(scheduleViewportUpdate, 100);
               });
-              
+
               // Fix for iOS PWA status bar
               if (window.navigator.standalone === true) {
                 document.documentElement.classList.add('ios-pwa');
               }
-              
+
               // Also detect iOS PWA by checking for specific iOS features
               if (/iPad|iPhone|iPod/.test(navigator.userAgent) && window.navigator.standalone !== false) {
                 document.documentElement.classList.add('ios-pwa');
