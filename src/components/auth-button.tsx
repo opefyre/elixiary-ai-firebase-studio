@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 import Link from 'next/link';
+import './auth-button.css';
 import {
   GoogleAuthProvider,
   signInWithPopup,

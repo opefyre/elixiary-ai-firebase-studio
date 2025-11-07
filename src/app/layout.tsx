@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import "./layout-animations.css";
 import "../styles/mobile-pwa.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";

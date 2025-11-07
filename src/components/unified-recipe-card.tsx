@@ -32,6 +32,7 @@ import { exportRecipeToPDF } from '@/lib/pdf-exporter';
 import { generateCocktailGradient } from '@/lib/generate-cocktail-gradient';
 import Image from 'next/image';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
+import '@/styles/prose.css';
 
 interface UnifiedRecipeCardProps {
   recipe: {

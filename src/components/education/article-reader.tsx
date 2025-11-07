@@ -9,6 +9,7 @@ import { EducationArticle } from '@/types/education';
 import { ArticleCard } from './article-card';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import '@/styles/prose.css';
 
 interface ArticleReaderProps {
   article: EducationArticle;
