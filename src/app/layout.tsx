@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import "../styles/mobile-pwa.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,6 +13,21 @@ import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analyti
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 import { config } from "@/lib/config";
 import { getNonce } from "@/lib/nonce";
+import { cn } from "@/lib/utils";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  display: "swap",
+  variable: "--font-plus-jakarta",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.baseUrl),
@@ -126,7 +142,10 @@ export default async function RootLayout({
 }>) {
   const nonce = await getNonce();
   return (
-    <html lang="en" className="dark">
+    <html
+      lang="en"
+      className={cn("dark", inter.variable, plusJakartaSans.variable)}
+    >
       <head>
         {/* Nonce for CSP */}
         <meta name="nonce" content={nonce} />
@@ -149,20 +168,8 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         
         {/* Preconnect to external domains */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
         <link rel="preconnect" href="https://drive.google.com" />
         <link rel="dns-prefetch" href="https://drive.google.com" />
-        
-        {/* Fonts */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
         
         {/* Structured Data */}
         <script
@@ -201,7 +208,7 @@ export default async function RootLayout({
         />
         <GoogleTagManager nonce={nonce} />
       </head>
-      <body className="font-body antialiased">
+      <body className={cn(inter.className, "font-body antialiased")}>
         <GoogleTagManagerNoScript />
         <GoogleAnalytics nonce={nonce} />
         <FirebaseClientProvider>
