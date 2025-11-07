@@ -116,7 +116,15 @@ export async function GET(request: NextRequest) {
     const total = totalSnapshot.size;
 
       const response = {
-        recipes: recipes,
+        recipes: recipes.map(recipe => ({
+          id: recipe.id,
+          name: recipe.name,
+          prepTime: recipe.prepTime,
+          glassware: recipe.glassware,
+          difficulty: recipe.difficulty,
+          tags: recipe.tags || [],
+          imageUrl: recipe.imageUrl ?? null
+        })),
         pagination: {
           page,
           limit,

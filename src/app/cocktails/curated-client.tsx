@@ -16,10 +16,10 @@ import {
   Martini,
   Loader2
 } from 'lucide-react';
-import { CuratedRecipe, Category, Tag } from './types';
+import { CuratedRecipeSummary, Category, Tag } from './types';
 
 interface CuratedCocktailsClientProps {
-  initialRecipes: CuratedRecipe[];
+  initialRecipes: CuratedRecipeSummary[];
   initialCategories: Category[];
   initialTags: Tag[];
   initialHasMore: boolean;
@@ -42,7 +42,7 @@ export function CuratedCocktailsClient({
   initialHasMore,
   initialError
 }: CuratedCocktailsClientProps) {
-  const [recipes, setRecipes] = useState<CuratedRecipe[]>(initialRecipes);
+  const [recipes, setRecipes] = useState<CuratedRecipeSummary[]>(initialRecipes);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -146,7 +146,7 @@ export function CuratedCocktailsClient({
         throw new Error(data.error);
       }
 
-      const newRecipes: CuratedRecipe[] = data.recipes || [];
+      const newRecipes: CuratedRecipeSummary[] = data.recipes || [];
       const hasNext = data.pagination?.hasNext ?? false;
 
       setHasMore(hasNext);

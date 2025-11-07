@@ -46,10 +46,18 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const recipesSnapshot = await recipesQuery.get();
   const recipesDocs = recipesSnapshot.docs;
 
-  const recipes = recipesDocs.slice(0, INITIAL_LIMIT).map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Omit<CuratedRecipe, 'id'>),
-  })) as CuratedRecipe[];
+  const recipes = recipesDocs.slice(0, INITIAL_LIMIT).map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      prepTime: data.prepTime,
+      glassware: data.glassware,
+      difficulty: data.difficulty,
+      tags: data.tags ?? [],
+      imageUrl: data.imageUrl ?? null,
+    } as CuratedRecipe;
+  });
 
   const hasMore = recipesDocs.length > INITIAL_LIMIT;
 
