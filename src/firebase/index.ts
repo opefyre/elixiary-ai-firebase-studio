@@ -2,10 +2,22 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+
+type FirebaseSdks = {
+  firebaseApp: FirebaseApp;
+  auth: Auth;
+  firestore: Firestore;
+};
+
+let cachedSdks: FirebaseSdks | null = null;
 
 export function initializeFirebase() {
+  if (cachedSdks) {
+    return cachedSdks;
+  }
+
   if (!getApps().length) {
     const firebaseApp = initializeApp(firebaseConfig);
     return getSdks(firebaseApp);
@@ -15,11 +27,17 @@ export function initializeFirebase() {
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
-  return {
+  if (cachedSdks && cachedSdks.firebaseApp === firebaseApp) {
+    return cachedSdks;
+  }
+
+  cachedSdks = {
     firebaseApp,
     auth: getAuth(firebaseApp),
     firestore: getFirestore(firebaseApp)
   };
+
+  return cachedSdks;
 }
 
 export * from './provider';
