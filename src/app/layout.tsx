@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Footer } from "@/components/layout/footer";
 import { OfflineWarning } from "@/components/offline-warning";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
-import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/google-tag-manager";
 import { Citrus, GlassWater, Martini, Sprout } from "lucide-react";
 import { config } from "@/lib/config";
 import { getNonce } from "@/lib/nonce";
@@ -216,10 +215,8 @@ export default async function RootLayout({
             })
           }}
         />
-        <GoogleTagManager nonce={nonce} />
       </head>
       <body className={cn(inter.className, "font-body antialiased")}>
-        <GoogleTagManagerNoScript />
         <GoogleAnalytics nonce={nonce} />
         <a href="#main-content" className="skip-link">
           Skip to main content
