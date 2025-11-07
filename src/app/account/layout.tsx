@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { AuthGuard } from '@/components/auth-guard';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 import { getCanonicalUrl } from '@/lib/config';
 
 export const metadata: Metadata = {
@@ -19,5 +20,9 @@ export default function AccountLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthGuard>{children}</AuthGuard>;
+  return (
+    <AppClientProviders>
+      <AuthGuard>{children}</AuthGuard>
+    </AppClientProviders>
+  );
 }
