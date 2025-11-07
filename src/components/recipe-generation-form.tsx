@@ -632,7 +632,7 @@ ${window.location.origin}`.trim();
               {/* Loading Bar */}
               <div className="w-full max-w-xs">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-primary/20">
-                  <div className="h-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+                  <div className="h-full animate-shimmer bg-gradient-to-r from-transparent via-primary to-transparent"></div>
                 </div>
               </div>
             </div>
