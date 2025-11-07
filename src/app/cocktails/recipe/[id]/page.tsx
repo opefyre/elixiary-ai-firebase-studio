@@ -12,6 +12,7 @@ import {
   Sparkles,
   Wine,
 } from 'lucide-react';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 import { RecipeActions } from './recipe-actions';
 import { RecipeImage } from '../recipe-image';
 import type { CuratedRecipe } from './types';
@@ -90,74 +91,75 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   })) as CuratedRecipe[];
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-24">
-      <div className="mb-6 flex items-center gap-4">
-        <Button variant="ghost" asChild>
-          <Link href="/cocktails">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Cocktails
-          </Link>
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className="space-y-4 lg:space-y-6">
-          <div className="relative flex aspect-[3/4] w-full max-h-[80vh] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
-            {recipe.imageUrl ? (
-              <RecipeImage
-                src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
-                alt={recipe.name}
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                <Martini className="h-24 w-24 text-primary/30" />
-              </div>
-            )}
-          </div>
-
-          <RecipeActions recipe={recipe} />
+    <AppClientProviders>
+      <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="mb-6 flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/cocktails">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Cocktails
+            </Link>
+          </Button>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <h1 className="mb-2 flex items-center gap-3 text-3xl font-bold">
-              <span className="text-4xl">🍸</span>
-              {recipe.name}
-            </h1>
-            <div className="mb-4 flex items-center gap-4">
-              <Badge className={`${getDifficultyColor(recipe.difficulty)} gap-1`}>
-                <ChefHat className="h-3 w-3" />
-                {recipe.difficulty}
-              </Badge>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span className="text-sm">{recipe.prepTime}</span>
-              </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Wine className="h-4 w-4" />
-                <span className="text-sm">{recipe.glassware}</span>
-              </div>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="space-y-4 lg:space-y-6">
+            <div className="relative flex aspect-[3/4] w-full max-h-[80vh] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
+              {recipe.imageUrl ? (
+                <RecipeImage
+                  src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
+                  alt={recipe.name}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                  <Martini className="h-24 w-24 text-primary/30" />
+                </div>
+              )}
             </div>
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>📂</span>
-              <span>
-                {recipe.category} {recipe.source ? `• ${recipe.source}` : null}
-              </span>
-            </p>
+
+            <RecipeActions recipe={recipe} />
           </div>
 
-          <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="text-lg">🥃</span>
-                Ingredients
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
+          <div className="space-y-6">
+            <div>
+              <h1 className="mb-2 flex items-center gap-3 text-3xl font-bold">
+                <span className="text-4xl">🍸</span>
+                {recipe.name}
+              </h1>
+              <div className="mb-4 flex items-center gap-4">
+                <Badge className={`${getDifficultyColor(recipe.difficulty)} gap-1`}>
+                  <ChefHat className="h-3 w-3" />
+                  {recipe.difficulty}
+                </Badge>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span className="text-sm">{recipe.prepTime}</span>
+                </div>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Wine className="h-4 w-4" />
+                  <span className="text-sm">{recipe.glassware}</span>
+                </div>
+              </div>
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>📂</span>
+                <span>
+                  {recipe.category} {recipe.source ? `• ${recipe.source}` : null}
+                </span>
+              </p>
+            </div>
+
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-lg">🥃</span>
+                  Ingredients
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
                 {recipe.ingredients.map((ingredient, index) => (
                   <li
                     key={`${ingredient.name}-${index}`}
@@ -222,50 +224,51 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
         </div>
       </div>
 
-      {relatedRecipes.length > 0 && (
-        <div className="mt-12">
-          <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold">
-            <span className="text-2xl">🍹</span>
-            More {recipe.category}
-          </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {relatedRecipes.map((relatedRecipe) => (
-              <Link key={relatedRecipe.id} href={`/cocktails/recipe/${relatedRecipe.id}`} className="block">
-                <Card className="group h-full cursor-pointer transition-all duration-300 hover:shadow-lg">
-                  <CardContent className="flex h-full flex-col p-0">
-                    <div className="relative h-60 flex-shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5">
-                      {relatedRecipe.imageUrl ? (
-                        <RecipeImage
-                          src={
-                            getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl
-                          }
-                          alt={relatedRecipe.name}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 100vw"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                          <Martini className="h-8 w-8 text-primary/30" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-grow flex-col p-3">
-                      <h3 className="mb-2 line-clamp-2 flex-grow text-sm font-semibold">
-                        {relatedRecipe.name}
-                      </h3>
-                      <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {relatedRecipe.prepTime}
+        {relatedRecipes.length > 0 && (
+          <div className="mt-12">
+            <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold">
+              <span className="text-2xl">🍹</span>
+              More {recipe.category}
+            </h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {relatedRecipes.map((relatedRecipe) => (
+                <Link key={relatedRecipe.id} href={`/cocktails/recipe/${relatedRecipe.id}`} className="block">
+                  <Card className="group h-full cursor-pointer transition-all duration-300 hover:shadow-lg">
+                    <CardContent className="flex h-full flex-col p-0">
+                      <div className="relative h-60 flex-shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5">
+                        {relatedRecipe.imageUrl ? (
+                          <RecipeImage
+                            src={
+                              getGoogleDriveThumbnail(relatedRecipe.imageUrl) || relatedRecipe.imageUrl
+                            }
+                            alt={relatedRecipe.name}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 100vw"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                            <Martini className="h-8 w-8 text-primary/30" />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                      <div className="flex flex-grow flex-col p-3">
+                        <h3 className="mb-2 line-clamp-2 flex-grow text-sm font-semibold">
+                          {relatedRecipe.name}
+                        </h3>
+                        <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {relatedRecipe.prepTime}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </AppClientProviders>
   );
 }
