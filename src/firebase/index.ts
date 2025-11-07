@@ -20,6 +20,14 @@ export function initializeFirebase() {
 
   if (!getApps().length) {
     const firebaseApp = initializeApp(firebaseConfig);
+    try {
+      initializeFirestore(firebaseApp, {
+        experimentalAutoDetectLongPolling: true,
+        useFetchStreams: false
+      });
+    } catch (error) {
+      // Firestore may already be initialized; ignore re-initialization errors.
+    }
     return getSdks(firebaseApp);
   }
 
