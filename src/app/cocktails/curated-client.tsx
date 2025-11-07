@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,11 +69,11 @@ export function CuratedCocktailsClient({
     }
   };
 
-  const getGoogleDriveThumbnail = (url: string) => {
+  const getGoogleDriveThumbnail = (url: string, width = 400, height = 600) => {
     if (!url) return null;
     const fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
     if (fileId) {
-      return `https://lh3.googleusercontent.com/d/${fileId[1]}=w400-h600-p`;
+      return `https://lh3.googleusercontent.com/d/${fileId[1]}=w${width}-h${height}-c`;
     }
     return url;
   };
@@ -358,7 +359,7 @@ export function CuratedCocktailsClient({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-8">
-        {recipes.map((recipe) => (
+        {recipes.map((recipe, index) => (
           <Card
             key={recipe.id}
             className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm cursor-pointer h-full"
@@ -367,15 +368,17 @@ export function CuratedCocktailsClient({
             <CardContent className="p-0 h-full flex flex-col">
               <div className="relative h-80 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
                 {recipe.imageUrl ? (
-                  <img
-                    src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
+                  <Image
+                    src={getGoogleDriveThumbnail(recipe.imageUrl, 400, 600) || recipe.imageUrl}
                     alt={recipe.name}
+                    width={400}
+                    height={600}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
                       e.currentTarget.classList.add('hidden');
                     }}
-                    loading="lazy"
-                    decoding="async"
+                    priority={index === 0}
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
