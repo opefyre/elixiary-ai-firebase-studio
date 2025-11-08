@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
 
         return response;
       } catch (error: any) {
-        if (!isMissingIndexError(error) || tagsForQuery.length === 0) {
+        if (!isMissingIndexError(error)) {
           throw error;
         }
 
