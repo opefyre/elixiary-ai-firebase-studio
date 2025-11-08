@@ -3,7 +3,14 @@
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent
+} from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +63,104 @@ const DynamicSaveRecipeButton = dynamic(
     )
   }
 );
+
+const DEFAULT_VISIBLE_TAGS = 12;
+
+interface TagFilterListProps {
+  tags: Tag[];
+  selectedTags: string[];
+  onToggle: (tagId: string) => void;
+}
+
+function TagFilterList({ tags, selectedTags, onToggle }: TagFilterListProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const { visibleTags, hiddenTagCount } = useMemo(() => {
+    const orderedSelectedTags = tags.filter(tag => selectedTags.includes(tag.id));
+    const remainingTags = tags.filter(tag => !selectedTags.includes(tag.id));
+
+    const collapsedTags = [...orderedSelectedTags];
+    for (const tag of remainingTags) {
+      if (collapsedTags.length >= DEFAULT_VISIBLE_TAGS) {
+        break;
+      }
+      collapsedTags.push(tag);
+    }
+
+    const uniqueCollapsed = collapsedTags.filter(
+      (tag, index, array) => array.findIndex(item => item.id === tag.id) === index
+    );
+
+    return {
+      visibleTags: isExpanded ? tags : uniqueCollapsed,
+      hiddenTagCount: Math.max(tags.length - uniqueCollapsed.length, 0)
+    };
+  }, [isExpanded, tags, selectedTags]);
+
+  if (tags.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mb-8">
+      <div className="mb-3 flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2 text-center sm:text-left">
+          <Filter className="h-4 w-4" />
+          Popular Tags
+        </h2>
+        {hiddenTagCount > 0 && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 px-3 text-xs"
+            onClick={() => setIsExpanded(prev => !prev)}
+          >
+            {isExpanded ? 'Show less' : `Show all (+${hiddenTagCount})`}
+          </Button>
+        )}
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+        {visibleTags.map(tag => {
+          const isActive = selectedTags.includes(tag.id);
+          return (
+            <Badge
+              key={tag.id}
+              variant={isActive ? 'default' : 'secondary'}
+              className={`cursor-pointer px-3 py-1 text-xs transition ${
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
+                  : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+              }`}
+              onClick={() => onToggle(tag.id)}
+            >
+              {tag.name}
+            </Badge>
+          );
+        })}
+
+        {!isExpanded && hiddenTagCount > 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 px-3 text-xs"
+            onClick={() => setIsExpanded(true)}
+          >
+            Show all
+          </Button>
+        )}
+      </div>
+
+      {selectedTags.length > 0 && !isExpanded && (
+        <p className="mt-3 text-center text-xs text-muted-foreground sm:text-left">
+          Showing your selected tags and the most popular options. Tap “Show all” to browse everything.
+        </p>
+      )}
+    </div>
+  );
+}
 
 function CuratedCocktailsClientContent({
   initialRecipes,
@@ -372,29 +477,7 @@ function CuratedCocktailsClientContent({
         </div>
       </div>
 
-      {tags.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2 justify-center">
-            <Filter className="h-4 w-4" />
-            Popular Tags
-          </h2>
-          <div className="flex flex-wrap justify-center gap-2">
-            {tags.map((tag) => {
-              const isActive = selectedTags.includes(tag.id);
-              return (
-                <Badge
-                  key={tag.id}
-                  variant={isActive ? 'default' : 'secondary'}
-                  className={`cursor-pointer px-3 py-1 text-xs transition ${isActive ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground'}`}
-                  onClick={() => toggleTag(tag.id)}
-                >
-                  {tag.name}
-                </Badge>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <TagFilterList tags={tags} selectedTags={selectedTags} onToggle={toggleTag} />
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {recipes.map((recipe, index) => (
