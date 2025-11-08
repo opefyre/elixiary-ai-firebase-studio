@@ -43,7 +43,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
       case 'trends':
         return 'Modern movements';
       default:
-        return 'Explore the essentials';
+        return 'Click to Explore!';
     }
   };
 
