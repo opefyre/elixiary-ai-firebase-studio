@@ -58,11 +58,12 @@ export async function GET(request: NextRequest) {
       const filteredTags = tags?.filter(Boolean) ?? [];
       const tagsForQuery = filteredTags.slice(0, 10);
 
-      const buildBaseQuery = (orderByDocumentId = false) => {
+      const buildBaseQuery = (orderByDocumentId = false, useLegacyCategoryField = false) => {
         let query = adminDb.collection('curated-recipes');
 
         if (category) {
-          query = query.where('category', '==', category);
+          const categoryField = useLegacyCategoryField ? 'category' : 'categoryId';
+          query = query.where(categoryField, '==', category);
         }
 
         if (difficulty) {
@@ -82,13 +83,13 @@ export async function GET(request: NextRequest) {
 
       const offset = (page - 1) * limit;
 
-      const fetchRecipes = async (orderByDocumentId = false) => {
-        const baseQuery = buildBaseQuery(orderByDocumentId);
+      const fetchRecipes = async (orderByDocumentId = false, useLegacyCategoryField = false) => {
+        const baseQuery = buildBaseQuery(orderByDocumentId, useLegacyCategoryField);
         const paginatedQuery = baseQuery.offset(offset).limit(limit);
 
         const [pageSnapshot, totalSnapshot] = await Promise.all([
           paginatedQuery.get(),
-          buildBaseQuery(orderByDocumentId).get()
+          buildBaseQuery(orderByDocumentId, useLegacyCategoryField).get()
         ]);
 
         const recipes = pageSnapshot.docs.map(doc => ({
@@ -150,8 +151,16 @@ export async function GET(request: NextRequest) {
       const isMissingIndexError = (error: any) =>
         error?.code === 9 || error?.message?.includes('requires an index');
 
+      let useLegacyCategoryField = false;
+
       try {
-        const { recipes, total } = await fetchRecipes(false);
+        let { recipes, total } = await fetchRecipes(false);
+
+        if (category && total === 0) {
+          useLegacyCategoryField = true;
+          ({ recipes, total } = await fetchRecipes(false, true));
+        }
+
         const filteredRecipes = applySearchAndTagFilters(recipes);
         const response = buildResponse(filteredRecipes, total);
 
@@ -163,9 +172,17 @@ export async function GET(request: NextRequest) {
           throw error;
         }
 
-        const fallbackQuery = buildBaseQuery(true);
-        const fallbackSnapshot = await fallbackQuery.get();
-        const totalMatches = fallbackSnapshot.size;
+        let fallbackQuery = buildBaseQuery(true, useLegacyCategoryField);
+        let fallbackSnapshot = await fallbackQuery.get();
+        let totalMatches = fallbackSnapshot.size;
+
+        if (category && totalMatches === 0 && !useLegacyCategoryField) {
+          useLegacyCategoryField = true;
+          fallbackQuery = buildBaseQuery(true, true);
+          fallbackSnapshot = await fallbackQuery.get();
+          totalMatches = fallbackSnapshot.size;
+        }
+
         const allRecipes = fallbackSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
