@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Martini } from 'lucide-react';
 import { CocktailBreadcrumbs } from '@/app/cocktails/_components';
 import { getCategoryDisplayName } from '@/lib/cocktails';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 import { CategoryRecipesGrid } from './category-recipes-grid';
 import type { Category, CuratedRecipe } from './types';
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore';
@@ -133,11 +134,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
       </div>
 
-      <CategoryRecipesGrid
-        initialRecipes={recipes}
-        categoryId={params.category}
-        initialHasMore={hasMore}
-      />
+      <AppClientProviders>
+        <CategoryRecipesGrid
+          initialRecipes={recipes}
+          categoryId={params.category}
+          initialHasMore={hasMore}
+        />
+      </AppClientProviders>
     </div>
   );
 }
