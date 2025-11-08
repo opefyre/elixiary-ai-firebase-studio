@@ -123,9 +123,12 @@ function CuratedCocktailsClientContent({
   }: FetchOptions = {}) => {
     const searchTerm = (query ?? lastSearchQuery ?? '').trim();
     const isSearchRequest = searchTerm.length >= 3;
-    const categoryFilter = categoryOverride ?? selectedCategory;
-    const difficultyFilter = difficultyOverride ?? selectedDifficulty;
-    const tagFilter = tagsOverride ?? selectedTags;
+    const categoryFilter =
+      categoryOverride !== undefined ? categoryOverride : selectedCategory;
+    const difficultyFilter =
+      difficultyOverride !== undefined ? difficultyOverride : selectedDifficulty;
+    const tagFilter =
+      tagsOverride !== undefined ? tagsOverride : selectedTags;
 
     try {
       setSearchError(null);
