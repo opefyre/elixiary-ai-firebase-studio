@@ -294,10 +294,10 @@ export function SearchResultsPage({ searchParams }: SearchResultsPageProps) {
                   : 'grid-cols-1'
               }`}>
                 {articles.map((article) => (
-                  <ArticleCard 
-                    key={article.id} 
-                    article={article} 
-                    variant={viewMode === 'list' ? 'compact' : 'default'}
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    variant={viewMode === 'list' ? 'compact' : 'minimal'}
                   />
                 ))}
               </div>
