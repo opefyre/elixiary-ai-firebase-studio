@@ -9,11 +9,32 @@ import { EducationCategory } from '@/types/education';
 
 type IconLookup = Record<string, LucideIcon | undefined>;
 
+import { cn } from '@/lib/utils';
+import { EducationCategory } from '@/types/education';
+
 interface CategoryGridProps {
   categories: EducationCategory[];
 }
 
 export function CategoryGrid({ categories }: CategoryGridProps) {
+  const getCategoryIcon = (category: EducationCategory) => {
+    const icon = category.icon?.trim();
+    if (icon) {
+      return icon;
+    }
+
+    const slugIcons: Record<string, string> = {
+      fundamentals: '🎓',
+      equipment: '🛠️',
+      techniques: '🧪',
+      ingredients: '🍋',
+      classics: '🍸',
+      trends: '✨',
+    };
+
+    return slugIcons[category.slug] ?? '📚';
+  };
+
   const getCategoryCaption = (category: string) => {
     switch (category) {
       case 'fundamentals':
