@@ -30,6 +30,10 @@ This document explains the Firestore indexing implementation for Elixiary AI to 
 {"fieldPath": "glassware", "order": "ASCENDING"}, {"fieldPath": "createdAt", "order": "DESCENDING"}
 {"fieldPath": "category", "order": "ASCENDING"}, {"fieldPath": "glassware", "order": "ASCENDING"}
 {"fieldPath": "category", "order": "ASCENDING"}, {"fieldPath": "difficulty", "order": "ASCENDING"}, {"fieldPath": "createdAt", "order": "DESCENDING"}
+{"fieldPath": "tags", "arrayConfig": "CONTAINS"}, {"fieldPath": "name", "order": "ASCENDING"}
+{"fieldPath": "category", "order": "ASCENDING"}, {"fieldPath": "tags", "arrayConfig": "CONTAINS"}, {"fieldPath": "name", "order": "ASCENDING"}
+{"fieldPath": "difficulty", "order": "ASCENDING"}, {"fieldPath": "tags", "arrayConfig": "CONTAINS"}, {"fieldPath": "name", "order": "ASCENDING"}
+{"fieldPath": "category", "order": "ASCENDING"}, {"fieldPath": "difficulty", "order": "ASCENDING"}, {"fieldPath": "tags", "arrayConfig": "CONTAINS"}, {"fieldPath": "name", "order": "ASCENDING"}
 ```
 
 ### **User Saved Recipes Collection:**
