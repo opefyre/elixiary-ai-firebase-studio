@@ -3,10 +3,19 @@ import { initializeFirebaseServer } from '@/firebase/server';
 import { CacheManager } from '@/lib/redis';
 import RequestDeduplicator from '@/lib/request-deduplicator';
 
+const CACHE_PREFIX = 'curated-recipes:';
+const CACHE_VERSION = 'v2';
+let curatedRecipesCacheCleared = false;
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
+    if (!curatedRecipesCacheCleared) {
+      await CacheManager.deleteByPrefix(CACHE_PREFIX);
+      curatedRecipesCacheCleared = true;
+    }
+
     // Parse query parameters
     const page = parseInt(searchParams.get('page') || '1');
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
@@ -16,7 +25,7 @@ export async function GET(request: NextRequest) {
     const tags = searchParams.get('tags')?.split(',').filter(Boolean);
 
     // Create cache key
-    const cacheKey = `curated-recipes:${JSON.stringify({
+    const cacheKey = `${CACHE_PREFIX}${CACHE_VERSION}:${JSON.stringify({
       page,
       limit,
       category,
@@ -34,6 +43,7 @@ export async function GET(request: NextRequest) {
     // Use request deduplication to prevent duplicate processing
     const deduplicator = RequestDeduplicator.getInstance();
     const dedupKey = RequestDeduplicator.createCacheKey('curated-recipes', {
+      cacheVersion: CACHE_VERSION,
       page,
       limit,
       category,
@@ -45,77 +55,79 @@ export async function GET(request: NextRequest) {
     const response = await deduplicator.deduplicate(dedupKey, async () => {
       const { adminDb } = await initializeFirebaseServer();
 
-    // Build query based on available filters
-    let query = adminDb.collection('curated-recipes');
+      const filteredTags = tags?.filter(Boolean) ?? [];
+      const tagsForQuery = filteredTags.slice(0, 10);
 
-    // Apply filters in the correct order for index usage
-    if (category && difficulty) {
-      // Use composite index: category + difficulty + name
-      query = query
-        .where('category', '==', category)
-        .where('difficulty', '==', difficulty)
-        .orderBy('name', 'asc');
-    } else if (category) {
-      // Use composite index: category + name
-      query = query
-        .where('category', '==', category)
-        .orderBy('name', 'asc');
-    } else if (difficulty) {
-      // Use single field index: difficulty
-      query = query
-        .where('difficulty', '==', difficulty)
-        .orderBy('name', 'asc');
-    } else {
-      // No filters, just order by name
-      query = query.orderBy('name', 'asc');
-    }
+      const buildBaseQuery = (orderByDocumentId = false) => {
+        let query = adminDb.collection('curated-recipes');
 
-    // Apply pagination BEFORE fetching (server-side pagination)
-    const offset = (page - 1) * limit;
-    query = query.offset(offset).limit(limit);
-    
-    // Get only the documents we need
-    const snapshot = await query.get();
-    let recipes = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+        if (category) {
+          query = query.where('category', '==', category);
+        }
 
-    // Apply client-side filters for complex queries (tags, search)
-    // Note: This now only filters the small paginated result set
-    if (tags && tags.length > 0) {
-      recipes = recipes.filter(recipe => 
-        tags.some(tag => recipe.tags && recipe.tags.includes(tag))
-      );
-    }
-    
-    if (search) {
-      const searchLower = search.toLowerCase();
-      recipes = recipes.filter(recipe => {
-        const name = recipe.name?.toLowerCase() || '';
-        const ingredients = recipe.ingredients?.map((ing: any) => ing.name?.toLowerCase()).join(' ') || '';
-        const tags = recipe.tags?.join(' ').toLowerCase() || '';
-        const category = recipe.category?.toLowerCase() || '';
-        
-        const searchText = `${name} ${ingredients} ${tags} ${category}`;
-        return searchText.includes(searchLower);
-      });
-    }
+        if (difficulty) {
+          query = query.where('difficulty', '==', difficulty);
+        }
 
-    // For pagination info, we need to get total count separately
-    // This is a limitation of server-side pagination with client-side filtering
-    const totalQuery = adminDb.collection('curated-recipes');
-    if (category && difficulty) {
-      totalQuery.where('category', '==', category).where('difficulty', '==', difficulty);
-    } else if (category) {
-      totalQuery.where('category', '==', category);
-    } else if (difficulty) {
-      totalQuery.where('difficulty', '==', difficulty);
-    }
-    const totalSnapshot = await totalQuery.get();
-    const total = totalSnapshot.size;
+        if (tagsForQuery.length > 0) {
+          query = query.where('tags', 'array-contains-any', tagsForQuery);
+        }
 
-      const response = {
+        if (orderByDocumentId) {
+          return query.orderBy('__name__');
+        }
+
+        return query.orderBy('name', 'asc');
+      };
+
+      const offset = (page - 1) * limit;
+
+      const fetchRecipes = async (orderByDocumentId = false) => {
+        const baseQuery = buildBaseQuery(orderByDocumentId);
+        const paginatedQuery = baseQuery.offset(offset).limit(limit);
+
+        const [pageSnapshot, totalSnapshot] = await Promise.all([
+          paginatedQuery.get(),
+          buildBaseQuery(orderByDocumentId).get()
+        ]);
+
+        const recipes = pageSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        return {
+          recipes,
+          total: totalSnapshot.size
+        };
+      };
+
+      const applySearchAndTagFilters = (recipes: any[]) => {
+        let filtered = recipes;
+
+        if (filteredTags.length > 0) {
+          filtered = filtered.filter(recipe =>
+            filteredTags.some(tag => recipe.tags && recipe.tags.includes(tag))
+          );
+        }
+
+        if (search) {
+          const searchLower = search.toLowerCase();
+          filtered = filtered.filter(recipe => {
+            const name = recipe.name?.toLowerCase() || '';
+            const ingredients = recipe.ingredients?.map((ing: any) => ing.name?.toLowerCase()).join(' ') || '';
+            const tags = recipe.tags?.join(' ').toLowerCase() || '';
+            const category = recipe.category?.toLowerCase() || '';
+
+            const searchText = `${name} ${ingredients} ${tags} ${category}`;
+            return searchText.includes(searchLower);
+          });
+        }
+
+        return filtered;
+      };
+
+      const buildResponse = (recipes: any[], total: number) => ({
         recipes: recipes.map(recipe => ({
           id: recipe.id,
           name: recipe.name,
@@ -133,12 +145,45 @@ export async function GET(request: NextRequest) {
           hasNext: page * limit < total,
           hasPrev: page > 1
         }
-      };
+      });
 
-      // Cache the response for 5 minutes
-      await CacheManager.set(cacheKey, JSON.stringify(response), 300);
+      const isMissingIndexError = (error: any) =>
+        error?.code === 9 || error?.message?.includes('requires an index');
 
-      return response;
+      try {
+        const { recipes, total } = await fetchRecipes(false);
+        const filteredRecipes = applySearchAndTagFilters(recipes);
+        const response = buildResponse(filteredRecipes, total);
+
+        await CacheManager.set(cacheKey, JSON.stringify(response), 300);
+
+        return response;
+      } catch (error: any) {
+        if (!isMissingIndexError(error) || tagsForQuery.length === 0) {
+          throw error;
+        }
+
+        const fallbackQuery = buildBaseQuery(true);
+        const fallbackSnapshot = await fallbackQuery.get();
+        const totalMatches = fallbackSnapshot.size;
+        const allRecipes = fallbackSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        const filteredRecipes = applySearchAndTagFilters(allRecipes).sort((a, b) => {
+          const nameA = (a.name || '').toLowerCase();
+          const nameB = (b.name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+
+        const paginatedRecipes = filteredRecipes.slice(offset, offset + limit);
+        const response = buildResponse(paginatedRecipes, totalMatches);
+
+        await CacheManager.set(cacheKey, JSON.stringify(response), 300);
+
+        return response;
+      }
     });
 
     return NextResponse.json(response);
