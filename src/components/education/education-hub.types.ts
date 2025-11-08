@@ -13,4 +13,5 @@ export type EducationHubContent = {
   featuredArticles: EducationArticle[];
   stats: EducationHubStats;
   featuredError?: boolean;
+  popularTags: string[];
 };

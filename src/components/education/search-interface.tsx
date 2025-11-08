@@ -1,43 +1,40 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { EducationArticle } from '@/types/education';
+import { PopularTopics } from './popular-topics';
 
 interface SearchInterfaceProps {
   onSearch: (query: string) => Promise<void> | void;
   placeholder?: string;
   onSearchApplied?: () => void;
+  popularTags?: string[];
 }
 
 export function SearchInterface({
   onSearch,
   placeholder = "Search articles, techniques, ingredients...",
   onSearchApplied,
+  popularTags = [],
 }: SearchInterfaceProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<EducationArticle[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  // Popular search terms
-  const popularSearches = [
-    'shaking techniques',
-    'muddling basics',
-    'stirring vs shaking',
-    'glassware guide',
-    'bitters guide',
-    'classic cocktails',
-    'garnishing tips',
-    'bar tools'
-  ];
+  useEffect(() => {
+    if (selectedTag && !popularTags.includes(selectedTag)) {
+      setSelectedTag(null);
+    }
+  }, [popularTags, selectedTag]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,6 +54,9 @@ export function SearchInterface({
 
   const handleInputChange = async (value: string) => {
     setQuery(value);
+    if (selectedTag) {
+      setSelectedTag(null);
+    }
 
     if (value.length >= 2) {
       setLoading(true);
@@ -106,16 +106,23 @@ export function SearchInterface({
     void handleSearch(title);
   };
 
-  const handlePopularSearchClick = (term: string) => {
-    setQuery(term);
-    void handleSearch(term);
-  };
-
   const clearSearch = () => {
     setQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
+    setSelectedTag(null);
     void Promise.resolve(onSearch(''));
+  };
+
+  const handlePopularTagChange = (tag: string | null) => {
+    if (!tag) {
+      clearSearch();
+      return;
+    }
+
+    setSelectedTag(tag);
+    setQuery(tag);
+    void handleSearch(tag);
   };
 
   return (
@@ -177,27 +184,9 @@ export function SearchInterface({
         </Card>
       )}
 
-      {/* Popular Searches */}
-      <div className="mt-4">
-        <div className="flex items-center justify-between text-xs uppercase tracking-wider text-muted-foreground mb-2">
-          <span className="flex items-center gap-2">
-            <Filter className="w-4 h-4" /> Popular searches
-          </span>
-          <span>Tap to explore</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {popularSearches.map((term) => (
-            <Badge
-              key={term}
-              variant="secondary"
-              onClick={() => handlePopularSearchClick(term)}
-              className="cursor-pointer rounded-full px-3 py-1 text-xs font-medium hover:bg-primary hover:text-primary-foreground"
-            >
-              {term}
-            </Badge>
-          ))}
-        </div>
-      </div>
+      {popularTags.length > 0 && (
+        <PopularTopics tags={popularTags} selectedTag={selectedTag} onChange={handlePopularTagChange} />
+      )}
     </div>
   );
 }

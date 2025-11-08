@@ -11,6 +11,9 @@ const DEFAULT_STATS: EducationHubStats = {
   averageRating: null,
 };
 
+const POPULAR_TAG_SAMPLE_LIMIT = 200;
+const POPULAR_TAG_RESULT_LIMIT = 20;
+
 type AnalyticsEntry = {
   type?: string;
   userId?: string | null;
@@ -202,6 +205,57 @@ export async function loadEducationHubData(): Promise<EducationHubContent | null
     }
   }
 
+  let popularTags: string[] = [];
+  try {
+    const tagsSnapshot = await adminDb
+      .collection('education_articles')
+      .where('status', '==', 'published')
+      .limit(POPULAR_TAG_SAMPLE_LIMIT)
+      .get();
+
+    const tagFrequency = new Map<string, { count: number; latestPublishedAt: number }>();
+
+    tagsSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      const tags = Array.isArray(data.tags) ? data.tags : [];
+      const publishedAt = toDate(data.publishedAt).getTime();
+
+      tags
+        .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
+        .filter((tag) => tag.length > 0)
+        .forEach((tag) => {
+          const existing = tagFrequency.get(tag);
+          if (existing) {
+            existing.count += 1;
+            existing.latestPublishedAt = Math.max(existing.latestPublishedAt, publishedAt);
+            tagFrequency.set(tag, existing);
+          } else {
+            tagFrequency.set(tag, { count: 1, latestPublishedAt: publishedAt });
+          }
+        });
+    });
+
+    popularTags = Array.from(tagFrequency.entries())
+      .sort((a, b) => {
+        const countDifference = b[1].count - a[1].count;
+        if (countDifference !== 0) {
+          return countDifference;
+        }
+
+        const recencyDifference = b[1].latestPublishedAt - a[1].latestPublishedAt;
+        if (recencyDifference !== 0) {
+          return recencyDifference;
+        }
+
+        return a[0].localeCompare(b[0]);
+      })
+      .slice(0, POPULAR_TAG_RESULT_LIMIT)
+      .map(([tag]) => tag);
+  } catch (error) {
+    console.error('Error computing popular education tags for hub:', error);
+    popularTags = [];
+  }
+
   try {
     const analyticsStart = new Date();
     analyticsStart.setDate(analyticsStart.getDate() - 90);
@@ -242,5 +296,6 @@ export async function loadEducationHubData(): Promise<EducationHubContent | null
     featuredArticles,
     stats,
     featuredError,
+    popularTags,
   };
 }
