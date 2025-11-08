@@ -31,7 +31,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
 
   const gridClasses = cn(
     'grid gap-2.5 sm:gap-3',
-    '[grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]'
+    '[grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]'
   );
 
   if (categories.length === 0) {
