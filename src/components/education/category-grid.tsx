@@ -10,6 +10,24 @@ interface CategoryGridProps {
 }
 
 export function CategoryGrid({ categories }: CategoryGridProps) {
+  const getCategoryIcon = (category: EducationCategory) => {
+    const icon = category.icon?.trim();
+    if (icon) {
+      return icon;
+    }
+
+    const slugIcons: Record<string, string> = {
+      fundamentals: '🎓',
+      equipment: '🛠️',
+      techniques: '🧪',
+      ingredients: '🍋',
+      classics: '🍸',
+      trends: '✨',
+    };
+
+    return slugIcons[category.slug] ?? '📚';
+  };
+
   const getCategoryCaption = (category: string) => {
     switch (category) {
       case 'fundamentals':
@@ -71,7 +89,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
             }}
             aria-hidden="true"
           >
-            <span className="leading-none">{category.icon || '📚'}</span>
+            <span className="leading-none">{getCategoryIcon(category)}</span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
