@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Key, Plus, Trash2, RotateCcw, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { Copy, Key, Plus, Trash2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
 
@@ -200,56 +200,6 @@ export function APIKeyManager() {
     }
   };
 
-  const rotateAPIKey = async (keyId: string) => {
-    if (!confirm('Are you sure you want to rotate this API key? The old key will be revoked and a new one will be generated.')) {
-      return;
-    }
-
-    if (!user || !auth) {
-      toast({
-        title: 'Error',
-        description: 'Please sign in to manage API keys',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    try {
-      const token = await user.getIdToken();
-      
-      const response = await fetch(`/api/account/api-keys/${keyId}/rotate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setNewKey(data.data.newApiKey);
-        fetchAPIKeys();
-        toast({
-          title: 'Success',
-          description: 'API key rotated successfully'
-        });
-      } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to rotate API key',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('Error rotating API key:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to rotate API key',
-        variant: 'destructive'
-      });
-    }
-  };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -387,15 +337,6 @@ export function APIKeyManager() {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => rotateAPIKey(key.id)}
-                        className="h-8 px-3 text-xs"
-                      >
-                        <RotateCcw className="h-3 w-3 mr-1" />
-                        Rotate
-                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
