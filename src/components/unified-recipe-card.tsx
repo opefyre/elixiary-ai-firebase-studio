@@ -378,123 +378,126 @@ ${window.location.origin}`.trim();
 
   return (
     <>
-      <Card 
-        className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm cursor-pointer h-full"
+      <Card
+        className="group relative h-full cursor-pointer overflow-hidden rounded-3xl border-0 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
         onClick={handleCardClick}
       >
-        <CardContent className="p-0 h-full flex flex-col">
-          {/* Recipe Image */}
-          <div className="relative h-80 bg-gradient-to-br from-primary/10 to-primary/5 rounded-t-lg overflow-hidden flex-shrink-0">
+        <CardContent className="relative flex h-full flex-col p-0">
+          <div className="relative flex h-full min-h-[28rem] flex-col">
             {recipeImage ? (
               <Image
                 src={getGoogleDriveThumbnail(recipeImage) || recipeImage}
                 alt={recipeName || 'Recipe'}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 onError={(e) => {
                   // Fallback to placeholder if image fails to load
                   e.currentTarget.classList.add('hidden');
                 }}
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/40 to-primary/10 text-white/70">
                 <div className="text-6xl">🍸</div>
               </div>
             )}
-            
-            {/* Source Badge */}
-            <div className="absolute top-3 left-3">
-              <Badge variant="outline" className="text-xs bg-background/80">
-                {isAIRecipe ? 'AI Generated' : 'Curated'}
-              </Badge>
-            </div>
-            
-            {/* Favorite Star */}
-            {isSaved && (
-              <div className="absolute top-3 right-3">
-                <Star className="h-5 w-5 text-yellow-500 fill-current" />
-              </div>
-            )}
-          </div>
 
-          {/* Recipe Info */}
-          <div className="p-5 flex flex-col flex-grow">
-            <h3 className="font-semibold text-lg mb-3 line-clamp-2 leading-tight">
-              {recipeName}
-            </h3>
-            
-            <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-              {recipe.prepTime && (
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span className="text-xs">{recipe.prepTime}</span>
-                </div>
-              )}
-              {recipeGlassware && (
-                <div className="flex items-center gap-1">
-                  <Zap className="h-3.5 w-3.5" />
-                  <span className="text-xs">{recipeGlassware}</span>
-                </div>
-              )}
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/10 transition-opacity duration-300 group-hover:from-black/85 group-hover:via-black/60" />
 
-            {/* Tags */}
-            {recipe.tags && recipe.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-3 mt-auto">
-                {recipe.tags.slice(0, 2).map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
-                    {tag.replace(/_/g, ' ')}
-                  </Badge>
-                ))}
-                {recipe.tags.length > 2 && (
-                  <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50">
-                    +{recipe.tags.length - 2}
-                  </Badge>
+            <div className="relative z-10 flex h-full flex-col justify-between p-5">
+              <div className="flex items-start justify-between gap-3">
+                <Badge className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+                  {isAIRecipe ? 'AI Generated' : 'Curated'}
+                </Badge>
+
+                {isSaved && (
+                  <Star className="h-5 w-5 text-yellow-400 drop-shadow fill-current" />
                 )}
               </div>
-            )}
 
-            {/* Actions - positioned to not interfere with card click */}
-            <div className="flex items-center justify-between mt-auto">
-              <div className="flex items-center justify-center text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <span>
-                  {isCuratedRecipe ? 'Click to view full recipe' : 'Click to view details'}
-                </span>
-              </div>
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <h3 className="line-clamp-2 text-xl font-semibold leading-tight text-white drop-shadow-lg">
+                    {recipeName}
+                  </h3>
 
-              <div className="flex items-center gap-1">
-                {(isAIRecipe && onDelete) && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowDeleteDialog(true);
-                    }}
-                    disabled={isDeleting}
-                    className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  >
-                    {isDeleting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
+                  <div className="flex flex-wrap items-center gap-4 text-xs font-medium uppercase tracking-wide text-white/80">
+                    {recipe.prepTime && (
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-white/70" />
+                        <span>{recipe.prepTime}</span>
+                      </div>
                     )}
-                  </Button>
+                    {recipeGlassware && (
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-white/70" />
+                        <span>{recipeGlassware}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {recipe.tags && recipe.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {recipe.tags.slice(0, 2).map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-white backdrop-blur-sm"
+                      >
+                        {tag.replace(/_/g, ' ')}
+                      </Badge>
+                    ))}
+                    {recipe.tags.length > 2 && (
+                      <Badge
+                        variant="secondary"
+                        className="border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-white backdrop-blur-sm"
+                      >
+                        +{recipe.tags.length - 2}
+                      </Badge>
+                    )}
+                  </div>
                 )}
-                
-                {isCuratedRecipe && onUnsave && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowUnsaveDialog(true);
-                    }}
-                    className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  >
-                    <Star className="h-4 w-4" />
-                  </Button>
-                )}
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-white/70 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    {isCuratedRecipe ? 'View full recipe' : 'Preview recipe'}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    {(isAIRecipe && onDelete) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteDialog(true);
+                        }}
+                        disabled={isDeleting}
+                        className="rounded-full border border-white/20 bg-white/10 text-white opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:text-white group-hover:opacity-100"
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+
+                    {isCuratedRecipe && onUnsave && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowUnsaveDialog(true);
+                        }}
+                        className="rounded-full border border-white/20 bg-white/10 text-white opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:text-white group-hover:opacity-100"
+                      >
+                        <Star className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
