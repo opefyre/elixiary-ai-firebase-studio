@@ -230,12 +230,12 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               <span className="text-2xl">🍹</span>
               More {recipe.category}
             </h2>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {relatedRecipes.map((relatedRecipe) => (
                 <Link key={relatedRecipe.id} href={`/cocktails/recipe/${relatedRecipe.id}`} className="block">
-                  <Card className="group h-full cursor-pointer transition-all duration-300 hover:shadow-lg">
-                    <CardContent className="flex h-full flex-col p-0">
-                      <div className="relative h-60 w-full flex-shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5">
+                  <Card className="group relative h-full overflow-hidden rounded-3xl border-0 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                    <CardContent className="relative flex h-full flex-col p-0">
+                      <div className="relative flex h-full min-h-[22rem] flex-col">
                         {relatedRecipe.imageUrl ? (
                           <RecipeImage
                             src={
@@ -243,22 +243,25 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                             }
                             alt={relatedRecipe.name}
                             fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 100vw"
                           />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                            <Martini className="h-8 w-8 text-primary/30" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/40 to-primary/10 text-white/70">
+                            <Martini className="h-10 w-10" />
                           </div>
                         )}
-                      </div>
-                      <div className="flex flex-grow flex-col p-3">
-                        <h3 className="mb-2 line-clamp-2 flex-grow text-sm font-semibold">
-                          {relatedRecipe.name}
-                        </h3>
-                        <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {relatedRecipe.prepTime}
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/10 transition-opacity duration-300 group-hover:from-black/85 group-hover:via-black/60" />
+
+                        <div className="relative z-10 flex h-full flex-col justify-end p-5">
+                          <h3 className="mb-3 line-clamp-2 text-lg font-semibold leading-tight text-white drop-shadow-lg">
+                            {relatedRecipe.name}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-white/80">
+                            <Clock className="h-4 w-4 text-white/70" />
+                            <span>{relatedRecipe.prepTime}</span>
+                          </div>
                         </div>
                       </div>
                     </CardContent>

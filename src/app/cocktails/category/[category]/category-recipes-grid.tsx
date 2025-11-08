@@ -26,13 +26,13 @@ const formatTagText = (tag: string) => {
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty.toLowerCase()) {
     case 'easy':
-      return 'bg-green-100 text-green-800';
+      return 'bg-emerald-500/80 text-white shadow-lg backdrop-blur-sm';
     case 'medium':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-amber-500/80 text-white shadow-lg backdrop-blur-sm';
     case 'hard':
-      return 'bg-red-100 text-red-800';
+      return 'bg-rose-500/80 text-white shadow-lg backdrop-blur-sm';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-slate-500/80 text-white shadow-lg backdrop-blur-sm';
   }
 };
 
@@ -90,73 +90,90 @@ export function CategoryRecipesGrid({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {recipes.map((recipe) => (
           <Link key={recipe.id} href={`/cocktails/recipe/${recipe.id}`} className="block">
-            <Card className="group h-full cursor-pointer transition-all duration-300 hover:shadow-lg">
-              <CardContent className="flex h-full flex-col p-0">
-                <div className="relative h-80 flex-shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5">
+            <Card className="group relative h-full overflow-hidden rounded-3xl border-0 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+              <CardContent className="relative flex h-full flex-col p-0">
+                <div className="relative flex h-full min-h-[28rem] flex-col">
                   {recipe.imageUrl ? (
                     <Image
                       src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
                       alt={recipe.name}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
                         e.currentTarget.classList.add('hidden');
                       }}
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                      <Martini className="h-16 w-16 text-primary/30" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/40 to-primary/10 text-white/70">
+                      <Martini className="h-16 w-16" />
                     </div>
                   )}
 
-                  <div className="absolute right-3 top-3">
-                    <Badge className={getDifficultyColor(recipe.difficulty)}>
-                      {recipe.difficulty}
-                    </Badge>
-                  </div>
-                </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/10 transition-opacity duration-300 group-hover:from-black/85 group-hover:via-black/60" />
 
-                <div className="flex flex-grow flex-col p-4">
-                  <h3 className="mb-3 line-clamp-2 flex-grow text-lg font-semibold">
-                    {recipe.name}
-                  </h3>
-
-                  <div className="mb-3 flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span className="text-xs">{recipe.prepTime}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Zap className="h-3.5 w-3.5" />
-                      <span className="text-xs">{recipe.glassware}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-auto mb-3 flex flex-wrap gap-1">
-                    {recipe.tags.slice(0, 2).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="bg-muted/50 px-2 py-0.5 text-xs">
-                        {formatTagText(tag)}
+                  <div className="relative z-10 flex h-full flex-col justify-between p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <Badge className={`rounded-full border border-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide ${getDifficultyColor(recipe.difficulty)}`}>
+                        {recipe.difficulty}
                       </Badge>
-                    ))}
-                    {recipe.tags.length > 2 && (
-                      <Badge variant="secondary" className="bg-muted/50 px-2 py-0.5 text-xs">
-                        +{recipe.tags.length - 2}
-                      </Badge>
-                    )}
-                  </div>
+                    </div>
 
-                  <div className="flex justify-center">
-                    <SaveRecipeButton
-                      recipeId={recipe.id}
-                      recipeData={recipe}
-                      variant="ghost"
-                      size="sm"
-                      showText={false}
-                      className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                    />
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        <h3 className="line-clamp-2 text-xl font-semibold leading-tight text-white drop-shadow-lg">
+                          {recipe.name}
+                        </h3>
+
+                        <div className="flex flex-wrap items-center gap-4 text-xs font-medium uppercase tracking-wide text-white/80">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-white/70" />
+                            <span>{recipe.prepTime}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-white/70" />
+                            <span>{recipe.glassware}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {recipe.tags.slice(0, 2).map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="secondary"
+                            className="border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-white backdrop-blur-sm"
+                          >
+                            {formatTagText(tag)}
+                          </Badge>
+                        ))}
+                        {recipe.tags.length > 2 && (
+                          <Badge
+                            variant="secondary"
+                            className="border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-white backdrop-blur-sm"
+                          >
+                            +{recipe.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-medium uppercase tracking-wide text-white/70 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                          View full recipe
+                        </span>
+
+                        <SaveRecipeButton
+                          recipeId={recipe.id}
+                          recipeData={recipe}
+                          variant="ghost"
+                          size="sm"
+                          showText={false}
+                          className="rounded-full border border-white/20 bg-white/10 text-white opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:text-white group-hover:opacity-100"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
