@@ -104,17 +104,17 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
           <div className="space-y-4 lg:space-y-6">
-            <div className="relative mx-auto flex aspect-[3/4] w-full max-w-[clamp(16rem,40vw,28rem)] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
+            <div className="relative mx-auto aspect-[3/4] w-full max-w-[clamp(16rem,40vw,28rem)] overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
               {recipe.imageUrl ? (
                 <RecipeImage
                   src={getGoogleDriveThumbnail(recipe.imageUrl) || recipe.imageUrl}
                   alt={recipe.name}
                   fill
-                  className="object-cover"
+                  priority
                   sizes="(min-width: 1024px) 25vw, (min-width: 768px) 35vw, 100vw"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
                   <Martini className="h-24 w-24 text-primary/30" />
                 </div>
               )}
@@ -235,7 +235,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                 <Link key={relatedRecipe.id} href={`/cocktails/recipe/${relatedRecipe.id}`} className="block">
                   <Card className="group h-full cursor-pointer transition-all duration-300 hover:shadow-lg">
                     <CardContent className="flex h-full flex-col p-0">
-                      <div className="relative h-60 flex-shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5">
+                      <div className="relative h-60 w-full flex-shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5">
                         {relatedRecipe.imageUrl ? (
                           <RecipeImage
                             src={
