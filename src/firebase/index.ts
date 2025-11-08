@@ -22,7 +22,9 @@ export function initializeFirebase() {
     const firebaseApp = initializeApp(firebaseConfig);
     try {
       initializeFirestore(firebaseApp, {
-        experimentalAutoDetectLongPolling: true,
+        // Force long polling to avoid WebChannel "Listen" 404 errors that occur in
+        // restrictive network environments (e.g. when loading the My Recipes page).
+        experimentalForceLongPolling: true,
         useFetchStreams: false
       });
     } catch (error) {
