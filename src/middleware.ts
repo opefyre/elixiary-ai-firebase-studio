@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
   const cspHeader = [
     "default-src 'self'",
       `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://apis.google.com`,
-      `style-src 'self' 'nonce-${nonce}' 'unsafe-inline' 'unsafe-hashes' 'sha256-zlqnbDt84zf1iSefLU/ImC54isoprH/MRiVZGskwexk=' 'sha256-1OjyRYLAOH1vhXLUN4bBHal0rWxuwBDBP220NNc0CNU=' 'sha256-nzTgYzXYDNe6BAHiiI7NNlfK8n/auuOAhh2t92YvuXo=' 'sha256-441zG27rExd4/il+NvIqyL8zFx5XmyNQtE381kSkUJk=' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' https://fonts.googleapis.com`,
+      `style-src 'self' 'nonce-${nonce}' 'unsafe-hashes' 'sha256-zlqnbDt84zf1iSefLU/ImC54isoprH/MRiVZGskwexk=' 'sha256-1OjyRYLAOH1vhXLUN4bBHal0rWxuwBDBP220NNc0CNU=' 'sha256-nzTgYzXYDNe6BAHiiI7NNlfK8n/auuOAhh2t92YvuXo=' 'sha256-441zG27rExd4/il+NvIqyL8zFx5XmyNQtE381kSkUJk=' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'sha256-/3kWSXHts8LrwfemLzY9W0tOv5I4eLIhrf0pT8cU0WI=' 'sha256-uHMRMH/uk4ERGIkgk2bUAqw+i1tFFbeiOQTApmnK3t4=' 'sha256-ZDrxqUOB4m/L0JWL/+gS52g1CRH0l/qwMhjTw5Z/Fsc=' https://fonts.googleapis.com`,
           "img-src 'self' data: blob: https://lh3.googleusercontent.com https://images.unsplash.com https://picsum.photos https://placehold.co https://drive.google.com https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebase.com https://*.firebaseapp.com https://*.stripe.com https://api.stripe.com https://checkout.stripe.com wss://*.firebase.com https://www.google-analytics.com https://*.google-analytics.com https://accounts.google.com",
