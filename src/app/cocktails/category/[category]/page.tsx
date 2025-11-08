@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { initializeFirebaseServer } from '@/firebase/server';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Martini, ArrowLeft } from 'lucide-react';
+import { Martini } from 'lucide-react';
+import { CocktailBreadcrumbs } from '@/app/cocktails/_components';
+import { getCategoryDisplayName } from '@/lib/cocktails';
 import { CategoryRecipesGrid } from './category-recipes-grid';
 import type { Category, CuratedRecipe } from './types';
 
@@ -14,17 +14,6 @@ interface CategoryPageProps {
 }
 
 const INITIAL_LIMIT = 20;
-
-const getCategoryDisplayName = (category: Category) => {
-  if (category.name) {
-    return category.name;
-  }
-
-  return category.id
-    .replace(/^cat_/, '')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-};
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { adminDb } = initializeFirebaseServer();
@@ -62,17 +51,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const hasMore = recipesDocs.length > INITIAL_LIMIT;
 
   const displayName = getCategoryDisplayName(category);
+  const breadcrumbs = [
+    { label: 'Cocktails', href: '/cocktails' },
+    { label: displayName, href: `/cocktails/category/${params.category}` },
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24">
-      <div className="mb-6">
-        <Button variant="ghost" asChild>
-          <Link href="/cocktails">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Cocktails
-          </Link>
-        </Button>
-      </div>
+      <CocktailBreadcrumbs items={breadcrumbs} className="mb-6" />
 
       <div className="mb-8 text-center">
         <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
