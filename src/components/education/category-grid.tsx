@@ -1,8 +1,9 @@
 'use client';
 
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { EducationCategory } from '@/types/education';
 import Link from 'next/link';
+
+import { cn } from '@/lib/utils';
+import { EducationCategory } from '@/types/education';
 
 interface CategoryGridProps {
   categories: EducationCategory[];
@@ -28,35 +29,58 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
     }
   };
 
+  const gridClasses = cn(
+    'grid gap-3 sm:gap-4',
+    '[grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]'
+  );
+
   if (categories.length === 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={gridClasses}>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Card key={`skeleton-${i}`} className="animate-pulse border border-border/50 bg-background/70">
-            <CardHeader className="space-y-2">
-              <div className="h-5 bg-muted rounded"></div>
-              <div className="h-3 bg-muted rounded w-2/3"></div>
-            </CardHeader>
-          </Card>
+          <div
+            key={`skeleton-${i}`}
+            className="animate-pulse rounded-xl border border-border/60 bg-background/80 p-4 sm:p-5"
+          >
+            <div className="flex items-center gap-4">
+              <div className="h-11 w-11 shrink-0 rounded-full bg-muted" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-2/3 rounded bg-muted" />
+                <div className="h-3 w-1/2 rounded bg-muted" />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className={gridClasses}>
       {categories.map((category) => (
         <Link key={`category-${category.id}`} href={`/education/${category.slug}`}>
-          <Card className="group h-full border border-border/60 bg-background/80 transition-colors duration-200 hover:border-foreground/40 hover:bg-background">
-            <CardHeader className="space-y-1 py-6">
-              <CardTitle className="text-base font-semibold tracking-tight text-foreground">
-                {category.name}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {getCategoryCaption(category.slug)} · {category.articleCount} articles
+          <div className="group relative flex h-full items-center gap-4 rounded-xl border border-border/60 bg-background/80 p-4 transition-colors duration-200 hover:border-foreground/40 hover:bg-background sm:p-5">
+            <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/40 bg-muted/80 text-xl"
+              style={{ color: category.color || 'inherit' }}
+              aria-hidden="true"
+            >
+              <span className="leading-none">{category.icon || '📚'}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <h3 className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
+                  {category.name}
+                </h3>
+                <span className="text-xs font-medium text-muted-foreground sm:text-sm">
+                  {category.articleCount} {category.articleCount === 1 ? 'article' : 'articles'}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                {getCategoryCaption(category.slug)}
               </p>
-            </CardHeader>
-          </Card>
+            </div>
+          </div>
         </Link>
       ))}
     </div>
