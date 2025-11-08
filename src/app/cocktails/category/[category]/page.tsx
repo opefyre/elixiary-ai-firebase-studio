@@ -26,13 +26,23 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const category = { id: categoryDoc.id, ...(categoryDoc.data() as Omit<Category, 'id'>) } as Category;
 
-  const recipesQuery = adminDb
+  let recipesQuery = adminDb
     .collection('curated-recipes')
-    .where('category', '==', params.category)
+    .where('categoryId', '==', params.category)
     .orderBy('name', 'asc')
     .limit(INITIAL_LIMIT + 1);
 
-  const recipesSnapshot = await recipesQuery.get();
+  let recipesSnapshot = await recipesQuery.get();
+
+  if (recipesSnapshot.empty) {
+    recipesQuery = adminDb
+      .collection('curated-recipes')
+      .where('category', '==', params.category)
+      .orderBy('name', 'asc')
+      .limit(INITIAL_LIMIT + 1);
+
+    recipesSnapshot = await recipesQuery.get();
+  }
   const recipesDocs = recipesSnapshot.docs;
 
   const recipes = recipesDocs.slice(0, INITIAL_LIMIT).map((doc) => {
