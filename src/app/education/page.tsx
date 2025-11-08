@@ -129,6 +129,7 @@ export default async function EducationPage() {
           featuredArticles={educationData.featuredArticles}
           stats={educationData.stats}
           featuredError={educationData.featuredError}
+          popularTags={educationData.popularTags}
         />
       ) : (
         <EducationFallback />

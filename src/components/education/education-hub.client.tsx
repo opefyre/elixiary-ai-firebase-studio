@@ -50,6 +50,7 @@ export function EducationHub({
   featuredArticles,
   stats,
   featuredError = false,
+  popularTags,
 }: EducationHubProps) {
   const initialArticlesRef = useRef<EducationArticle[]>(latestArticles);
   const [articles, setArticles] = useState<EducationArticle[]>(latestArticles);
@@ -123,7 +124,11 @@ export function EducationHub({
       {/* Search Bar */}
       <section className="mb-12">
         <div className="max-w-2xl mx-auto">
-          <SearchInterface onSearch={handleSearch} onSearchApplied={scrollToResults} />
+          <SearchInterface
+            onSearch={handleSearch}
+            onSearchApplied={scrollToResults}
+            popularTags={popularTags}
+          />
         </div>
       </section>
 
