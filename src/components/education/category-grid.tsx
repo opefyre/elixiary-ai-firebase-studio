@@ -9,6 +9,9 @@ import { EducationCategory } from '@/types/education';
 
 type IconLookup = Record<string, LucideIcon | undefined>;
 
+import { cn } from '@/lib/utils';
+import { EducationCategory } from '@/types/education';
+
 interface CategoryGridProps {
   categories: EducationCategory[];
 }
