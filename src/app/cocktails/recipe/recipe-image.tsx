@@ -4,9 +4,15 @@ import { useState } from 'react';
 import Image, { type ImageProps } from 'next/image';
 import { cn } from '@/lib/utils';
 
-export type RecipeImageProps = Omit<ImageProps, 'onError'>;
+export type RecipeImageProps = ImageProps;
 
-export function RecipeImage({ className, ...props }: RecipeImageProps) {
+export function RecipeImage({
+  className,
+  onError,
+  sizes,
+  style,
+  ...props
+}: RecipeImageProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   if (!isVisible) {
@@ -16,8 +22,20 @@ export function RecipeImage({ className, ...props }: RecipeImageProps) {
   return (
     <Image
       {...props}
-      className={cn(className)}
-      onError={() => setIsVisible(false)}
+      sizes={sizes ?? '100vw'}
+      className={cn(
+        'absolute inset-0 h-full w-full object-cover object-center',
+        className
+      )}
+      style={{
+        objectFit: 'cover',
+        objectPosition: 'center',
+        ...style,
+      }}
+      onError={(event) => {
+        setIsVisible(false);
+        onError?.(event);
+      }}
     />
   );
 }
