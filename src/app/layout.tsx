@@ -147,9 +147,6 @@ export default async function RootLayout({
         {/* Nonce for CSP */}
         <meta name="nonce" content={nonce} />
 
-        {/* Canonical URL to prevent duplicate content issues */}
-        <link rel="canonical" href={config.baseUrl} />
-
         {/* Favicon and Icons */}
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
