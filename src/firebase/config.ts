@@ -1,8 +1,20 @@
+const requireEnv = (value: string | undefined, key: string): string => {
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+
+  return value;
+};
+
+const getOptionalEnv = (value: string | undefined, fallback = ""): string => {
+  return value ?? fallback;
+};
+
 export const firebaseConfig = {
-  "projectId": "studio-1063505923-cbb37",
-  "appId": "1:608849643395:web:cadb73d82f7dcd849158b6",
-  "apiKey": "AIzaSyBpXf3HbU9GtT_OBkAUAdzAGMnfn6RyU8s",
-  "authDomain": "studio-1063505923-cbb37.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "608849643395"
+  projectId: requireEnv(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID, "NEXT_PUBLIC_FIREBASE_PROJECT_ID"),
+  appId: requireEnv(process.env.NEXT_PUBLIC_FIREBASE_APP_ID, "NEXT_PUBLIC_FIREBASE_APP_ID"),
+  apiKey: requireEnv(process.env.NEXT_PUBLIC_FIREBASE_API_KEY, "NEXT_PUBLIC_FIREBASE_API_KEY"),
+  authDomain: requireEnv(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"),
+  measurementId: getOptionalEnv(process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID),
+  messagingSenderId: requireEnv(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID, "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"),
 };
