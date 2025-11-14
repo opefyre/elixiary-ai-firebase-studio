@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import {
@@ -481,16 +482,17 @@ function CuratedCocktailsClientContent({
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {recipes.map((recipe, index) => (
-          <Card
+          <Link
             key={recipe.id}
-            className="group relative h-full overflow-hidden rounded-3xl border-0 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
-            onClick={() => (window.location.href = `/cocktails/recipe/${recipe.id}`)}
+            href={`/cocktails/recipe/${recipe.id}`}
+            className="group block h-full"
           >
-            <CardContent className="relative flex h-full flex-col p-0">
-              <div className="relative flex h-full min-h-[28rem] flex-col">
-                {recipe.imageUrl ? (
-                  <Image
-                    src={getGoogleDriveThumbnail(recipe.imageUrl, 400, 600) || recipe.imageUrl}
+            <Card className="relative h-full overflow-hidden rounded-3xl border-0 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+              <CardContent className="relative flex h-full flex-col p-0">
+                <div className="relative flex h-full min-h-[28rem] flex-col">
+                  {recipe.imageUrl ? (
+                    <Image
+                      src={getGoogleDriveThumbnail(recipe.imageUrl, 400, 600) || recipe.imageUrl}
                     alt={recipe.name}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
@@ -583,8 +585,9 @@ function CuratedCocktailsClientContent({
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
