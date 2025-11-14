@@ -283,14 +283,28 @@ export default async function RootLayout({
                 setTimeout(scheduleViewportUpdate, 100);
               });
 
-              // Fix for iOS PWA status bar
-              if (window.navigator.standalone === true) {
-                document.documentElement.classList.add('ios-pwa');
-              }
+              const applyIosPwaClasses = () => {
+                const htmlEl = document.documentElement;
+                const bodyEl = document.body;
+                const classes = ['ios-pwa', 'ios-pwa-fix', 'ios-scroll-fix'];
 
-              // Also detect iOS PWA by checking for specific iOS features
-              if (/iPad|iPhone|iPod/.test(navigator.userAgent) && window.navigator.standalone !== false) {
-                document.documentElement.classList.add('ios-pwa');
+                classes.forEach((cls) => {
+                  htmlEl.classList.add(cls);
+                  if (bodyEl) {
+                    bodyEl.classList.add(cls);
+                  }
+                });
+              };
+
+              const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+              const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+              if (isiOS && (isStandalone || window.navigator.standalone !== false)) {
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', applyIosPwaClasses, { once: true });
+                } else {
+                  applyIosPwaClasses();
+                }
               }
             `,
           }}
