@@ -297,9 +297,12 @@ export default async function RootLayout({
               };
 
               const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-              const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+              const isDisplayModeStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches === true;
+              const hasNavigatorStandalone = 'standalone' in window.navigator;
+              const isNavigatorStandalone = hasNavigatorStandalone && window.navigator.standalone === true;
+              const isStandalone = isDisplayModeStandalone || isNavigatorStandalone;
 
-              if (isiOS && (isStandalone || window.navigator.standalone !== false)) {
+              if (isiOS && isStandalone) {
                 if (document.readyState === 'loading') {
                   document.addEventListener('DOMContentLoaded', applyIosPwaClasses, { once: true });
                 } else {
