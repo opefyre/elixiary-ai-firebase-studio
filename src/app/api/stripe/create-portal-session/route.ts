@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     // Create the billing portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/account`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/account`,
     });
 
     return NextResponse.json({ url: session.url });

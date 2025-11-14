@@ -8,7 +8,7 @@ Disallow: /_next/
 Disallow: /privacy
 
 # Sitemap
-Sitemap: https://www.elixiary.com/sitemap.xml
+Sitemap: https://elixiary.com/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1

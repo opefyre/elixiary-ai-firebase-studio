@@ -117,7 +117,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     { label: recipe.name },
   ];
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com';
   const structuredDataItems = breadcrumbs.map((item, index) => {
     const href = item.href ?? (index === breadcrumbs.length - 1 ? `/cocktails/recipe/${params.id}` : undefined);
     return {
