@@ -31,7 +31,7 @@ export function OfflineWarning() {
   return (
     <div
       role="alert"
-      className="fixed bottom-4 right-4 z-[100] flex items-center gap-3 rounded-lg bg-destructive p-4 text-destructive-foreground shadow-lg"
+      className="offline-warning-safe-area fixed z-[100] flex items-center gap-3 rounded-lg bg-destructive py-4 pl-4 text-destructive-foreground shadow-lg"
     >
       <WifiOff className="h-5 w-5" />
       <div className="text-sm font-medium">
