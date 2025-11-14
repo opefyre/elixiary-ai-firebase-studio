@@ -67,14 +67,14 @@
   "categories": ["food", "lifestyle", "entertainment"],
   "screenshots": [
     {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
+      "src": "/logo.png",
+      "sizes": "522x522",
       "type": "image/png",
       "form_factor": "wide"
     },
     {
-      "src": "/screenshot-narrow.png",
-      "sizes": "750x1334",
+      "src": "/icon.png",
+      "sizes": "522x522",
       "type": "image/png",
       "form_factor": "narrow"
     }
