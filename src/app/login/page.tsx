@@ -19,14 +19,14 @@ function LoginPageContent() {
 
   if (isUserLoading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full min-h-0 w-full items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="container flex min-h-screen flex-col items-center justify-center overflow-hidden py-12 pt-32 md:pt-20">
+    <div className="container flex h-full min-h-0 w-full flex-col items-center justify-center overflow-hidden py-12 pt-32 md:pt-20">
       <div className="mx-auto w-full max-w-md">
         <AuthForm />
       </div>
