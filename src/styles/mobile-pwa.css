@@ -10,6 +10,12 @@
 
 /* No top navbar on mobile PWA - content goes full screen */
 
+.mobile-navbar-fix {
+  /* Ensure fixed headers clear device notches/status bars */
+  padding-top: max(var(--safe-top), 0px);
+  min-height: calc(4rem + max(var(--safe-top), 0px));
+}
+
 /* Mobile PWA Layout - Bottom Navigation Only */
 @media screen and (max-width: 768px) {
   /* Bottom navigation - native app style with increased height */
