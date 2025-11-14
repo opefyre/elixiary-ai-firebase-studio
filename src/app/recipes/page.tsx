@@ -12,7 +12,6 @@ import Link from 'next/link';
 import { UnifiedRecipeCard } from '@/components/unified-recipe-card';
 import { ShoppingListDialog } from '@/components/shopping-list-dialog';
 import { FeatureUpgradeDialog } from '@/components/feature-upgrade-dialog';
-import { AppClientProviders } from '@/components/providers/app-client-providers';
 
 function RecipesPageContent() {
   const { user, isUserLoading } = useUser();
@@ -371,10 +370,6 @@ function RecipesPageContent() {
 }
 
 export default function RecipesPage() {
-  return (
-    <AppClientProviders>
-      <RecipesPageContent />
-    </AppClientProviders>
-  );
+  return <RecipesPageContent />;
 }
 
