@@ -182,8 +182,8 @@ export default function PrivacyPage() {
               <p><strong>Email:</strong> hello@elixiary.com</p>
               <p>
                 <strong>Website:</strong>{' '}
-                <a href="https://www.elixiary.com" className="text-primary hover:underline">
-                  www.elixiary.com
+                <a href="https://elixiary.com" className="text-primary hover:underline">
+                  elixiary.com
                 </a>
               </p>
             </div>

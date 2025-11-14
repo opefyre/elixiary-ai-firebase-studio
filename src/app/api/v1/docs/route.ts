@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       title: 'Elixiary AI API',
       version: '1.0.0',
       description: 'Professional cocktail recipe API for Pro users',
-      baseUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/api/v1`,
+      baseUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/api/v1`,
       authentication: {
         type: 'API Key',
         header: 'x-api-key',
@@ -135,17 +135,17 @@ export async function GET(request: NextRequest) {
       },
       examples: {
         curl: {
-          getRecipes: `curl -X GET "${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/api/v1/recipes?category=cocktails&limit=5" \\
+          getRecipes: `curl -X GET "${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/api/v1/recipes?category=cocktails&limit=5" \\
   -H "x-api-key: elx_live_your_api_key_here" \\
   -H "x-user-email: user@example.com"`,
-          saveRecipe: `curl -X POST "${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/api/v1/user/recipes" \\
+          saveRecipe: `curl -X POST "${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/api/v1/user/recipes" \\
   -H "x-api-key: elx_live_your_api_key_here" \\
   -H "x-user-email: user@example.com" \\
   -H "Content-Type: application/json" \\
   -d '{"recipeId": "abc123"}'`
         },
         javascript: {
-          getRecipes: `const response = await fetch('${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/api/v1/recipes?category=cocktails&limit=5', {
+          getRecipes: `const response = await fetch('${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/api/v1/recipes?category=cocktails&limit=5', {
   headers: {
     'x-api-key': 'elx_live_your_api_key_here',
     'x-user-email': 'user@example.com'
@@ -161,7 +161,7 @@ headers = {
     'x-user-email': 'user@example.com'
 }
 
-response = requests.get('${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/api/v1/recipes?category=cocktails&limit=5', headers=headers)
+response = requests.get('${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/api/v1/recipes?category=cocktails&limit=5', headers=headers)
 data = response.json()`
         }
       },
@@ -177,7 +177,7 @@ data = response.json()`
       },
       support: {
         email: 'api@elixiary.com',
-        documentation: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elixiary.com'}/api/v1/docs`,
+        documentation: `${process.env.NEXT_PUBLIC_APP_URL || 'https://elixiary.com'}/api/v1/docs`,
         status: 'https://status.elixiary.com'
       }
     };
