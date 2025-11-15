@@ -101,16 +101,10 @@ export function SaveRecipeButton({
       </Button>
 
       <FeatureUpgradeDialog
-        open={showUpgradeDialog}
-        onOpenChange={setShowUpgradeDialog}
-        feature="Save Curated Recipes"
-        description="Save your favorite curated cocktail recipes to your personal collection and access them anytime from your profile."
-        proFeatures={[
-          'Save unlimited curated recipes',
-          'Access saved recipes from your profile',
-          'Organize your favorite cocktails',
-          'Quick access to your go-to drinks'
-        ]}
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        featureName="Save Curated Recipes"
+        featureDescription="Save your favorite curated cocktail recipes to your personal collection and access them anytime from your profile."
       />
     </>
   );
