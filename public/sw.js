@@ -1,32 +1,30 @@
 // Service Worker for Elixiary PWA
-const CACHE_NAME = 'elixiary-v1.1.0';
-const STATIC_CACHE = 'elixiary-static-v1.1.0';
-const DYNAMIC_CACHE = 'elixiary-dynamic-v1.1.0';
+const STATIC_CACHE = 'elixiary-static-v1.2.0';
+const DYNAMIC_CACHE = 'elixiary-dynamic-v1.2.0';
+const OFFLINE_URL = '/offline.html';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
-  '/',
-  '/cocktails',
-  '/pricing',
-  '/login',
-  '/privacy',
   '/manifest.json',
   '/favicon.ico',
+  '/favicon.png',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/android-chrome-72x72.png',
+  '/android-chrome-96x96.png',
+  '/android-chrome-144x144.png',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
-  '/apple-touch-icon.png'
+  '/apple-touch-icon.png',
+  '/icon.png'
 ];
 
 // Install event - cache static files
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then((cache) => {
-        return cache.addAll(STATIC_FILES);
-      })
-      .then(() => {
-        return self.skipWaiting();
-      })
+      .then((cache) => cache.addAll([...STATIC_FILES, OFFLINE_URL]))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -65,48 +63,65 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Skip external requests
-  if (url.origin !== location.origin) {
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        // Return cached version if available
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigationRequest(request));
+    return;
+  }
 
-        // Otherwise, fetch from network
-        return fetch(request)
-          .then((response) => {
-            // Don't cache if not a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            // Cache dynamic content
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => {
-                cache.put(request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch((error) => {
-            // Return offline page for navigation requests
-            if (request.mode === 'navigate') {
-              return caches.match('/');
-            }
-            
-            throw error;
-          });
-      })
-  );
+  event.respondWith(handleAssetRequest(request));
 });
+
+async function handleNavigationRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+
+    if (!networkResponse || networkResponse.status !== 200) {
+      throw new Error('Invalid network response');
+    }
+
+    const responseClone = networkResponse.clone();
+    caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, responseClone));
+
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    const offlineResponse = await caches.match(OFFLINE_URL);
+    if (offlineResponse) {
+      return offlineResponse;
+    }
+
+    throw error;
+  }
+}
+
+function handleAssetRequest(request) {
+  return caches.match(request)
+    .then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(request)
+        .then((response) => {
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response;
+          }
+
+          const responseToCache = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, responseToCache));
+
+          return response;
+        });
+    });
+}
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
