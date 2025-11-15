@@ -1,7 +1,42 @@
 // Service Worker for Elixiary PWA
-const CACHE_NAME = 'elixiary-v1.1.0';
-const STATIC_CACHE = 'elixiary-static-v1.1.0';
-const DYNAMIC_CACHE = 'elixiary-dynamic-v1.1.0';
+const BUILD_ID_FALLBACK = 'development';
+
+/**
+ * Attempt to discover the build identifier so that we can version our caches.
+ *
+ * Priority order:
+ * 1. Global injected at build time via NEXT_PUBLIC_GIT_SHA / NEXT_PUBLIC_BUILD_ID.
+ * 2. Next.js build identifier exposed at /_next/static/BUILD_ID.
+ * 3. A fallback string to ensure SW continues to work locally.
+ */
+const buildIdPromise = (async () => {
+  const injected = self?.ENV?.NEXT_PUBLIC_GIT_SHA
+    || self?.ENV?.NEXT_PUBLIC_BUILD_ID
+    || self?.NEXT_PUBLIC_GIT_SHA
+    || self?.NEXT_PUBLIC_BUILD_ID;
+
+  if (injected && typeof injected === 'string') {
+    return injected;
+  }
+
+  try {
+    const response = await fetch('/_next/static/BUILD_ID', { cache: 'no-store' });
+    if (response.ok) {
+      const text = (await response.text()).trim();
+      if (text) {
+        return text;
+      }
+    }
+  } catch (error) {
+    console.warn('[ServiceWorker] Unable to fetch build identifier', error);
+  }
+
+  return BUILD_ID_FALLBACK;
+})();
+
+const cacheKey = (segment, buildId) => `elixiary-${segment}-${buildId}`;
+const getStaticCacheName = (buildId) => cacheKey('static', buildId);
+const getDynamicCacheName = (buildId) => cacheKey('dynamic', buildId);
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
@@ -20,32 +55,29 @@ const STATIC_FILES = [
 // Install event - cache static files
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        return cache.addAll(STATIC_FILES);
-      })
-      .then(() => {
-        return self.skipWaiting();
-      })
+    buildIdPromise.then((buildId) =>
+      caches.open(getStaticCacheName(buildId))
+        .then((cache) => cache.addAll(STATIC_FILES))
+        .then(() => self.skipWaiting())
+    )
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
+    buildIdPromise.then((buildId) =>
+      caches.keys()
+        .then((cacheNames) => Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+            if (cacheName.startsWith('elixiary-') && !cacheName.endsWith(buildId)) {
               return caches.delete(cacheName);
             }
+            return undefined;
           })
-        );
-      })
-      .then(() => {
-        return self.clients.claim();
-      })
+        ))
+        .then(() => self.clients.claim())
+    )
   );
 });
 
@@ -70,41 +102,43 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        // Return cached version if available
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+    buildIdPromise.then((buildId) =>
+      caches.match(request)
+        .then((cachedResponse) => {
+          // Return cached version if available
+          if (cachedResponse) {
+            return cachedResponse;
+          }
 
-        // Otherwise, fetch from network
-        return fetch(request)
-          .then((response) => {
-            // Don't cache if not a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+          // Otherwise, fetch from network
+          return fetch(request)
+            .then((response) => {
+              // Don't cache if not a valid response
+              if (!response || response.status !== 200 || response.type !== 'basic') {
+                return response;
+              }
+
+              // Clone the response
+              const responseToCache = response.clone();
+
+              // Cache dynamic content
+              caches.open(getDynamicCacheName(buildId))
+                .then((cache) => {
+                  cache.put(request, responseToCache);
+                });
+
               return response;
-            }
+            })
+            .catch((error) => {
+              // Return offline page for navigation requests
+              if (request.mode === 'navigate') {
+                return caches.match('/');
+              }
 
-            // Clone the response
-            const responseToCache = response.clone();
-
-            // Cache dynamic content
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => {
-                cache.put(request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch((error) => {
-            // Return offline page for navigation requests
-            if (request.mode === 'navigate') {
-              return caches.match('/');
-            }
-            
-            throw error;
-          });
-      })
+              throw error;
+            });
+        })
+    )
   );
 });
 
