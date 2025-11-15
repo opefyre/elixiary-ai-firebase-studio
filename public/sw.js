@@ -40,16 +40,18 @@ const getDynamicCacheName = (buildId) => cacheKey('dynamic', buildId);
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
-  '/',
-  '/cocktails',
-  '/pricing',
-  '/login',
-  '/privacy',
   '/manifest.json',
   '/favicon.ico',
+  '/favicon.png',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/android-chrome-72x72.png',
+  '/android-chrome-96x96.png',
+  '/android-chrome-144x144.png',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
-  '/apple-touch-icon.png'
+  '/apple-touch-icon.png',
+  '/icon.png'
 ];
 
 // Install event - cache static files
@@ -97,7 +99,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Skip external requests
-  if (url.origin !== location.origin) {
+  if (url.origin !== self.location.origin) {
     return;
   }
 
