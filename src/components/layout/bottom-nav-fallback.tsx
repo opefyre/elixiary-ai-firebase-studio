@@ -11,7 +11,7 @@ const navItems = [
 export function BottomNavFallback() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border bottom-nav">
-      <div className="flex items-center justify-around px-2 py-1 h-full">
+      <div className="flex items-center justify-between px-2 py-1 h-full">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -19,11 +19,12 @@ export function BottomNavFallback() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors min-w-0 flex-1 h-full text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                "flex items-center justify-center rounded-lg transition-colors min-w-0 flex-1 h-full text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
+              aria-label={item.label}
             >
-              <Icon className="h-5 w-5 mb-1" />
-              <span className="text-xs font-medium truncate">{item.label}</span>
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              <span className="sr-only">{item.label}</span>
             </Link>
           );
         })}
