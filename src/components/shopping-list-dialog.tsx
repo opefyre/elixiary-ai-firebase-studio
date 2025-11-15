@@ -189,7 +189,7 @@ ${window.location.origin}
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl md:max-h-[90vh] md:overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <ShoppingCart className="h-6 w-6 text-primary" />
@@ -215,7 +215,7 @@ ${window.location.origin}
               </div>
             </div>
 
-            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+            <div className="space-y-2 md:max-h-[50vh] md:overflow-y-auto md:pr-2">
               {allRecipes.map((recipe) => (
                 <Card
                   key={recipe.id}
@@ -288,7 +288,7 @@ ${window.location.origin}
                 </div>
               </Card>
             ) : (
-              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 bg-muted/20 rounded-lg p-4">
+              <div className="space-y-4 md:max-h-[50vh] md:overflow-y-auto md:pr-2 bg-muted/20 rounded-lg p-4">
                 {spirits.length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold mb-2">🥃 Spirits & Liqueurs</h4>
