@@ -1,7 +1,42 @@
 // Service Worker for Elixiary PWA
-const STATIC_CACHE = 'elixiary-static-v1.2.0';
-const DYNAMIC_CACHE = 'elixiary-dynamic-v1.2.0';
-const OFFLINE_URL = '/offline.html';
+const BUILD_ID_FALLBACK = 'development';
+
+/**
+ * Attempt to discover the build identifier so that we can version our caches.
+ *
+ * Priority order:
+ * 1. Global injected at build time via NEXT_PUBLIC_GIT_SHA / NEXT_PUBLIC_BUILD_ID.
+ * 2. Next.js build identifier exposed at /_next/static/BUILD_ID.
+ * 3. A fallback string to ensure SW continues to work locally.
+ */
+const buildIdPromise = (async () => {
+  const injected = self?.ENV?.NEXT_PUBLIC_GIT_SHA
+    || self?.ENV?.NEXT_PUBLIC_BUILD_ID
+    || self?.NEXT_PUBLIC_GIT_SHA
+    || self?.NEXT_PUBLIC_BUILD_ID;
+
+  if (injected && typeof injected === 'string') {
+    return injected;
+  }
+
+  try {
+    const response = await fetch('/_next/static/BUILD_ID', { cache: 'no-store' });
+    if (response.ok) {
+      const text = (await response.text()).trim();
+      if (text) {
+        return text;
+      }
+    }
+  } catch (error) {
+    console.warn('[ServiceWorker] Unable to fetch build identifier', error);
+  }
+
+  return BUILD_ID_FALLBACK;
+})();
+
+const cacheKey = (segment, buildId) => `elixiary-${segment}-${buildId}`;
+const getStaticCacheName = (buildId) => cacheKey('static', buildId);
+const getDynamicCacheName = (buildId) => cacheKey('dynamic', buildId);
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
@@ -22,28 +57,29 @@ const STATIC_FILES = [
 // Install event - cache static files
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll([...STATIC_FILES, OFFLINE_URL]))
-      .then(() => self.skipWaiting())
+    buildIdPromise.then((buildId) =>
+      caches.open(getStaticCacheName(buildId))
+        .then((cache) => cache.addAll(STATIC_FILES))
+        .then(() => self.skipWaiting())
+    )
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
+    buildIdPromise.then((buildId) =>
+      caches.keys()
+        .then((cacheNames) => Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+            if (cacheName.startsWith('elixiary-') && !cacheName.endsWith(buildId)) {
               return caches.delete(cacheName);
             }
+            return undefined;
           })
-        );
-      })
-      .then(() => {
-        return self.clients.claim();
-      })
+        ))
+        .then(() => self.clients.claim())
+    )
   );
 });
 
@@ -67,61 +103,46 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (request.mode === 'navigate') {
-    event.respondWith(handleNavigationRequest(request));
-    return;
-  }
-
-  event.respondWith(handleAssetRequest(request));
-});
-
-async function handleNavigationRequest(request) {
-  try {
-    const networkResponse = await fetch(request);
-
-    if (!networkResponse || networkResponse.status !== 200) {
-      throw new Error('Invalid network response');
-    }
-
-    const responseClone = networkResponse.clone();
-    caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, responseClone));
-
-    return networkResponse;
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    const offlineResponse = await caches.match(OFFLINE_URL);
-    if (offlineResponse) {
-      return offlineResponse;
-    }
-
-    throw error;
-  }
-}
-
-function handleAssetRequest(request) {
-  return caches.match(request)
-    .then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request)
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+  event.respondWith(
+    buildIdPromise.then((buildId) =>
+      caches.match(request)
+        .then((cachedResponse) => {
+          // Return cached version if available
+          if (cachedResponse) {
+            return cachedResponse;
           }
 
-          const responseToCache = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, responseToCache));
+          // Otherwise, fetch from network
+          return fetch(request)
+            .then((response) => {
+              // Don't cache if not a valid response
+              if (!response || response.status !== 200 || response.type !== 'basic') {
+                return response;
+              }
 
-          return response;
-        });
-    });
-}
+              // Clone the response
+              const responseToCache = response.clone();
+
+              // Cache dynamic content
+              caches.open(getDynamicCacheName(buildId))
+                .then((cache) => {
+                  cache.put(request, responseToCache);
+                });
+
+              return response;
+            })
+            .catch((error) => {
+              // Return offline page for navigation requests
+              if (request.mode === 'navigate') {
+                return caches.match('/');
+              }
+
+              throw error;
+            });
+        })
+    )
+  );
+});
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
