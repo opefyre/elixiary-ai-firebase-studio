@@ -69,7 +69,7 @@ export function BottomNavClient() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border bottom-nav">
-      <div className="flex items-center justify-between px-2 py-2 h-full">
+      <div className="flex items-center justify-between px-2 py-1 h-full">
         {visibleItems.map((item) => {
           const Icon = item.icon;
           return (
