@@ -11,7 +11,7 @@ const navItems = [
 export function BottomNavFallback() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border bottom-nav">
-      <div className="flex items-center justify-around px-2 py-3 h-full">
+      <div className="flex items-center justify-around px-2 py-1 h-full">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (

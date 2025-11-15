@@ -31,10 +31,10 @@
     left: 0;
     right: 0;
     z-index: 50;
-    /* Increased height for better touch targets and rounded corners */
-    min-height: calc(5.5rem + max(12px, var(--safe-bottom)));
+    /* Reduced height while respecting safe area inset */
+    min-height: calc(4rem + var(--safe-bottom));
     /* Give bottom nav safe padding at the bottom */
-    padding-bottom: max(12px, var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
     /* Ensure bottom nav extends to edges */
     margin: 0;
   }
@@ -42,7 +42,7 @@
   /* Add padding to body to account for increased bottom nav height */
   .mobile-body-padding {
     padding-top: 0; /* No top padding - full screen */
-    padding-bottom: calc(5.5rem + max(12px, var(--safe-bottom)));
+    padding-bottom: calc(4rem + var(--safe-bottom));
   }
   
   /* Fix for content appearing above elements when scrolling */
@@ -57,9 +57,6 @@
     align-items: center;
     justify-content: space-around;
     height: 100%;
-    /* Add extra padding to account for rounded corners */
-    padding-top: 8px;
-    padding-bottom: 8px;
   }
   
   /* Make sure buttons have proper touch targets */
