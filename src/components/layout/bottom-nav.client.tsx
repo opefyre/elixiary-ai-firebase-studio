@@ -9,6 +9,8 @@ import {
   Wine,
   BookOpen,
   Code,
+  GraduationCap,
+  BadgeDollarSign,
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -39,12 +41,24 @@ export function BottomNavClient() {
       requireAuth: true,
     },
     {
+      href: "/education",
+      icon: GraduationCap,
+      label: "Education",
+      active: pathname.startsWith("/education"),
+    },
+    {
       href: "/api/docs",
       icon: Code,
       label: "API",
       active: pathname.startsWith("/api/docs"),
       requireAuth: true,
       requirePro: true,
+    },
+    {
+      href: "/pricing",
+      icon: BadgeDollarSign,
+      label: "Pricing",
+      active: pathname.startsWith("/pricing"),
     },
     {
       href: user ? "/account" : "/login",
