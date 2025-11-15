@@ -269,24 +269,30 @@ function RecipesPageContent() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mt-6">
+        <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
           <Button
             variant={activeTab === 'ai' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActiveTab('ai')}
-            className="gap-2"
+            className="w-full justify-center gap-2 sm:justify-start"
           >
             <Crown className="h-4 w-4" />
-            AI Generated ({recipes.length})
+            <span className="flex flex-col items-center gap-0.5 text-xs font-medium leading-tight sm:flex-row sm:items-center sm:gap-2 sm:text-sm">
+              <span>AI Generated</span>
+              <span className="hidden text-muted-foreground sm:inline">({recipes.length})</span>
+            </span>
           </Button>
           <Button
             variant={activeTab === 'favorites' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActiveTab('favorites')}
-            className="gap-2"
+            className="w-full justify-center gap-2 sm:justify-start"
           >
             <Heart className="h-4 w-4" />
-            Favorites ({savedRecipes.length})
+            <span className="flex flex-col items-center gap-0.5 text-xs font-medium leading-tight sm:flex-row sm:items-center sm:gap-2 sm:text-sm">
+              <span>Favorites</span>
+              <span className="hidden text-muted-foreground sm:inline">({savedRecipes.length})</span>
+            </span>
           </Button>
         </div>
       </section>
