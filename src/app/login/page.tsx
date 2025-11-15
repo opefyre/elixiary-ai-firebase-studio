@@ -26,7 +26,7 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="container flex h-full min-h-0 w-full flex-col items-center justify-center overflow-hidden py-12 pt-32 md:pt-20">
+    <div className="container flex h-full min-h-0 w-full flex-col items-center justify-center overflow-hidden py-12 pt-safe md:pt-20">
       <div className="mx-auto w-full max-w-md">
         <AuthForm />
       </div>

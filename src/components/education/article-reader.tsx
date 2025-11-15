@@ -158,7 +158,7 @@ export function ArticleReader({ article }: ArticleReaderProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
         <div className="max-w-4xl mx-auto">
           {/* Article Header */}
           <div className="mb-8">

@@ -75,7 +75,7 @@ function RecipesPageContent() {
 
   if (isUserLoading || isLoading) {
     return (
-      <div className="container mx-auto max-w-6xl px-4 py-8 pt-24 md:py-12 md:pt-28">
+      <div className="container mx-auto max-w-6xl px-4 py-8 pt-safe md:py-12 md:pt-28">
         <div className="flex justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -85,7 +85,7 @@ function RecipesPageContent() {
 
   if (!user) {
     return (
-      <div className="container mx-auto max-w-6xl px-4 py-8 pt-24 md:py-12 md:pt-28">
+      <div className="container mx-auto max-w-6xl px-4 py-8 pt-safe md:py-12 md:pt-28">
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="text-center space-y-8 max-w-md">
             {/* Icon */}
@@ -144,7 +144,7 @@ function RecipesPageContent() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8 pt-24 md:py-12 md:pt-28">
+    <div className="container mx-auto max-w-6xl px-4 py-8 pt-safe md:py-12 md:pt-28">
       <section className="mb-8">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">

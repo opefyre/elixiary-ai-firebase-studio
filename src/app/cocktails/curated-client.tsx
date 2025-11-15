@@ -395,7 +395,7 @@ function CuratedCocktailsClientContent({
   const tags = initialTags;
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-24">
+    <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4">Cocktails</h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">

@@ -109,7 +109,7 @@ export function EducationHub({
   const shouldShowFeatured = featuredArticles.length > 0 || featuredError;
 
   return (
-    <div className="container mx-auto px-4 py-10 pt-28">
+    <div className="container mx-auto px-4 py-10 pt-safe md:pt-28">
       {/* Header */}
       <section className="mb-12 text-center space-y-4">
         <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-foreground">
