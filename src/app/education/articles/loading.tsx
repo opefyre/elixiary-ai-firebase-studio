@@ -1,7 +1,7 @@
 export default function LoadingArticlesArchive() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
         <div className="flex items-center justify-between mb-8">
           <div className="h-10 w-40 rounded bg-muted animate-pulse" />
           <div className="h-6 w-28 rounded bg-muted animate-pulse" />

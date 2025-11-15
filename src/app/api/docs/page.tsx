@@ -47,7 +47,7 @@ export default function APIDocsPage() {
 
   if (isUserLoading) {
     return (
-      <div className="container mx-auto max-w-4xl px-4 py-8 pt-24 md:py-12 md:pt-28">
+      <div className="container mx-auto max-w-4xl px-4 py-8 pt-safe md:py-12 md:pt-28">
         <div className="flex justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -57,7 +57,7 @@ export default function APIDocsPage() {
 
   if (!user) {
     return (
-      <div className="container mx-auto max-w-4xl px-4 py-8 pt-24 md:py-12 md:pt-28">
+      <div className="container mx-auto max-w-4xl px-4 py-8 pt-safe md:py-12 md:pt-28">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="relative mb-6">
@@ -78,7 +78,7 @@ export default function APIDocsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8 pt-20 md:py-12 md:pt-24">
+    <div className="container mx-auto max-w-6xl px-4 py-8 pt-safe md:py-12 md:pt-24">
       {/* Page Header */}
       <div className="mb-8 text-center">
         <h1 className="font-headline text-3xl font-bold md:text-4xl mb-4">

@@ -116,7 +116,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-24">
+    <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
       <CocktailBreadcrumbs items={breadcrumbs} className="mb-6" />
 
       <div className="mb-8 text-center">

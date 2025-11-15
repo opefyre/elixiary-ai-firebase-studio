@@ -106,7 +106,7 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
           <div className="animate-pulse">
             <div className="h-8 bg-muted rounded mb-8"></div>
             <div className="h-32 bg-muted rounded mb-8"></div>
@@ -123,7 +123,7 @@ export function CategoryPage({ category, searchParams }: CategoryPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
         {/* Category Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-between mb-8">

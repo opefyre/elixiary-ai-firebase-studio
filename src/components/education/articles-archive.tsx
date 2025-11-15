@@ -176,7 +176,7 @@ export async function ArticlesArchive({ searchParams }: ArticlesArchiveProps) {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
           <div className="text-center py-12">
             <div className="text-6xl mb-4">⚠️</div>
             <h1 className="text-2xl font-semibold mb-2">Unable to load articles</h1>
@@ -194,7 +194,7 @@ export async function ArticlesArchive({ searchParams }: ArticlesArchiveProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
         <div className="flex items-center justify-between mb-8">
           <Button asChild variant="ghost" size="sm">
             <Link href="/education">
