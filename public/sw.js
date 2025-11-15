@@ -39,6 +39,8 @@ const getStaticCacheName = (buildId) => cacheKey('static', buildId);
 const getDynamicCacheName = (buildId) => cacheKey('dynamic', buildId);
 
 // Files to cache for offline functionality
+const NETWORK_TIMEOUT_MS = 3000;
+
 const STATIC_FILES = [
   '/manifest.json',
   '/favicon.ico',
@@ -83,10 +85,29 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+const fetchWithTimeout = (request, timeout = NETWORK_TIMEOUT_MS) => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error('Network timeout'));
+    }, timeout);
+
+    fetch(request)
+      .then((response) => {
+        clearTimeout(timer);
+        resolve(response);
+      })
+      .catch((error) => {
+        clearTimeout(timer);
+        reject(error);
+      });
+  });
+};
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+  const isNavigationRequest = request.mode === 'navigate' || request.destination === 'document';
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
@@ -100,6 +121,31 @@ self.addEventListener('fetch', (event) => {
 
   // Skip external requests
   if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (isNavigationRequest) {
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetchWithTimeout(request);
+
+        if (networkResponse && networkResponse.ok) {
+          const responseToCache = networkResponse.clone();
+          const cache = await caches.open(DYNAMIC_CACHE);
+          cache.put(request, responseToCache);
+        }
+
+        return networkResponse;
+      } catch (error) {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        return caches.match('/');
+      }
+    })());
+
     return;
   }
 
@@ -129,18 +175,17 @@ self.addEventListener('fetch', (event) => {
                   cache.put(request, responseToCache);
                 });
 
-              return response;
-            })
-            .catch((error) => {
-              // Return offline page for navigation requests
-              if (request.mode === 'navigate') {
-                return caches.match('/');
-              }
+            return response;
+          })
+          .catch((error) => {
+            // Return offline page for navigation requests
+            if (request.mode === 'navigate') {
+              return caches.match('/');
+            }
 
-              throw error;
-            });
-        })
-    )
+            throw error;
+          });
+      })
   );
 });
 
