@@ -215,15 +215,15 @@ function ProPlanActionsContent({ pricing }: ProPlanActionsProps) {
 
     setIsLoadingCheckout(true);
     try {
+      const token = await user.getIdToken();
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           planType: newPlanType,
-          userId: user.uid,
-          userEmail: user.email,
           isPlanChange: true,
         }),
       });
