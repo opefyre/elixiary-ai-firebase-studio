@@ -261,8 +261,8 @@ export function AuthForm() {
       <CardContent className="p-6">
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="signin" className="w-full">Sign In</TabsTrigger>
+            <TabsTrigger value="signup" className="w-full">Sign Up</TabsTrigger>
           </TabsList>
           
           <TabsContent value="signin" className="space-y-4 mt-6">
