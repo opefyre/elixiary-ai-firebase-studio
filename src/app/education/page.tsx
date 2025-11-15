@@ -70,7 +70,7 @@ export const metadata: Metadata = {
 
 function EducationFallback() {
   return (
-    <div className="container mx-auto px-4 py-10 pt-safe md:pt-28">
+    <div className="container mx-auto px-4 pt-safe pb-10 md:pt-28">
       <section className="mb-12 text-center space-y-4">
         <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-foreground">Elevate Your Mixology Practice</h1>
         <p className="mx-auto max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed">

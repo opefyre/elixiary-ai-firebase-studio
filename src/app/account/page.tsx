@@ -127,7 +127,7 @@ function AccountPageContent() {
 
   if (isUserLoading || isSubLoading) {
     return (
-      <div className="container mx-auto max-w-4xl px-4 py-8 pt-safe md:py-12 md:pt-28">
+      <div className="container mx-auto max-w-4xl px-4 pt-safe pb-8 md:pb-12 md:pt-28">
         <div className="flex justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -137,7 +137,7 @@ function AccountPageContent() {
 
   if (!user) {
     return (
-      <div className="container mx-auto max-w-4xl px-4 py-8 pt-safe md:py-12 md:pt-28">
+      <div className="container mx-auto max-w-4xl px-4 pt-safe pb-8 md:pb-12 md:pt-28">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <User className="h-12 w-12 text-muted-foreground mb-4" />
@@ -165,7 +165,7 @@ function AccountPageContent() {
   );
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8 pt-safe md:py-12 md:pt-24">
+    <div className="container mx-auto max-w-4xl px-4 pt-safe pb-8 md:pb-12 md:pt-24">
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">My Account</h1>
