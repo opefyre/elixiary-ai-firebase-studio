@@ -489,7 +489,7 @@ function CuratedCocktailsClientContent({
           >
             <Card className="relative h-full overflow-hidden rounded-3xl border-0 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
               <CardContent className="relative flex h-full flex-col p-0">
-                <div className="relative flex h-full min-h-[28rem] flex-col">
+                <div className="relative flex h-full min-h-[20rem] flex-col sm:min-h-[24rem] lg:min-h-[28rem]">
                   {recipe.imageUrl ? (
                     <Image
                       src={getGoogleDriveThumbnail(recipe.imageUrl, 400, 600) || recipe.imageUrl}
@@ -510,20 +510,20 @@ function CuratedCocktailsClientContent({
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/10 transition-opacity duration-300 group-hover:from-black/85 group-hover:via-black/60" />
 
-                <div className="relative z-10 flex h-full flex-col justify-between p-5">
-                  <div className="flex items-start justify-between gap-3">
+                <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-6">
+                  <div className="flex items-start justify-between gap-2 sm:gap-3">
                     <Badge className={`rounded-full border border-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide ${getDifficultyColor(recipe.difficulty)}`}>
                       {recipe.difficulty}
                     </Badge>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="space-y-3">
-                      <h3 className="line-clamp-2 text-xl font-semibold leading-tight text-white drop-shadow-lg">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="space-y-2 sm:space-y-3">
+                      <h3 className="line-clamp-2 text-lg font-semibold leading-tight text-white drop-shadow-lg sm:text-xl">
                         {recipe.name}
                       </h3>
 
-                      <div className="flex flex-wrap items-center gap-4 text-xs font-medium uppercase tracking-wide text-white/80">
+                      <div className="flex flex-wrap items-center gap-3 text-[0.7rem] font-medium uppercase tracking-wide text-white/80 sm:gap-4 sm:text-xs">
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-white/70" />
                           <span>{recipe.prepTime}</span>
