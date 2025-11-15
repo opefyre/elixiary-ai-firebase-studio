@@ -82,8 +82,10 @@ export function PopularTopics({
       </div>
       <div
         className={cn(
-          'flex gap-2',
-          expanded ? 'flex-wrap' : 'overflow-x-auto pb-2',
+          'flex w-full flex-wrap gap-x-2 gap-y-2',
+          expanded
+            ? 'max-h-60 overflow-y-auto pb-2 pr-1 touch-pan-y'
+            : 'max-h-32 overflow-hidden',
         )}
       >
         {visibleTags.map((tag) => {
@@ -94,7 +96,7 @@ export function PopularTopics({
               type="button"
               onClick={() => handleTagClick(tag)}
               className={cn(
-                'whitespace-nowrap rounded-full border px-4 py-1 text-xs font-medium transition-colors duration-150',
+                'max-w-full truncate whitespace-nowrap rounded-full border px-4 py-1 text-sm font-medium transition-colors duration-150',
                 isSelected
                   ? 'border-primary bg-primary text-primary-foreground shadow-sm'
                   : 'border-border/60 bg-muted/50 text-foreground hover:border-primary/60 hover:bg-primary/10',
