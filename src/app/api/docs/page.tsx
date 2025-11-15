@@ -201,12 +201,16 @@ export default function APIDocsPage() {
       {/* Main Documentation */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="authentication">Authentication</TabsTrigger>
-          <TabsTrigger value="endpoints">Endpoints</TabsTrigger>
-          <TabsTrigger value="filtering">Filtering & Pagination</TabsTrigger>
-          <TabsTrigger value="examples">Examples</TabsTrigger>
-          <TabsTrigger value="errors">Error Handling</TabsTrigger>
+          <TabsTrigger value="overview" className="flex-1 w-full">Overview</TabsTrigger>
+          <TabsTrigger value="authentication" className="flex-1 w-full">
+            Authentication
+          </TabsTrigger>
+          <TabsTrigger value="endpoints" className="flex-1 w-full">Endpoints</TabsTrigger>
+          <TabsTrigger value="filtering" className="flex-1 w-full">
+            Filtering & Pagination
+          </TabsTrigger>
+          <TabsTrigger value="examples" className="flex-1 w-full">Examples</TabsTrigger>
+          <TabsTrigger value="errors" className="flex-1 w-full">Error Handling</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
