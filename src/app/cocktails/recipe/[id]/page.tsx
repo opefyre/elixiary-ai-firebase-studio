@@ -130,7 +130,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     <>
       <BreadcrumbStructuredData items={structuredDataItems} />
       <AppClientProviders>
-        <div className="container mx-auto px-4 py-8 pt-safe md:pt-24">
+        <div className="container mx-auto px-4 pt-safe pb-8 md:pt-24">
           <CocktailBreadcrumbs items={breadcrumbs} className="mb-6" />
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
             <div className="space-y-4 lg:space-y-6">
