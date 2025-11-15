@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getCanonicalUrl } from '@/lib/config';
+import { AppClientProviders } from '@/components/providers/app-client-providers';
 
 export const metadata: Metadata = {
   title: 'API Documentation | Elixiary AI',
@@ -19,5 +20,5 @@ export default function DocsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <AppClientProviders>{children}</AppClientProviders>;
 }
